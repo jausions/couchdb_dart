@@ -1,14 +1,10 @@
 import 'package:meta/meta.dart';
 
-import '../../clients/couchdb_client.dart';
-import '../../entities/server_model_response.dart';
-import 'base_model.dart';
+import '../responses/server_response.dart';
 
 /// Server interface provides the basic interface to a CouchDB server
 /// for obtaining CouchDB information and getting and setting configuration information
-abstract class ServerBaseModel extends BaseModel {
-  /// Create ServerModel by accepting web-based or server-based client
-  ServerBaseModel(CouchDbClient client) : super(client);
+abstract class ServerInterface {
 
   /// Accessing the root of a CouchDB instance returns meta information about the instance
   ///
@@ -24,7 +20,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///   "version": "1.3.1"
   /// }
   /// ```
-  Future<ServerModelResponse> couchDbInfo({Map<String, String> headers});
+  Future<ServerResponse> couchDbInfo({Map<String, String> headers});
 
   /// List of running tasks, including the task type, name, status and process ID
   ///
@@ -62,7 +58,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///     }
   /// ]
   /// ```
-  Future<ServerModelResponse> activeTasks({Map<String, String> headers});
+  Future<ServerResponse> activeTasks({Map<String, String> headers});
 
   /// Returns a list of all the databases in the CouchDB instance
   ///
@@ -76,7 +72,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///   "locations"
   /// ]
   /// ```
-  Future<ServerModelResponse> allDbs({Map<String, String> headers});
+  Future<ServerResponse> allDbs({Map<String, String> headers});
 
   /// Returns information of a list of the specified databases in the CouchDB instance
   ///
@@ -143,7 +139,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///   }
   /// ]
   /// ```
-  Future<ServerModelResponse> dbsInfo(List<String> keys);
+  Future<ServerResponse> dbsInfo(List<String> keys);
 
   /// Returns the status of the node or cluster, per the cluster setup wizard
   ///
@@ -158,7 +154,7 @@ abstract class ServerBaseModel extends BaseModel {
   /// - `single_node_enabled`,
   /// - `cluster_enabled`,
   /// - `cluster_finished`
-  Future<ServerModelResponse> clusterSetupStatus(
+  Future<ServerResponse> clusterSetupStatus(
       {List<String> ensureDbsExist, Map<String, String> headers});
 
   /// Configure a node as a single (standalone) node, as part of a cluster, or finalise a cluster
@@ -166,7 +162,7 @@ abstract class ServerBaseModel extends BaseModel {
   /// Correspond to `POST /_cluster_setup` method.
   /// If [ensureDbsExist] isn't specified, it is defaults to `["_users","_replicator","_global_changes"]`.
   /// [bindAdress] should be provided not [host], if CouchDB is configuring as `single_node`.
-  Future<ServerModelResponse> configureCouchDb(
+  Future<ServerResponse> configureCouchDb(
       {@required String action,
       @required String bindAdress,
       @required String username,
@@ -200,7 +196,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///     "last_seq": "2-g1AAAAFReJzLYWBg4MhgTmHgzcvPy09JdcjLz8gvLskBCjMlMiTJ____PyuDOZEpFyjAnmJhkWaeaIquGIf2JAUgmWQPMiGRAZcaB5CaePxqEkBq6vGqyWMBkgwNQAqobD4hdQsg6vYTUncAou4-IXUPIOpA7ssCAIFHa60"
   /// }
   /// ```
-  Future<ServerModelResponse> dbUpdates(
+  Future<ServerResponse> dbUpdates(
       {String feed = 'normal',
       int timeout = 60,
       int heartbeat = 60000,
@@ -224,7 +220,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///     ]
   /// }
   /// ```
-  Future<ServerModelResponse> membership({Map<String, String> headers});
+  Future<ServerResponse> membership({Map<String, String> headers});
 
   /// Request, configure, or stop, a replication operation
   ///
@@ -265,7 +261,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///     "source_last_seq": 28
   /// }
   /// ```
-  Future<ServerModelResponse> replicate(
+  Future<ServerResponse> replicate(
       {bool cancel,
       bool continuous,
       bool createTarget,
@@ -308,7 +304,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///     "total_rows": 2
   ///  }
   /// ```
-  Future<ServerModelResponse> schedulerJobs({int limit, int skip});
+  Future<ServerResponse> schedulerJobs({int limit, int skip});
 
   /// List of replication document states
   ///
@@ -335,7 +331,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///     "total_rows": 2
   /// }
   /// ```
-  Future<ServerModelResponse> schedulerDocs({int limit, int skip});
+  Future<ServerResponse> schedulerDocs({int limit, int skip});
 
   /// Gets information about replication documents from a [replicator] database
   ///
@@ -365,7 +361,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///     "total_rows": 1
   /// }
   /// ```
-  Future<ServerModelResponse> schedulerDocsWithReplicatorDbName(
+  Future<ServerResponse> schedulerDocsWithReplicatorDbName(
       {String replicator = '_replicator', int limit, int skip});
 
   /// Gets information about replication document from a [replicator] database
@@ -390,7 +386,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///     "target": "http://adm:*****@localhost:15984/cdyno-0000002/"
   /// }
   /// ```
-  Future<ServerModelResponse> schedulerDocsWithDocId(String docId,
+  Future<ServerResponse> schedulerDocsWithDocId(String docId,
       {String replicator = '_replicator'});
 
   /// Returns a JSON object containing the statistics for the running server
@@ -460,7 +456,7 @@ abstract class ServerBaseModel extends BaseModel {
   ///   "desc": "length of a request inside CouchDB without MochiWeb"
   /// }
   /// ```
-  Future<ServerModelResponse> nodeStats(
+  Future<ServerResponse> nodeStats(
       {String nodeName = '_local',
       String statisticSection,
       String statisticId,
@@ -469,7 +465,7 @@ abstract class ServerBaseModel extends BaseModel {
   /// Returns a JSON object containing various system-level statistics for the running server
   ///
   /// **These statistics are generally intended for CouchDB developers only.**
-  Future<ServerModelResponse> systemStatsForNode(
+  Future<ServerResponse> systemStatsForNode(
       {String nodeName = '_local', Map<String, String> headers});
 
   // /// Accesses the built-in Fauxton administration interface for CouchDB.
@@ -483,7 +479,7 @@ abstract class ServerBaseModel extends BaseModel {
   /// ```json
   /// {"status": "ok"}
   /// ```
-  Future<ServerModelResponse> up();
+  Future<ServerResponse> up();
 
   /// Requests one or more Universally Unique Identifiers (UUIDs) from the CouchDB instance
   ///
@@ -504,11 +500,11 @@ abstract class ServerBaseModel extends BaseModel {
   ///     ]
   /// }
   /// ```
-  Future<ServerModelResponse> uuids(
+  Future<ServerResponse> uuids(
       {int count = 1, Map<String, String> headers});
 
-  // /// Binary content for the favicon.ico site icon
-  // /// Returns 'Not found' if favicon isn't exist.
-  // /// Throws `FormatException` all time. **Don't use it!**
-  // Future<DbResponse> favicon();
+// /// Binary content for the favicon.ico site icon
+// /// Returns 'Not found' if favicon isn't exist.
+// /// Throws `FormatException` all time. **Don't use it!**
+// Future<DbResponse> favicon();
 }

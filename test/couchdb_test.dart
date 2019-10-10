@@ -1,11 +1,11 @@
 import 'package:couchdb/couchdb.dart';
 
 Future<void> main() async {
-  final c = CouchDbClient.fromString('http://localhost:5984');
-  final da = DatabaseModel(c);
-  final ddm = DesignDocumentModel(c);
-  final dm = DocumentModel(c);
-  final sm = ServerModel(c);
+  final c = Client.fromString('http://localhost:5984');
+  final da = Databases(c);
+  final ddm = DesignDocuments(c);
+  final dm = Documents(c);
+  final sm = Server(c);
 
   final queries = <Map<String, Object>>[{'keys': <String>['_design/yyy', 'FishStew']}];
 

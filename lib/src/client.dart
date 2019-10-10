@@ -1,13 +1,13 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as Http;
 
-import '../entities/db_response.dart';
-import '../exceptions/couchdb_exception.dart';
+import 'responses/api_response.dart';
+import 'exceptions/couchdb_exception.dart';
 
 /// Client for interacting with database via server-side and web applications
-class CouchDbClient {
+class Client {
   /// Creates instance of client with [username], [password], [host], [port],
   /// [cors], [auth], [scheme] of the connection and
   /// [secret] (needed for proxy authentication) parameters.
@@ -23,7 +23,7 @@ class CouchDbClient {
   ///
   ///   - http
   ///   - https (if `SSL` set to `true`)
-  CouchDbClient(
+  Client(
       {String username,
       String password,
       String scheme = 'http',
@@ -36,13 +36,13 @@ class CouchDbClient {
       : secret = utf8.encode(secret != null ? secret : '') {
     if (username == null && password != null) {
       throw CouchDbException(401,
-          response: DbResponse(<String, Object>{
+          response: ApiResponse(<String, Object>{
             'error': 'Authorization failed',
             'reason': 'You must provide username if password is non null!'
           }).errorResponse());
     } else if (username != null && password == null) {
       throw CouchDbException(401,
-          response: DbResponse(<String, Object>{
+          response: ApiResponse(<String, Object>{
             'error': 'Authorization failed',
             'reason': 'You must provide password if username is non null!'
           }).errorResponse());
@@ -59,9 +59,9 @@ class CouchDbClient {
         scheme: scheme, host: host, port: port, userInfo: userInfo, path: path);
   }
 
-  /// Create [CouchDbClient] instance from [uri] and
+  /// Create [Client] instance from [uri] and
   /// [auth], [cors] and [secret] params.
-  CouchDbClient.fromUri(Uri uri,
+  Client.fromUri(Uri uri,
       {this.auth = 'basic', this.cors = false, String secret})
       : secret = utf8.encode(secret != null ? secret : '') {
     final properUri = Uri(
@@ -74,9 +74,9 @@ class CouchDbClient {
     _connectUri = properUri;
   }
 
-  /// Create [CouchDbClient] instance from [uri] and
+  /// Create [Client] instance from [uri] and
   /// [auth], [cors] and [secret] params.
-  CouchDbClient.fromString(String uri,
+  Client.fromString(String uri,
       {String auth = 'basic', bool cors = false, String secret})
       : this.fromUri(Uri.tryParse(uri), auth: auth, cors: cors, secret: secret);
 
@@ -126,8 +126,8 @@ class CouchDbClient {
   /// Holds secret for proxy authentication
   final List<int> secret;
 
-  /// Client for requests
-  final Client _client = Client();
+  /// Web Client for requests
+  final Http.Client _httpClient = Http.Client();
 
   /// Request headers
   ///
@@ -179,25 +179,25 @@ class CouchDbClient {
   }
 
   /// HEAD method
-  Future<DbResponse> head(String path, {Map<String, String> reqHeaders}) async {
+  Future<ApiResponse> head(String path, {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
     final res =
-        await _client.head(Uri.parse('$origin/$path'), headers: headers);
+        await _httpClient.head(Uri.parse('$origin/$path'), headers: headers);
 
     _checkForErrorStatusCode(res.statusCode);
 
-    return DbResponse(null, headers: res.headers);
+    return ApiResponse(null, headers: res.headers);
   }
 
   /// GET method
-  Future<DbResponse> get(String path, {Map<String, String> reqHeaders}) async {
+  Future<ApiResponse> get(String path, {Map<String, String> reqHeaders}) async {
     Map<String, Object> json;
 
     modifyRequestHeaders(reqHeaders);
 
     final uriString = path.isNotEmpty ? '$origin/$path' : '$origin';
-    final res = await _client.get(Uri.parse(uriString), headers: headers);
+    final res = await _httpClient.get(Uri.parse(uriString), headers: headers);
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
     if (res.headers['content-type'] == 'application/json') {
@@ -219,11 +219,11 @@ class CouchDbClient {
     _checkForErrorStatusCode(res.statusCode,
         body: bodyUTF8, headers: res.headers);
 
-    return DbResponse(json, raw: bodyUTF8, headers: res.headers);
+    return ApiResponse(json, raw: bodyUTF8, headers: res.headers);
   }
 
   /// PUT method
-  Future<DbResponse> put(String path,
+  Future<ApiResponse> put(String path,
       {Object body, Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
@@ -232,7 +232,7 @@ class CouchDbClient {
       body is Map ? encodedBody = jsonEncode(body) : encodedBody = body;
     }
 
-    final res = await _client.put(Uri.parse('$origin/$path'),
+    final res = await _httpClient.put(Uri.parse('$origin/$path'),
         headers: headers, body: encodedBody);
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
@@ -242,11 +242,11 @@ class CouchDbClient {
     _checkForErrorStatusCode(res.statusCode,
         body: bodyUTF8, headers: res.headers);
 
-    return DbResponse(json, headers: res.headers);
+    return ApiResponse(json, headers: res.headers);
   }
 
   /// POST method
-  Future<DbResponse> post(String path,
+  Future<ApiResponse> post(String path,
       {Object body, Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
@@ -255,7 +255,7 @@ class CouchDbClient {
       body is Map ? encodedBody = jsonEncode(body) : encodedBody = body;
     }
 
-    final res = await _client.post(Uri.parse('$origin/$path'),
+    final res = await _httpClient.post(Uri.parse('$origin/$path'),
         headers: headers, body: encodedBody);
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
@@ -271,16 +271,16 @@ class CouchDbClient {
     _checkForErrorStatusCode(res.statusCode,
         body: bodyUTF8, headers: res.headers);
 
-    return DbResponse(json, headers: res.headers);
+    return ApiResponse(json, headers: res.headers);
   }
 
   /// DELETE method
-  Future<DbResponse> delete(String path,
+  Future<ApiResponse> delete(String path,
       {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
     final res =
-        await _client.delete(Uri.parse('$origin/$path'), headers: headers);
+        await _httpClient.delete(Uri.parse('$origin/$path'), headers: headers);
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
     final resBody = jsonDecode(bodyUTF8);
@@ -289,16 +289,16 @@ class CouchDbClient {
     _checkForErrorStatusCode(res.statusCode,
         body: bodyUTF8, headers: res.headers);
 
-    return DbResponse(json, headers: res.headers);
+    return ApiResponse(json, headers: res.headers);
   }
 
   /// COPY method
-  Future<DbResponse> copy(String path, {Map<String, String> reqHeaders}) async {
+  Future<ApiResponse> copy(String path, {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
-    final request = Request('COPY', Uri.parse('$origin/$path'));
+    final request = Http.Request('COPY', Uri.parse('$origin/$path'));
     request.headers.addAll(headers);
 
-    final res = await _client.send(request);
+    final res = await _httpClient.send(request);
 
     final body = await res.stream.transform(utf8.decoder).join();
 
@@ -307,7 +307,7 @@ class CouchDbClient {
 
     _checkForErrorStatusCode(res.statusCode, body: body, headers: res.headers);
 
-    return DbResponse(json, headers: res.headers);
+    return ApiResponse(json, headers: res.headers);
   }
 
   /// Makes request with specific [method] and with long or
@@ -319,13 +319,13 @@ class CouchDbClient {
     modifyRequestHeaders(reqHeaders);
 
     final uriString = path.isNotEmpty ? '$origin/$path' : '$origin';
-    final request = Request(method, Uri.parse(uriString));
+    final request = Http.Request(method, Uri.parse(uriString));
     request.headers.addAll(headers);
     if (body != null && (method == 'post' || method == 'put')) {
       request.body =
           body is Map || body is List ? jsonEncode(body) : body.toString();
     }
-    final res = await _client.send(request);
+    final res = await _httpClient.send(request);
 
     final resStream = res.stream.asBroadcastStream().transform(utf8.decoder);
     _checkForErrorStatusCode(res.statusCode,
@@ -343,7 +343,7 @@ class CouchDbClient {
     if (code < 200 || code > 202) {
       throw CouchDbException(code,
           response:
-              DbResponse(jsonDecode(body), headers: headers).errorResponse());
+              ApiResponse(jsonDecode(body), headers: headers).errorResponse());
     }
   }
 
@@ -359,8 +359,8 @@ class CouchDbClient {
   /// ```json
   /// {'ok': true, 'name': 'root', 'roles': ['_admin']}
   /// ```
-  Future<DbResponse> authenticate([String next]) async {
-    DbResponse res;
+  Future<ApiResponse> authenticate([String next]) async {
+    ApiResponse res;
     final path = next != null ? '_session?next=$next' : '_session';
 
     try {
@@ -381,8 +381,8 @@ class CouchDbClient {
   /// ```json
   /// {'ok': true}
   /// ```
-  Future<DbResponse> logout() async {
-    DbResponse res;
+  Future<ApiResponse> logout() async {
+    ApiResponse res;
 
     try {
       res = await delete('_session');
@@ -420,8 +420,8 @@ class CouchDbClient {
   ///     }
   /// }
   /// ```
-  Future<DbResponse> userInfo({bool basic = false}) async {
-    DbResponse res;
+  Future<ApiResponse> userInfo({bool basic = false}) async {
+    ApiResponse res;
     final prevAuth = auth;
 
     if (basic) {

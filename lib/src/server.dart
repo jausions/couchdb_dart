@@ -1,86 +1,89 @@
 import 'package:meta/meta.dart';
 
-import '../clients/couchdb_client.dart';
-import '../entities/db_response.dart';
-import '../entities/server_model_response.dart';
-import '../exceptions/couchdb_exception.dart';
+import 'client.dart';
+import 'responses/api_response.dart';
+import 'responses/server_response.dart';
+import 'exceptions/couchdb_exception.dart';
 // import '../utils/browser_runner.dart';
-import '../utils/includer_path.dart';
-import 'base/server_base_model.dart';
+import 'utils/includer_path.dart';
+import 'interfaces/server_interface.dart';
 
 /// Server interface provides the basic interface to a CouchDB server
 /// for obtaining CouchDB information and getting and setting configuration information
-class ServerModel extends ServerBaseModel {
-  /// Create ServerModel by accepting web-based or server-based client
-  ServerModel(CouchDbClient client) : super(client);
+class Server implements ServerInterface {
+  /// Instance of connected client
+  final Client _client;
+
+  /// Create Server by accepting web-based or server-based client
+  Server(this._client);
 
   @override
-  Future<ServerModelResponse> couchDbInfo({Map<String, String> headers}) async {
-    DbResponse result;
+  Future<ServerResponse> couchDbInfo({Map<String, String> headers}) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('', reqHeaders: headers);
+      result = await _client.get('', reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> activeTasks({Map<String, String> headers}) async {
-    DbResponse result;
+  Future<ServerResponse> activeTasks({Map<String, String> headers}) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('_active_tasks', reqHeaders: headers);
+      result = await _client.get('_active_tasks', reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> allDbs({Map<String, String> headers}) async {
-    DbResponse result;
+  Future<ServerResponse> allDbs({Map<String, String> headers}) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('_all_dbs', reqHeaders: headers);
+      result = await _client.get('_all_dbs', reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> dbsInfo(List<String> keys) async {
-    DbResponse result;
+  Future<ServerResponse> dbsInfo(List<String> keys) async {
+    ApiResponse result;
 
     final body = <String, List<String>>{'keys': keys};
 
     try {
-      result = await client.post('_dbs_info', body: body);
+      result = await _client.post('_dbs_info', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> clusterSetupStatus(
+  Future<ServerResponse> clusterSetupStatus(
       {List<String> ensureDbsExist, Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get(
+      result = await _client.get(
           '_cluster_setup?${includeNonNullParam('ensure_dbs_exist', ensureDbsExist)}',
           reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> configureCouchDb(
+  Future<ServerResponse> configureCouchDb(
       {@required String action,
       String bindAdress,
       String username,
@@ -93,7 +96,7 @@ class ServerModel extends ServerBaseModel {
       String host,
       List<String> ensureDbsExist,
       Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, Object>{'action': action};
 
@@ -129,21 +132,21 @@ class ServerModel extends ServerBaseModel {
 
     try {
       result =
-          await client.post('_cluster_setup', reqHeaders: headers, body: body);
+          await _client.post('_cluster_setup', reqHeaders: headers, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> dbUpdates(
+  Future<ServerResponse> dbUpdates(
       {String feed = 'normal',
       int timeout = 60,
       int heartbeat = 60000,
       String since,
       Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     String path;
 
@@ -154,27 +157,27 @@ class ServerModel extends ServerBaseModel {
             '_db_updates?feed=$feed&timeout=$timeout&${includeNonNullParam('since', since)}';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> membership({Map<String, String> headers}) async {
-    DbResponse result;
+  Future<ServerResponse> membership({Map<String, String> headers}) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('_membership', reqHeaders: headers);
+      result = await _client.get('_membership', reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> replicate(
+  Future<ServerResponse> replicate(
       {bool cancel,
       bool continuous,
       bool createTarget,
@@ -184,7 +187,7 @@ class ServerModel extends ServerBaseModel {
       Object source,
       Object target,
       Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
     final body = <String, Object>{};
 
     if (cancel != null) {
@@ -213,97 +216,97 @@ class ServerModel extends ServerBaseModel {
     }
 
     try {
-      result = await client.post('_replicate', reqHeaders: headers, body: body);
+      result = await _client.post('_replicate', reqHeaders: headers, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> schedulerJobs({int limit, int skip}) async {
-    DbResponse result;
+  Future<ServerResponse> schedulerJobs({int limit, int skip}) async {
+    ApiResponse result;
 
     try {
-      result = await client.get(
+      result = await _client.get(
           '_scheduler/jobs?${includeNonNullParam('limit', limit)}&${includeNonNullParam('skip', skip)}');
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> schedulerDocs({int limit, int skip}) async {
-    DbResponse result;
+  Future<ServerResponse> schedulerDocs({int limit, int skip}) async {
+    ApiResponse result;
 
     try {
-      result = await client.get(
+      result = await _client.get(
           '_scheduler/docs?${includeNonNullParam('limit', limit)}&${includeNonNullParam('skip', skip)}');
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> schedulerDocsWithReplicatorDbName(
+  Future<ServerResponse> schedulerDocsWithReplicatorDbName(
       {String replicator = '_replicator', int limit, int skip}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get(
+      result = await _client.get(
           '_scheduler/docs/$replicator?${includeNonNullParam('limit', limit)}&${includeNonNullParam('skip', skip)}');
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> schedulerDocsWithDocId(String docId,
+  Future<ServerResponse> schedulerDocsWithDocId(String docId,
       {String replicator = '_replicator'}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get('_scheduler/docs/$replicator/$docId');
+      result = await _client.get('_scheduler/docs/$replicator/$docId');
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> nodeStats(
+  Future<ServerResponse> nodeStats(
       {String nodeName = '_local',
       String statisticSection,
       String statisticId,
       Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = statisticSection != null && statisticId != null
         ? '_node/$nodeName/_stats/$statisticSection/$statisticId'
         : '_node/$nodeName/_stats';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> systemStatsForNode(
+  Future<ServerResponse> systemStatsForNode(
       {String nodeName = '_local', Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get('_node/$nodeName/_system', reqHeaders: headers);
+      result = await _client.get('_node/$nodeName/_system', reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   // @override
@@ -312,28 +315,28 @@ class ServerModel extends ServerBaseModel {
   // }
 
   @override
-  Future<ServerModelResponse> up() async {
-    DbResponse result;
+  Future<ServerResponse> up() async {
+    ApiResponse result;
 
     try {
-      result = await client.get('_up');
+      result = await _client.get('_up');
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerModelResponse> uuids(
+  Future<ServerResponse> uuids(
       {int count = 1, Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get('_uuids?count=$count', reqHeaders: headers);
+      result = await _client.get('_uuids?count=$count', reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.serverModelResponse();
+    return ServerResponse.from(result);
   }
 
   // @override

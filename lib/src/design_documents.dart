@@ -1,19 +1,22 @@
 import 'package:meta/meta.dart';
 
-import '../clients/couchdb_client.dart';
-import '../entities/db_response.dart';
-import '../entities/design_document_model_response.dart';
-import '../exceptions/couchdb_exception.dart';
-import '../utils/includer_path.dart';
-import 'base/design_document_base_model.dart';
+import 'client.dart';
+import 'responses/api_response.dart';
+import 'responses/design_documents_response.dart';
+import 'exceptions/couchdb_exception.dart';
+import 'utils/includer_path.dart';
+import 'interfaces/design_documents_interface.dart';
 
 /// Class that contains methods that allow operate with design documents
-class DesignDocumentModel extends DesignDocumentBaseModel {
-  /// Create DesignDocumentBaseModel by accepting web-based or server-based client
-  DesignDocumentModel(CouchDbClient client) : super(client);
+class DesignDocuments implements DesignDocumentsInterface {
+  /// Instance of connected client
+  final Client _client;
+
+  /// Create DesignDocument by accepting web-based or server-based client
+  DesignDocuments(this._client);
 
   @override
-  Future<DesignDocumentModelResponse> designDocHeaders(
+  Future<DesignDocumentsResponse> designDocHeaders(
       String dbName, String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
@@ -28,7 +31,7 @@ class DesignDocumentModel extends DesignDocumentBaseModel {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$ddocId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
@@ -37,15 +40,15 @@ class DesignDocumentModel extends DesignDocumentBaseModel {
         '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
 
     try {
-      result = await client.head(path, reqHeaders: headers);
+      result = await _client.head(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> designDoc(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> designDoc(String dbName, String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -59,7 +62,7 @@ class DesignDocumentModel extends DesignDocumentBaseModel {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$ddocId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
@@ -68,151 +71,151 @@ class DesignDocumentModel extends DesignDocumentBaseModel {
         '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> insertDesignDoc(
+  Future<DesignDocumentsResponse> insertDesignDoc(
       String dbName, String ddocId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
       String batch,
       bool newEdits = true}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$ddocId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.put(path, reqHeaders: headers, body: body);
+      result = await _client.put(path, reqHeaders: headers, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> deleteDesignDoc(
+  Future<DesignDocumentsResponse> deleteDesignDoc(
       String dbName, String ddocId, String rev,
       {Map<String, String> headers, String batch}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$ddocId?rev=$rev&${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.delete(path, reqHeaders: headers);
+      result = await _client.delete(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> copyDesignDoc(
+  Future<DesignDocumentsResponse> copyDesignDoc(
       String dbName, String ddocId,
       {Map<String, String> headers, String rev, String batch}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$ddocId?${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.copy(path, reqHeaders: headers);
+      result = await _client.copy(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> attachmentInfo(
+  Future<DesignDocumentsResponse> attachmentInfo(
       String dbName, String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
 
     try {
-      result = await client.head(path, reqHeaders: headers);
+      result = await _client.head(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> attachment(
+  Future<DesignDocumentsResponse> attachment(
       String dbName, String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> uploadAttachment(
+  Future<DesignDocumentsResponse> uploadAttachment(
       String dbName, String ddocId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
 
     try {
-      result = await client.put(path, reqHeaders: headers, body: body);
+      result = await _client.put(path, reqHeaders: headers, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> deleteAttachment(
+  Future<DesignDocumentsResponse> deleteAttachment(
       String dbName, String ddocId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$ddocId/$attName?rev=$rev&'
         '${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.delete(path, reqHeaders: headers);
+      result = await _client.delete(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> designDocInfo(
+  Future<DesignDocumentsResponse> designDocInfo(
       String dbName, String ddocId,
       {Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$ddocId/_info';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeViewFunction(
+  Future<DesignDocumentsResponse> executeViewFunction(
       String dbName, String ddocId, String viewName,
       {bool conflicts = false,
       bool descending = false,
@@ -237,7 +240,7 @@ class DesignDocumentModel extends DesignDocumentBaseModel {
       String update = 'true',
       bool updateSeq = false,
       Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
     String path;
 
     if (reduce == true) {
@@ -264,15 +267,15 @@ class DesignDocumentModel extends DesignDocumentBaseModel {
     }
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeViewFunctionWithKeys(
+  Future<DesignDocumentsResponse> executeViewFunctionWithKeys(
       String dbName, String ddocId, String viewName,
       {@required List<Object> keys,
       bool conflicts = false,
@@ -297,7 +300,7 @@ class DesignDocumentModel extends DesignDocumentBaseModel {
       String update = 'true',
       bool updateSeq = false,
       Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
     String path;
 
     if (reduce == true) {
@@ -326,138 +329,138 @@ class DesignDocumentModel extends DesignDocumentBaseModel {
     final body = <String, List<Object>>{'keys': keys};
 
     try {
-      result = await client.post(path, reqHeaders: headers, body: body);
+      result = await _client.post(path, reqHeaders: headers, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeViewQueries(String dbName,
+  Future<DesignDocumentsResponse> executeViewQueries(String dbName,
       String ddocId, String viewName, List<Object> queries) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, List<Object>>{'queries': queries};
 
     try {
-      result = await client.post('$dbName/$ddocId/_view/$viewName/queries',
+      result = await _client.post('$dbName/$ddocId/_view/$viewName/queries',
           body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeShowFunctionForNull(
+  Future<DesignDocumentsResponse> executeShowFunctionForNull(
       String dbName, String ddocId, String funcName,
       {String format}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get(
+      result = await _client.get(
           '$dbName/$ddocId/_show/$funcName?${includeNonNullParam('format', format)}');
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeShowFunctionForDocument(
+  Future<DesignDocumentsResponse> executeShowFunctionForDocument(
       String dbName, String ddocId, String funcName, String docId,
       {String format}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get(
+      result = await _client.get(
           '$dbName/$ddocId/_show/$funcName/$docId?${includeNonNullParam('format', format)}');
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeListFunctionForView(
+  Future<DesignDocumentsResponse> executeListFunctionForView(
       String dbName, String ddocId, String funcName, String view,
       {String format}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get(
+      result = await _client.get(
           '$dbName/$ddocId/_list/$funcName/$view?${includeNonNullParam('format', format)}');
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeListFunctionForViewFromDoc(
+  Future<DesignDocumentsResponse> executeListFunctionForViewFromDoc(
       String dbName,
       String ddocId,
       String funcName,
       String otherDoc,
       String view,
       {String format}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get(
+      result = await _client.get(
           '$dbName/$ddocId/_list/$funcName/$otherDoc/$view?${includeNonNullParam('format', format)}');
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeUpdateFunctionForNull(
+  Future<DesignDocumentsResponse> executeUpdateFunctionForNull(
       String dbName, String ddocId, String funcName, Object body) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
       result =
-          await client.post('$dbName/$ddocId/_update/$funcName', body: body);
+          await _client.post('$dbName/$ddocId/_update/$funcName', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> executeUpdateFunctionForDocument(
+  Future<DesignDocumentsResponse> executeUpdateFunctionForDocument(
       String dbName,
       String ddocId,
       String funcName,
       String docId,
       Object body) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.put('$dbName/$ddocId/_update/$funcName/$docId',
+      result = await _client.put('$dbName/$ddocId/_update/$funcName/$docId',
           body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentModelResponse> rewritePath(
+  Future<DesignDocumentsResponse> rewritePath(
     String dbName,
     String ddocId,
     String path,
   ) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.put('$dbName/$ddocId/_rewrite/$path');
+      result = await _client.put('$dbName/$ddocId/_rewrite/$path');
     } on CouchDbException {
       rethrow;
     }
-    return result.designDocumentModelResponse();
+    return DesignDocumentsResponse.from(result);
   }
 }

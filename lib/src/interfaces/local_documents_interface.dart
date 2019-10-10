@@ -1,16 +1,12 @@
 import 'package:meta/meta.dart';
 
-import '../../clients/couchdb_client.dart';
-import '../../entities/local_document_model_response.dart';
-import 'base_model.dart';
+import '../responses/local_documents_response.dart';
 
 /// The Local (non-replicating) document interface allows to create local documents
 /// that are not replicated to other databases
 ///
 /// Local documents don't store attachments.
-abstract class LocalDocumentBaseModel extends BaseModel {
-  /// Create LocalDocumentModel by accepting web-based or server-based client
-  LocalDocumentBaseModel(CouchDbClient client) : super(client);
+abstract class LocalDocumentsInterface {
 
   /// Returns a JSON structure of all of the local documents in a given database
   ///
@@ -58,7 +54,7 @@ abstract class LocalDocumentBaseModel extends BaseModel {
   ///     "total_rows": null
   /// }
   /// ```
-  Future<LocalDocumentModelResponse> localDocs(String dbName,
+  Future<LocalDocumentsResponse> localDocs(String dbName,
       {bool conflicts = false,
       bool descending = false,
       String endKey,
@@ -99,7 +95,7 @@ abstract class LocalDocumentBaseModel extends BaseModel {
   ///     "offset" : null
   /// }
   /// ```
-  Future<LocalDocumentModelResponse> localDocsWithKeys(String dbName,
+  Future<LocalDocumentsResponse> localDocsWithKeys(String dbName,
       {@required List<String> keys,
       bool conflicts = false,
       bool descending = false,
@@ -117,7 +113,7 @@ abstract class LocalDocumentBaseModel extends BaseModel {
   /// Gets the specified local document
   ///
   /// [docId] must match pattern - `_local/{id}`
-  Future<LocalDocumentModelResponse> localDoc(String dbName, String docId,
+  Future<LocalDocumentsResponse> localDoc(String dbName, String docId,
       {Map<String, String> headers,
       bool conflicts = false,
       bool deletedConflicts = false,
@@ -132,7 +128,7 @@ abstract class LocalDocumentBaseModel extends BaseModel {
   /// Stores the specified local document
   ///
   /// [docId] must match pattern - `_local/{id}`
-  Future<LocalDocumentModelResponse> putLocalDoc(
+  Future<LocalDocumentsResponse> putLocalDoc(
       String dbName, String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
@@ -142,13 +138,13 @@ abstract class LocalDocumentBaseModel extends BaseModel {
   /// Deletes the specified local document
   ///
   /// [docId] must match pattern - `_local/{id}`
-  Future<LocalDocumentModelResponse> deleteLocalDoc(
+  Future<LocalDocumentsResponse> deleteLocalDoc(
       String dbName, String docId, String rev,
       {Map<String, String> headers, String batch});
 
   /// Copies the specified local document
   ///
   /// [docId] must match pattern - `_local/{id}`
-  Future<LocalDocumentModelResponse> copyLocalDoc(String dbName, String docId,
+  Future<LocalDocumentsResponse> copyLocalDoc(String dbName, String docId,
       {Map<String, String> headers, String rev, String batch});
 }

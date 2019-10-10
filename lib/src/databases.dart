@@ -2,49 +2,52 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
-import '../clients/couchdb_client.dart';
-import '../entities/database_model_response.dart';
-import '../entities/db_response.dart';
-import '../exceptions/couchdb_exception.dart';
-import '../utils/includer_path.dart';
-import 'base/database_base_model.dart';
+import 'client.dart';
+import 'responses/databases_response.dart';
+import 'responses/api_response.dart';
+import 'exceptions/couchdb_exception.dart';
+import 'utils/includer_path.dart';
+import 'interfaces/databases_interface.dart';
 
 /// Class that implements methods for interacting with entire database
 /// in CouchDB
-class DatabaseModel extends DatabaseBaseModel {
-  /// Create DatabaseModel by accepting web-based or server-based client
-  DatabaseModel(CouchDbClient client) : super(client);
+class Databases implements DatabasesInterface {
+  /// Instance of connected client
+  final Client _client;
+
+  /// Create Databases by accepting web-based or server-based client
+  Databases(this._client);
 
   @override
-  Future<DatabaseModelResponse> headDbInfo(String dbName) async {
-    DbResponse info;
+  Future<DatabasesResponse> headDbInfo(String dbName) async {
+    ApiResponse result;
     try {
-      info = await client.head(dbName);
+      result = await _client.head(dbName);
     } on CouchDbException catch (e) {
-      e.response = DbResponse(<String, String>{
+      e.response = ApiResponse(<String, String>{
         'error': 'Not found',
         'reason': 'Database doesn\'t exist.'
       }).errorResponse();
       rethrow;
     }
-    return info.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> dbInfo(String dbName) async {
-    DbResponse info;
+  Future<DatabasesResponse> dbInfo(String dbName) async {
+    ApiResponse result;
     try {
-      info = await client.get(dbName);
+      result = await _client.get(dbName);
     } on CouchDbException {
       rethrow;
     }
-    return info.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> createDb(String dbName, {int q = 8}) async {
+  Future<DatabasesResponse> createDb(String dbName, {int q = 8}) async {
     final regexp = RegExp(r'^[a-z][a-z0-9_$()+/-]*$');
-    DbResponse result;
+    ApiResponse result;
 
     if (!regexp.hasMatch(dbName)) {
       throw ArgumentError(r'''Incorrect db name!
@@ -57,43 +60,42 @@ class DatabaseModel extends DatabaseBaseModel {
 
     final path = '$dbName?q=$q';
     try {
-      result = await client.put(path);
+      result = await _client.put(path);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> deleteDb(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> deleteDb(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.delete(dbName);
+      result = await _client.delete(dbName);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> createDocIn(
-      String dbName, Map<String, Object> doc,
+  Future<DatabasesResponse> createDocIn(String dbName, Map<String, Object> doc,
       {String batch, Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName${includeNonNullParam('?batch', batch)}';
 
     try {
-      result = await client.post(path, body: doc, reqHeaders: headers);
+      result = await _client.post(path, body: doc, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> allDocs(String dbName,
+  Future<DatabasesResponse> allDocs(String dbName,
       {bool conflicts = false,
       bool descending = false,
       Object endKey,
@@ -116,10 +118,10 @@ class DatabaseModel extends DatabaseBaseModel {
       String startKeyDocId,
       String update,
       bool updateSeq = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.get('$dbName/_all_docs'
+      result = await _client.get('$dbName/_all_docs'
           '?conflicts=$conflicts'
           '&descending=$descending'
           '&${includeNonNullJsonParam("endkey", endKey)}'
@@ -145,28 +147,28 @@ class DatabaseModel extends DatabaseBaseModel {
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> docsByKeys(String dbName,
+  Future<DatabasesResponse> docsByKeys(String dbName,
       {List<String> keys}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, List<String>>{'keys': keys};
 
     try {
       result = keys == null
-          ? await client.post('$dbName/_all_docs')
-          : await client.post('$dbName/_all_docs', body: body);
+          ? await _client.post('$dbName/_all_docs')
+          : await _client.post('$dbName/_all_docs', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> allDesignDocs(String dbName,
+  Future<DatabasesResponse> allDesignDocs(String dbName,
       {bool conflicts = false,
       bool descending = false,
       String endKey,
@@ -180,7 +182,7 @@ class DatabaseModel extends DatabaseBaseModel {
       String startKey,
       String startKeyDocId,
       bool updateSeq = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/_design_docs?conflicts=$conflicts&descending=$descending&'
@@ -191,77 +193,76 @@ class DatabaseModel extends DatabaseBaseModel {
         'update_seq=$updateSeq';
 
     try {
-      result = await client.get(path);
+      result = await _client.get(path);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> designDocsByKeys(
+  Future<DatabasesResponse> designDocsByKeys(
       String dbName, List<String> keys) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, List<String>>{'keys': keys};
 
     try {
-      result = await client.post('$dbName/_design_docs', body: body);
+      result = await _client.post('$dbName/_design_docs', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> queriesDocsFrom(
+  Future<DatabasesResponse> queriesDocsFrom(
       String dbName, List<Map<String, Object>> queries) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, List<Map<String, Object>>>{'queries': queries};
 
     try {
-      result = await client.post('$dbName/_all_docs/queries', body: body);
+      result = await _client.post('$dbName/_all_docs/queries', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> bulkDocs(String dbName, List<Object> docs,
+  Future<DatabasesResponse> bulkDocs(String dbName, List<Object> docs,
       {@required bool revs}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, List<Object>>{'docs': docs};
 
     try {
-      result = await client.post('$dbName?revs=$revs', body: body);
+      result = await _client.post('$dbName?revs=$revs', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> insertBulkDocs(String dbName, List<Object> docs,
+  Future<DatabasesResponse> insertBulkDocs(String dbName, List<Object> docs,
       {bool newEdits = true, Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, Object>{'docs': docs, 'new_edits': newEdits};
 
     try {
-      result = await client.post('$dbName/_bulk_docs',
+      result = await _client.post('$dbName/_bulk_docs',
           body: body, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> find(
-      String dbName, Map<String, Object> selector,
+  Future<DatabasesResponse> find(String dbName, Map<String, Object> selector,
       {int limit = 25,
       int skip,
       List<Object> sort,
@@ -273,7 +274,7 @@ class DatabaseModel extends DatabaseBaseModel {
       bool stable,
       String stale = 'false',
       bool executionStats = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, Object>{
       'selector': selector,
@@ -301,21 +302,21 @@ class DatabaseModel extends DatabaseBaseModel {
     }
 
     try {
-      result = await client.post('$dbName/_find', body: body);
+      result = await _client.post('$dbName/_find', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> createIndexIn(String dbName,
+  Future<DatabasesResponse> createIndexIn(String dbName,
       {@required List<String> indexFields,
       String ddoc,
       String name,
       String type = 'json',
       Map<String, Object> partialFilterSelector}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, Object>{
       'index': <String, List<String>>{'fields': indexFields},
@@ -332,41 +333,40 @@ class DatabaseModel extends DatabaseBaseModel {
     }
 
     try {
-      result = await client.post('$dbName/_index', body: body);
+      result = await _client.post('$dbName/_index', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> indexesAt(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> indexesAt(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('$dbName/_index');
+      result = await _client.get('$dbName/_index');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> deleteIndexIn(
+  Future<DatabasesResponse> deleteIndexIn(
       String dbName, String designDoc, String name) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.delete('$dbName/_index/$designDoc/json/$name');
+      result = await _client.delete('$dbName/_index/$designDoc/json/$name');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> explain(
-      String dbName, Map<String, Object> selector,
+  Future<DatabasesResponse> explain(String dbName, Map<String, Object> selector,
       {int limit = 25,
       int skip,
       List<Object> sort,
@@ -378,7 +378,7 @@ class DatabaseModel extends DatabaseBaseModel {
       bool stable,
       String stale = 'false',
       bool executionStats = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final body = <String, Object>{
       'selector': selector,
@@ -406,51 +406,51 @@ class DatabaseModel extends DatabaseBaseModel {
     }
 
     try {
-      result = await client.post('$dbName/_explain', body: body);
+      result = await _client.post('$dbName/_explain', body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> shards(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> shards(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('$dbName/_shards');
+      result = await _client.get('$dbName/_shards');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> shard(String dbName, String docId) async {
-    DbResponse result;
+  Future<DatabasesResponse> shard(String dbName, String docId) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('$dbName/_shards/$docId');
+      result = await _client.get('$dbName/_shards/$docId');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> synchronizeShards(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> synchronizeShards(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.post('$dbName/_sync_shards');
+      result = await _client.post('$dbName/_sync_shards');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<Stream<DatabaseModelResponse>> changesIn(String dbName,
+  Future<Stream<DatabasesResponse>> changesIn(String dbName,
       {List<String> docIds,
       bool conflicts = false,
       bool descending = false,
@@ -467,7 +467,7 @@ class DatabaseModel extends DatabaseBaseModel {
       int timeout = 60000,
       String view,
       int seqInterval}) async {
-    Stream<DatabaseModelResponse> result;
+    Stream<DatabasesResponse> result;
 
     final path =
         '$dbName/_changes?${includeNonNullParam('doc_ids', docIds)}&conflicts=$conflicts&'
@@ -478,21 +478,20 @@ class DatabaseModel extends DatabaseBaseModel {
         '${includeNonNullParam('seq_interval', seqInterval)}';
 
     try {
-      final streamedRes = await client.streamed('get', path);
+      final streamedRes = await _client.streamed('get', path);
       switch (feed) {
         case 'longpoll':
           var strRes = await streamedRes.join();
           strRes = '{"result": [$strRes';
-          result = Stream<DatabaseModelResponse>.fromFuture(
-              Future<DatabaseModelResponse>.value(
-                  DbResponse(jsonDecode(strRes)).databaseModelResponse()));
+          result = Stream<DatabasesResponse>.fromFuture(
+              Future<DatabasesResponse>.value(
+                  DatabasesResponse.from(ApiResponse(jsonDecode(strRes)))));
           break;
         case 'continuous':
           final mappedRes =
               streamedRes.map((v) => v.replaceAll('}\n{', '},\n{'));
           result = mappedRes.map((v) =>
-              DbResponse(jsonDecode('{"result": [$v]}'))
-                  .databaseModelResponse());
+              DatabasesResponse.from(ApiResponse(jsonDecode('{"result": [$v]}'))));
           break;
         case 'eventsource':
           final mappedRes = streamedRes
@@ -500,15 +499,14 @@ class DatabaseModel extends DatabaseBaseModel {
               .map((v) => v.replaceAll('data', '"data"'))
               .map((v) => v.replaceAll('\nid', ',\n"id"'));
           result = mappedRes.map((v) =>
-              DbResponse(jsonDecode('{"result": [{$v}]}'))
-                  .databaseModelResponse());
+              DatabasesResponse.from(ApiResponse(jsonDecode('{"result": [{$v}]}'))));
           break;
         default:
           var strRes = await streamedRes.join();
           strRes = '{"result": [$strRes';
-          result = Stream<DatabaseModelResponse>.fromFuture(
-              Future<DatabaseModelResponse>.value(
-                  DbResponse(jsonDecode(strRes)).databaseModelResponse()));
+          result = Stream<DatabasesResponse>.fromFuture(
+              Future<DatabasesResponse>.value(
+                  DatabasesResponse.from(ApiResponse(jsonDecode(strRes)))));
       }
     } on CouchDbException {
       rethrow;
@@ -517,7 +515,7 @@ class DatabaseModel extends DatabaseBaseModel {
   }
 
   @override
-  Future<Stream<DatabaseModelResponse>> postChangesIn(String dbName,
+  Future<Stream<DatabasesResponse>> postChangesIn(String dbName,
       {List<String> docIds,
       bool conflicts = false,
       bool descending = false,
@@ -534,7 +532,7 @@ class DatabaseModel extends DatabaseBaseModel {
       int timeout = 60000,
       String view,
       int seqInterval}) async {
-    Stream<DatabaseModelResponse> result;
+    Stream<DatabasesResponse> result;
 
     final path = '$dbName/_changes?conflicts=$conflicts&'
         'descending=$descending&feed=$feed&filter=$filter&heartbeat=$heartbeat&'
@@ -547,21 +545,20 @@ class DatabaseModel extends DatabaseBaseModel {
 
     try {
       //result = await client.post(path, body: body);
-      final streamedRes = await client.streamed('post', path, body: body);
+      final streamedRes = await _client.streamed('post', path, body: body);
       switch (feed) {
         case 'longpoll':
           var strRes = await streamedRes.join();
           strRes = '{"result": [$strRes';
-          result = Stream<DatabaseModelResponse>.fromFuture(
-              Future<DatabaseModelResponse>.value(
-                  DbResponse(jsonDecode(strRes)).databaseModelResponse()));
+          result = Stream<DatabasesResponse>.fromFuture(
+              Future<DatabasesResponse>.value(
+                  DatabasesResponse.from(ApiResponse(jsonDecode(strRes)))));
           break;
         case 'continuous':
           final mappedRes =
               streamedRes.map((v) => v.replaceAll('}\n{', '},\n{'));
-          result = mappedRes.map((v) =>
-              DbResponse(jsonDecode('{"result": [$v]}'))
-                  .databaseModelResponse());
+          result = mappedRes.map((v) => DatabasesResponse.from(
+              ApiResponse(jsonDecode('{"result": [$v]}'))));
           break;
         case 'eventsource':
           final mappedRes = streamedRes
@@ -569,15 +566,14 @@ class DatabaseModel extends DatabaseBaseModel {
               .map((v) => v.replaceAll('data', '"data"'))
               .map((v) => v.replaceAll('\nid', ',\n"id"'));
           result = mappedRes.map((v) =>
-              DbResponse(jsonDecode('{"result": [{$v}]}'))
-                  .databaseModelResponse());
+              DatabasesResponse.from(ApiResponse(jsonDecode('{"result": [{$v}]}'))));
           break;
         default:
           var strRes = await streamedRes.join();
           strRes = '{"result": [$strRes';
-          result = Stream<DatabaseModelResponse>.fromFuture(
-              Future<DatabaseModelResponse>.value(
-                  DbResponse(jsonDecode(strRes)).databaseModelResponse()));
+          result = Stream<DatabasesResponse>.fromFuture(
+              Future<DatabasesResponse>.value(
+                  DatabasesResponse.from(ApiResponse(jsonDecode(strRes)))));
       }
     } on CouchDbException {
       rethrow;
@@ -586,166 +582,166 @@ class DatabaseModel extends DatabaseBaseModel {
   }
 
   @override
-  Future<DatabaseModelResponse> compact(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> compact(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.post('$dbName/_compact');
+      result = await _client.post('$dbName/_compact');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> compactViewIndexesWith(
+  Future<DatabasesResponse> compactViewIndexesWith(
       String dbName, String ddocName) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.post('$dbName/_compact/$ddocName');
+      result = await _client.post('$dbName/_compact/$ddocName');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> ensureFullCommit(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> ensureFullCommit(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.post('$dbName/_ensure_full_commit');
+      result = await _client.post('$dbName/_ensure_full_commit');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> viewCleanup(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> viewCleanup(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.post('$dbName/_view_cleanup');
+      result = await _client.post('$dbName/_view_cleanup');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> securityOf(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> securityOf(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('$dbName/_security');
+      result = await _client.get('$dbName/_security');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> setSecurityFor(
+  Future<DatabasesResponse> setSecurityFor(
       String dbName, Map<String, Map<String, List<String>>> security) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.put('$dbName/_security', body: security);
+      result = await _client.put('$dbName/_security', body: security);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> purge(
+  Future<DatabasesResponse> purge(
       String dbName, Map<String, List<String>> docs) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.post('$dbName/_purge', body: docs);
+      result = await _client.post('$dbName/_purge', body: docs);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> purgedInfosLimit(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> purgedInfosLimit(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('$dbName/_purged_infos_limit');
+      result = await _client.get('$dbName/_purged_infos_limit');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> setPurgedInfosLimit(
+  Future<DatabasesResponse> setPurgedInfosLimit(
       String dbName, int limit) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.put('$dbName/_purged_infos_limit', body: limit);
+      result = await _client.put('$dbName/_purged_infos_limit', body: limit);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> missingRevs(
+  Future<DatabasesResponse> missingRevs(
       String dbName, Map<String, List<String>> revs) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.post('$dbName/_missing_revs', body: revs);
+      result = await _client.post('$dbName/_missing_revs', body: revs);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> revsDiff(
+  Future<DatabasesResponse> revsDiff(
       String dbName, Map<String, List<String>> revs) async {
-    DbResponse result;
+    ApiResponse result;
 
     try {
-      result = await client.post('$dbName/_revs_diff', body: revs);
+      result = await _client.post('$dbName/_revs_diff', body: revs);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   @override
-  Future<DatabaseModelResponse> revsLimitOf(String dbName) async {
-    DbResponse result;
+  Future<DatabasesResponse> revsLimitOf(String dbName) async {
+    ApiResponse result;
 
     try {
-      result = await client.get('$dbName/_revs_limit');
+      result = await _client.get('$dbName/_revs_limit');
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 
   /// Sets the maximum number of document revisions that will be tracked by CouchDB,
   /// even after compaction has occurred
   @override
-  Future<DatabaseModelResponse> setRevsLimit(String dbName, int limit) async {
-    DbResponse result;
+  Future<DatabasesResponse> setRevsLimit(String dbName, int limit) async {
+    ApiResponse result;
 
     try {
-      result = await client.put('$dbName/_revs_limit', body: limit);
+      result = await _client.put('$dbName/_revs_limit', body: limit);
     } on CouchDbException {
       rethrow;
     }
-    return result.databaseModelResponse();
+    return DatabasesResponse.from(result);
   }
 }

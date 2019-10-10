@@ -1,10 +1,16 @@
-import '../models/document_model.dart';
+import 'package:couchdb/couchdb.dart';
 
-/// Class that contains responses from `DocumentModel` class
-class DocumentModelResponse {
-  /// Creates instance of [DocumentModelResponse]
-  DocumentModelResponse(
-      {this.doc,
+import '../local_documents.dart';
+
+/// Class that contains responses from `LocalDocuments` class
+class LocalDocumentsResponse {
+  /// Creates instance of [LocalDocumentsResponse]
+  LocalDocumentsResponse(
+      {this.offset,
+      this.rows,
+      this.totalRows,
+      this.updateSeq,
+      this.doc,
       this.ok,
       this.id,
       this.rev,
@@ -16,7 +22,46 @@ class DocumentModelResponse {
       this.revsInfo,
       this.revisions});
 
-  /// Holds document object
+  LocalDocumentsResponse.from(ApiResponse response) : this(
+      offset: response.json['offset'] as int,
+      rows: (response.json['rows']
+      as List<Object>)
+          ?.map((e) => e as Map<String, Object>)
+          ?.toList(),
+      totalRows: response.json['total_rows'] as int,
+      updateSeq: response.json['update_seq'] as String,
+      doc: response.json,
+      ok: response.json['ok'] as bool,
+      id: (response.json['_id'] ?? response.json['id']) as String,
+      rev: (response.json['_rev'] ?? response.json['rev']) as String,
+      attachment: response.json['_attachments'] ?? response.raw,
+      conflicts:
+      (response.json['_conflicts'] as List<Object>)
+          ?.map((e) => e as String)
+          ?.toList(),
+      deleted: response.json['_deleted'] as bool,
+      deletedConflicts: (response.json['_deleted_conflicts'] as List<Object>)
+          ?.map((e) => e as String)
+          ?.toList(),
+      localSeq: response.json['_local_seq'] as String,
+      revsInfo: (response.json['_revs_info'] as List<Object>)
+          ?.map((e) => e as Map<String, Object>)
+          ?.toList(),
+      revisions: response.json['_revisions'] as Map<String, Object>);
+
+  /// Holds offset where the document list started
+  final int offset;
+
+  /// List array of view row objects
+  final List<Map<String, Object>> rows;
+
+  /// Holds number of documents in the database
+  final int totalRows;
+
+  /// Current update sequence for the database
+  final String updateSeq;
+
+  /// Holds local document object
   ///
   /// May contain:
   /// - `_id` (string) – Document ID
@@ -29,9 +74,9 @@ class DocumentModelResponse {
   /// - `_revs_info (array)` – List of objects with information about local revisions and their status. Available if requested with `open_revs` query parameter
   /// - `_revisions (object)` – List of local revision tokens without. Available if requested with `revs=true` query parameter
   ///
-  /// This properties are listed separately in [DocumentModelResponse] and you can get their directly.
+  /// This properties are listed separately in [LocalDocumentsResponse] and you can get their directly.
   ///
-  /// Returns by [DocumentModel.doc]
+  /// Returns by [LocalDocuments.localDoc]
   final Map<String, Object> doc;
 
   /// Holds operation status. Available in case of success

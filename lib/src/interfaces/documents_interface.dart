@@ -1,17 +1,13 @@
 import 'package:meta/meta.dart';
 
-import '../../clients/couchdb_client.dart';
-import '../../entities/db_response.dart';
-import '../../entities/document_model_response.dart';
-import 'base_model.dart';
+import '../responses/api_response.dart';
+import '../responses/documents_response.dart';
 
 /// Class that define methods for create, read, update and delete documents within a database
-abstract class DocumentBaseModel extends BaseModel {
-  /// Create DocumentModel by accepting web-based or server-based client
-  DocumentBaseModel(CouchDbClient client) : super(client);
+abstract class DocumentsInterface {
 
   /// Returns the HTTP Headers containing a minimal amount of information about the specified document
-  Future<DocumentModelResponse> docInfo(String dbName, String docId,
+  Future<DocumentsResponse> docInfo(String dbName, String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -42,7 +38,7 @@ abstract class DocumentBaseModel extends BaseModel {
   ///     "name": "Spaghetti with meatballs"
   /// }
   /// ```
-  Future<DocumentModelResponse> doc(String dbName, String docId,
+  Future<DocumentsResponse> doc(String dbName, String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -67,7 +63,7 @@ abstract class DocumentBaseModel extends BaseModel {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentModelResponse> insertDoc(
+  Future<DocumentsResponse> insertDoc(
       String dbName, String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
@@ -84,7 +80,7 @@ abstract class DocumentBaseModel extends BaseModel {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentModelResponse> deleteDoc(
+  Future<DocumentsResponse> deleteDoc(
       String dbName, String docId, String rev,
       {Map<String, String> headers, String batch});
 
@@ -101,7 +97,7 @@ abstract class DocumentBaseModel extends BaseModel {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentModelResponse> copyDoc(
+  Future<DocumentsResponse> copyDoc(
       String dbName, String docId, String destinationId,
       {Map<String, String> headers,
       String rev,
@@ -109,14 +105,14 @@ abstract class DocumentBaseModel extends BaseModel {
       String batch});
 
   /// Returns the HTTP headers containing a minimal amount of information about the specified attachment
-  Future<DocumentModelResponse> attachmentInfo(
+  Future<DocumentsResponse> attachmentInfo(
       String dbName, String docId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Returns the file attachment associated with the document
   ///
-  /// Result is available in [DocumentModelResponse.attachment] or [DbResponse.raw] field as bytes of data.
-  Future<DocumentModelResponse> attachment(
+  /// Result is available in [DocumentsResponse.attachment] or [ApiResponse.raw] field as bytes of data.
+  Future<DocumentsResponse> attachment(
       String dbName, String docId, String attName,
       {Map<String, String> headers, String rev});
 
@@ -133,7 +129,7 @@ abstract class DocumentBaseModel extends BaseModel {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentModelResponse> uploadAttachment(
+  Future<DocumentsResponse> uploadAttachment(
       String dbName, String docId, String attName, Object body,
       {Map<String, String> headers, String rev});
 
@@ -147,7 +143,7 @@ abstract class DocumentBaseModel extends BaseModel {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentModelResponse> deleteAttachment(
+  Future<DocumentsResponse> deleteAttachment(
       String dbName, String docId, String attName,
       {@required String rev, Map<String, String> headers, String batch});
 }

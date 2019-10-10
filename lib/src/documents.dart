@@ -1,19 +1,22 @@
 import 'package:meta/meta.dart';
 
-import '../clients/couchdb_client.dart';
-import '../entities/db_response.dart';
-import '../entities/document_model_response.dart';
-import '../exceptions/couchdb_exception.dart';
-import '../utils/includer_path.dart';
-import 'base/document_base_model.dart';
+import 'client.dart';
+import 'responses/api_response.dart';
+import 'responses/documents_response.dart';
+import 'exceptions/couchdb_exception.dart';
+import 'utils/includer_path.dart';
+import 'interfaces/documents_interface.dart';
 
 /// Class that implements methods for create, read, update and delete documents within a database
-class DocumentModel extends DocumentBaseModel {
-  /// Create DocumentModel by accepting web-based or server-based client
-  DocumentModel(CouchDbClient client) : super(client);
+class Documents implements DocumentsInterface {
+  /// Instance of connected client
+  final Client _client;
+
+  /// Create Documents by accepting web-based or server-based client
+  Documents(this._client);
 
   @override
-  Future<DocumentModelResponse> docInfo(String dbName, String docId,
+  Future<DocumentsResponse> docInfo(String dbName, String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -27,7 +30,7 @@ class DocumentModel extends DocumentBaseModel {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$docId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
@@ -36,15 +39,15 @@ class DocumentModel extends DocumentBaseModel {
         '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
 
     try {
-      result = await client.head(path, reqHeaders: headers);
+      result = await _client.head(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentModelResponse> doc(String dbName, String docId,
+  Future<DocumentsResponse> doc(String dbName, String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -58,7 +61,7 @@ class DocumentModel extends DocumentBaseModel {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$docId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
@@ -67,59 +70,59 @@ class DocumentModel extends DocumentBaseModel {
         '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentModelResponse> insertDoc(
+  Future<DocumentsResponse> insertDoc(
       String dbName, String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
       String batch,
       bool newEdits = true}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.put(path, reqHeaders: headers, body: body);
+      result = await _client.put(path, reqHeaders: headers, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentModelResponse> deleteDoc(
+  Future<DocumentsResponse> deleteDoc(
       String dbName, String docId, String rev,
       {Map<String, String> headers, String batch}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$docId?rev=$rev&${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.delete(path, reqHeaders: headers);
+      result = await _client.delete(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentModelResponse> copyDoc(
+  Future<DocumentsResponse> copyDoc(
       String dbName, String docId, String destinationId,
       {Map<String, String> headers,
       String rev,
       String destinationRev,
       String batch}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
@@ -132,75 +135,75 @@ class DocumentModel extends DocumentBaseModel {
     headers['Destination'] = destination;
 
     try {
-      result = await client.copy(path, reqHeaders: headers);
+      result = await _client.copy(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentModelResponse> attachmentInfo(
+  Future<DocumentsResponse> attachmentInfo(
       String dbName, String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
     try {
-      result = await client.head(path, reqHeaders: headers);
+      result = await _client.head(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentModelResponse> attachment(
+  Future<DocumentsResponse> attachment(
       String dbName, String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentModelResponse> uploadAttachment(
+  Future<DocumentsResponse> uploadAttachment(
       String dbName, String docId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
     try {
-      result = await client.put(path, reqHeaders: headers, body: body);
+      result = await _client.put(path, reqHeaders: headers, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentModelResponse> deleteAttachment(
+  Future<DocumentsResponse> deleteAttachment(
       String dbName, String docId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$docId/$attName?rev=$rev&'
         '${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.delete(path, reqHeaders: headers);
+      result = await _client.delete(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.documentModelResponse();
+    return DocumentsResponse.from(result);
   }
 }

@@ -1,20 +1,23 @@
 import 'package:meta/meta.dart';
 
-import '../clients/couchdb_client.dart';
-import '../entities/db_response.dart';
-import '../entities/local_document_model_response.dart';
-import '../exceptions/couchdb_exception.dart';
-import '../utils/includer_path.dart';
-import 'base/local_document_base_model.dart';
+import 'client.dart';
+import 'responses/api_response.dart';
+import 'responses/local_documents_response.dart';
+import 'exceptions/couchdb_exception.dart';
+import 'utils/includer_path.dart';
+import 'interfaces/local_documents_interface.dart';
 
 /// The Local (non-replicating) document interface allows to create local documents
 /// that are not replicated to other databases
-class LocalDocumentModel extends LocalDocumentBaseModel {
-  /// Create LocalDocumentModel by accepting web-based or server-based client
-  LocalDocumentModel(CouchDbClient client) : super(client);
+class LocalDocuments implements LocalDocumentsInterface {
+  /// Instance of connected client
+  final Client _client;
+
+  /// Create LocalDocuments by accepting web-based or server-based client
+  LocalDocuments(this._client);
 
   @override
-  Future<LocalDocumentModelResponse> localDocs(String dbName,
+  Future<LocalDocumentsResponse> localDocs(String dbName,
       {bool conflicts = false,
       bool descending = false,
       String endKey,
@@ -29,7 +32,7 @@ class LocalDocumentModel extends LocalDocumentBaseModel {
       String startKeyDocId,
       bool updateSeq = false,
       Map<String, String> headers}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/_local_docs?conflicts=$conflicts&descending=$descending&'
@@ -40,15 +43,15 @@ class LocalDocumentModel extends LocalDocumentBaseModel {
         '${includeNonNullParam('startkey_docid', startKeyDocId)}&update_seq=$updateSeq';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.localDocumentModelResponse();
+    return LocalDocumentsResponse.from(result);
   }
 
   @override
-  Future<LocalDocumentModelResponse> localDocsWithKeys(String dbName,
+  Future<LocalDocumentsResponse> localDocsWithKeys(String dbName,
       {@required List<String> keys,
       bool conflicts = false,
       bool descending = false,
@@ -62,7 +65,7 @@ class LocalDocumentModel extends LocalDocumentBaseModel {
       String startKey,
       String startKeyDocId,
       bool updateSeq = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/_local_docs?conflicts=$conflicts&descending=$descending&'
@@ -74,15 +77,15 @@ class LocalDocumentModel extends LocalDocumentBaseModel {
     final body = <String, List<String>>{'keys': keys};
 
     try {
-      result = await client.post(path, body: body);
+      result = await _client.post(path, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.localDocumentModelResponse();
+    return LocalDocumentsResponse.from(result);
   }
 
   @override
-  Future<LocalDocumentModelResponse> localDoc(String dbName, String docId,
+  Future<LocalDocumentsResponse> localDoc(String dbName, String docId,
       {Map<String, String> headers,
       bool conflicts = false,
       bool deletedConflicts = false,
@@ -93,7 +96,7 @@ class LocalDocumentModel extends LocalDocumentBaseModel {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$docId?conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
@@ -101,64 +104,64 @@ class LocalDocumentModel extends LocalDocumentBaseModel {
         '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
 
     try {
-      result = await client.get(path, reqHeaders: headers);
+      result = await _client.get(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.localDocumentModelResponse();
+    return LocalDocumentsResponse.from(result);
   }
 
   @override
-  Future<LocalDocumentModelResponse> putLocalDoc(
+  Future<LocalDocumentsResponse> putLocalDoc(
       String dbName, String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
       String batch,
       bool newEdits = true}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.put(path, reqHeaders: headers, body: body);
+      result = await _client.put(path, reqHeaders: headers, body: body);
     } on CouchDbException {
       rethrow;
     }
-    return result.localDocumentModelResponse();
+    return LocalDocumentsResponse.from(result);
   }
 
   @override
-  Future<LocalDocumentModelResponse> deleteLocalDoc(
+  Future<LocalDocumentsResponse> deleteLocalDoc(
       String dbName, String docId, String rev,
       {Map<String, String> headers, String batch}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path =
         '$dbName/$docId?rev=$rev&${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.delete(path, reqHeaders: headers);
+      result = await _client.delete(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.localDocumentModelResponse();
+    return LocalDocumentsResponse.from(result);
   }
 
   @override
-  Future<LocalDocumentModelResponse> copyLocalDoc(String dbName, String docId,
+  Future<LocalDocumentsResponse> copyLocalDoc(String dbName, String docId,
       {Map<String, String> headers, String rev, String batch}) async {
-    DbResponse result;
+    ApiResponse result;
 
     final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
     try {
-      result = await client.copy(path, reqHeaders: headers);
+      result = await _client.copy(path, reqHeaders: headers);
     } on CouchDbException {
       rethrow;
     }
-    return result.localDocumentModelResponse();
+    return LocalDocumentsResponse.from(result);
   }
 }
