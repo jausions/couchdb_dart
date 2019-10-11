@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart' as Http;
+import 'package:http/http.dart' as http;
 
-import 'responses/api_response.dart';
-import 'exceptions/couchdb_exception.dart';
+import '../interfaces/client_interface.dart';
+import '../responses/api_response.dart';
+import '../exceptions/couchdb_exception.dart';
 
 /// Client for interacting with database via server-side and web applications
-class Client {
+class CouchDbClient implements ClientInterface {
   /// Creates instance of client with [username], [password], [host], [port],
   /// [cors], [auth], [scheme] of the connection and
   /// [secret] (needed for proxy authentication) parameters.
@@ -23,16 +24,16 @@ class Client {
   ///
   ///   - http
   ///   - https (if `SSL` set to `true`)
-  Client(
+  CouchDbClient(
       {String username,
-      String password,
-      String scheme = 'http',
-      String host = '0.0.0.0',
-      int port = 5984,
-      this.auth = 'basic',
-      this.cors = false,
-      String secret,
-      String path})
+        String password,
+        String scheme = 'http',
+        String host = '0.0.0.0',
+        int port = 5984,
+        this.auth = 'basic',
+        this.cors = false,
+        String secret,
+        String path})
       : secret = utf8.encode(secret != null ? secret : '') {
     if (username == null && password != null) {
       throw CouchDbException(401,
@@ -49,7 +50,7 @@ class Client {
     }
 
     final userInfo =
-        username == null && password == null ? null : '$username:$password';
+    username == null && password == null ? null : '$username:$password';
 
     final regExp = RegExp(r'http[s]?://');
     if (host.startsWith(regExp)) {
@@ -59,9 +60,9 @@ class Client {
         scheme: scheme, host: host, port: port, userInfo: userInfo, path: path);
   }
 
-  /// Create [Client] instance from [uri] and
+  /// Create [CouchDbClient] instance from [uri] and
   /// [auth], [cors] and [secret] params.
-  Client.fromUri(Uri uri,
+  CouchDbClient.fromUri(Uri uri,
       {this.auth = 'basic', this.cors = false, String secret})
       : secret = utf8.encode(secret != null ? secret : '') {
     final properUri = Uri(
@@ -76,7 +77,7 @@ class Client {
 
   /// Create [Client] instance from [uri] and
   /// [auth], [cors] and [secret] params.
-  Client.fromString(String uri,
+  CouchDbClient.fromString(String uri,
       {String auth = 'basic', bool cors = false, String secret})
       : this.fromUri(Uri.tryParse(uri), auth: auth, cors: cors, secret: secret);
 
@@ -127,7 +128,7 @@ class Client {
   final List<int> secret;
 
   /// Web Client for requests
-  final Http.Client _httpClient = Http.Client();
+  final http.Client _httpClient = http.Client();
 
   /// Request headers
   ///
@@ -183,7 +184,7 @@ class Client {
     modifyRequestHeaders(reqHeaders);
 
     final res =
-        await _httpClient.head(Uri.parse('$origin/$path'), headers: headers);
+    await _httpClient.head(Uri.parse('$origin/$path'), headers: headers);
 
     _checkForErrorStatusCode(res.statusCode);
 
@@ -280,7 +281,7 @@ class Client {
     modifyRequestHeaders(reqHeaders);
 
     final res =
-        await _httpClient.delete(Uri.parse('$origin/$path'), headers: headers);
+    await _httpClient.delete(Uri.parse('$origin/$path'), headers: headers);
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
     final resBody = jsonDecode(bodyUTF8);
@@ -295,7 +296,7 @@ class Client {
   /// COPY method
   Future<ApiResponse> copy(String path, {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
-    final request = Http.Request('COPY', Uri.parse('$origin/$path'));
+    final request = http.Request('COPY', Uri.parse('$origin/$path'));
     request.headers.addAll(headers);
 
     final res = await _httpClient.send(request);
@@ -319,11 +320,11 @@ class Client {
     modifyRequestHeaders(reqHeaders);
 
     final uriString = path.isNotEmpty ? '$origin/$path' : '$origin';
-    final request = Http.Request(method, Uri.parse(uriString));
+    final request = http.Request(method, Uri.parse(uriString));
     request.headers.addAll(headers);
     if (body != null && (method == 'post' || method == 'put')) {
       request.body =
-          body is Map || body is List ? jsonEncode(body) : body.toString();
+      body is Map || body is List ? jsonEncode(body) : body.toString();
     }
     final res = await _httpClient.send(request);
 
@@ -343,7 +344,7 @@ class Client {
     if (code < 200 || code > 202) {
       throw CouchDbException(code,
           response:
-              ApiResponse(jsonDecode(body), headers: headers).errorResponse());
+          ApiResponse(jsonDecode(body), headers: headers).errorResponse());
     }
   }
 

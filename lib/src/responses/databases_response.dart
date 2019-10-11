@@ -5,48 +5,47 @@ import '../databases.dart';
 /// Class that contains responses from `Databases` class
 class DatabasesResponse {
   /// Creates instance of [DatabasesResponse]
-  DatabasesResponse(
-      {this.cluster,
-      this.compactRunning,
-      this.dbName,
-      this.diskFormatVersion,
-      this.docCount,
-      this.docDelCount,
-      this.purgeSeq,
-      this.sizes,
-      this.updateSeq,
-      this.ok,
-      this.id,
-      this.rev,
-      this.offset,
-      this.rows,
-      this.totalRows,
-      this.results,
-      this.docs,
-      this.warning,
-      this.executionStats,
-      this.bookmark,
-      this.result,
-      this.name,
-      this.indexes,
-      this.index,
-      this.selector,
-      this.opts,
-      this.limit,
-      this.skip,
-      this.fields,
-      this.range,
-      this.lastSeq,
-      this.pending,
-      this.admins,
-      this.members,
-      this.purged,
-      this.missedRevs,
-      this.revsDiff,
-      this.list,
-      this.shards,
-      this.shardRange,
-      this.nodes});
+  DatabasesResponse({this.cluster,
+    this.compactRunning,
+    this.dbName,
+    this.diskFormatVersion,
+    this.docCount,
+    this.docDelCount,
+    this.purgeSeq,
+    this.sizes,
+    this.updateSeq,
+    this.ok,
+    this.id,
+    this.rev,
+    this.offset,
+    this.rows,
+    this.totalRows,
+    this.results,
+    this.docs,
+    this.warning,
+    this.executionStats,
+    this.bookmark,
+    this.result,
+    this.name,
+    this.indexes,
+    this.index,
+    this.selector,
+    this.opts,
+    this.limit,
+    this.skip,
+    this.fields,
+    this.range,
+    this.lastSeq,
+    this.pending,
+    this.admins,
+    this.members,
+    this.purged,
+    this.missedRevs,
+    this.revsDiff,
+    this.list,
+    this.shards,
+    this.shardRange,
+    this.nodes});
 
   /// Returns response with fields that may be returned by `Databases`
   /// request methods
@@ -86,26 +85,55 @@ class DatabasesResponse {
           ?.map((e) => e as Map<String, Object>)
           ?.toList(),
       index: response.json['index'] as Map<String, Object>,
-      selector: (response.json['selector'] as Map<String, Object>)?.map((k, v) =>
+      selector: (response.json['selector'] as Map<String, Object>)?.map((k,
+          v) =>
           MapEntry<String, Map<String, Object>>(k, v as Map<String, Object>)),
       opts: response.json['opts'] as Map<String, Object>,
       limit: response.json['limit'] as int,
       skip: response.json['skip'] as int,
-      fields: response.json['fields'] is String ? <String>[response.json['fields'] as String] : (response.json['fields'] as List<Object>)?.map((e) => e as String)?.toList(),
-      range: response.json['range'] is Map<String, Object> ? (response.json['range'] as Map<String, Object>)?.map((k, v) => MapEntry(k, v as List<Object>)) : null,
+      fields: response.json['fields'] is String ? <String>[
+        response.json['fields'] as String
+      ] : (response.json['fields'] as List<Object>)
+          ?.map((e) => e as String)
+          ?.toList(),
+      range: response.json['range'] is Map<String, Object> ? (response
+          .json['range'] as Map<String, Object>)?.map((k, v) =>
+          MapEntry(k, v as List<Object>)) : null,
       lastSeq: response.json['last_seq'] as String,
       pending: response.json['pending'] as int,
-      admins: (response.json['admins'] as Map<String, Object>)?.map((k, v) => MapEntry<String, List<String>>(k, (v as List<Object>)?.map((e) => e as String)?.toList())),
-      members: (response.json['members'] as Map<String, Object>)?.map((k, v) => MapEntry<String, List<String>>(k, (v as List<Object>)?.map((e) => e as String)?.toList())),
-      purged: (response.json['purged'] as Map<String, Object>)?.map((k, v) => MapEntry<String, Map<String, List<String>>>(k, (v as Map<String, Object>)?.map((k, v) => MapEntry<String, List<String>>(k, (v as List<Object>)?.map((e) => e as String)?.toList())))),
-      missedRevs: (response.json['missed_revs'] as Map<String, Object>)?.map((k, v) => MapEntry<String, List<String>>(k, (v as List<Object>)?.map((e) => e as String)?.toList())),
-      revsDiff: response.json.keys.every(RegExp('[a-z0-9-]{32,36}').hasMatch) ? response.json?.map((k, v) => MapEntry<String, Map<String, List<String>>>(k, (v as Map<String, Object>)?.map((k, v) => MapEntry<String, List<String>>(k, (v as List<Object>)?.map((e) => e as String)?.toList())))) : null,
-      list: (response.json['list'] as List<Object>)?.map((e) => e as Map<String, Object>)?.toList(),
-      shards: (response.json['shards'] as Map<String, Object>)?.map((k, v) => MapEntry<String, List<String>>(k, (v as List<Object>)?.map((v) => v as String)?.toList())),
-      shardRange: response.json['range'] is String ? response.json['range'] as String : null,
-      nodes: (response.json['nodes'] as List<Object>)?.map((v) => v as String)?.toList());
-
-
+      admins: (response.json['admins'] as Map<String, Object>)?.map((k, v) =>
+          MapEntry<String, List<String>>(
+              k, (v as List<Object>)?.map((e) => e as String)?.toList())),
+      members: (response.json['members'] as Map<String, Object>)?.map((k, v) =>
+          MapEntry<String, List<String>>(
+              k, (v as List<Object>)?.map((e) => e as String)?.toList())),
+      purged: (response.json['purged'] as Map<String, Object>)?.map((k, v) =>
+          MapEntry<String, Map<String, List<String>>>(k,
+              (v as Map<String, Object>)?.map((k, v) =>
+                  MapEntry<String, List<String>>(k, (v as List<Object>)
+                      ?.map((e) => e as String)
+                      ?.toList())))),
+      missedRevs: (response.json['missed_revs'] as Map<String, Object>)?.map((k,
+          v) => MapEntry<String, List<String>>(
+          k, (v as List<Object>)?.map((e) => e as String)?.toList())),
+      revsDiff: response.json.keys.every(RegExp('[a-z0-9-]{32,36}').hasMatch)
+          ? response.json?.map((k, v) =>
+          MapEntry<String, Map<String, List<String>>>(k,
+              (v as Map<String, Object>)?.map((k, v) =>
+                  MapEntry<String, List<String>>(k,
+                      (v as List<Object>)?.map((e) => e as String)?.toList()))))
+          : null,
+      list: (response.json['list'] as List<Object>)?.map((e) =>
+      e as Map<String, Object>)?.toList(),
+      shards: (response.json['shards'] as Map<String, Object>)?.map((k, v) =>
+          MapEntry<String, List<String>>(
+              k, (v as List<Object>)?.map((v) => v as String)?.toList())),
+      shardRange: response.json['range'] is String ? response
+          .json['range'] as String : null,
+      nodes: (response.json['nodes'] as List<Object>)
+          ?.map((v) => v as String)
+          ?.toList());
+  
   /// Holds cluster's info
   final Map<String, int> cluster;
 

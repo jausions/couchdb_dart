@@ -1,7 +1,7 @@
 import 'package:couchdb/couchdb.dart';
 
 Future<void> main() async {
-  final c = Client.fromString('http://localhost:5984');
+  final c = CouchDbClient.fromString('http://localhost:5984');
   final da = Databases(c);
   final ddm = DesignDocuments(c);
   final dm = Documents(c);

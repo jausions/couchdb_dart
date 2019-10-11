@@ -72,7 +72,7 @@ class DesignDocumentsResponse {
   /// - `_revs_info (array)` – List of objects with information about local revisions and their status. Available if requested with `open_revs` query parameter
   /// - `_revisions (object)` – List of local revision tokens without. Available if requested with `revs=true` query parameter
   ///
-  /// This properties are listed separately in [DesignDocumentsResponse] and you can get their directly.
+  /// This properties are listed separately in [DesignDocumentsResponse] and you can get them directly.
   ///
   /// Returns by [DesignDocuments.designDoc]
   final Map<String, Object> ddoc;

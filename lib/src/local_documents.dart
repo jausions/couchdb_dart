@@ -1,17 +1,16 @@
 import 'package:meta/meta.dart';
 
-import 'client.dart';
+import 'interfaces/client_interface.dart';
+import 'interfaces/local_documents_interface.dart';
 import 'responses/api_response.dart';
 import 'responses/local_documents_response.dart';
-import 'exceptions/couchdb_exception.dart';
 import 'utils/includer_path.dart';
-import 'interfaces/local_documents_interface.dart';
 
 /// The Local (non-replicating) document interface allows to create local documents
 /// that are not replicated to other databases
 class LocalDocuments implements LocalDocumentsInterface {
   /// Instance of connected client
-  final Client _client;
+  final ClientInterface _client;
 
   /// Create LocalDocuments by accepting web-based or server-based client
   LocalDocuments(this._client);
@@ -32,8 +31,6 @@ class LocalDocuments implements LocalDocumentsInterface {
       String startKeyDocId,
       bool updateSeq = false,
       Map<String, String> headers}) async {
-    ApiResponse result;
-
     final path =
         '$dbName/_local_docs?conflicts=$conflicts&descending=$descending&'
         '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
@@ -42,11 +39,7 @@ class LocalDocuments implements LocalDocumentsInterface {
         'skip=$skip&${includeNonNullParam('startkey', startKey)}&'
         '${includeNonNullParam('startkey_docid', startKeyDocId)}&update_seq=$updateSeq';
 
-    try {
-      result = await _client.get(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.get(path, reqHeaders: headers);
     return LocalDocumentsResponse.from(result);
   }
 
@@ -65,8 +58,6 @@ class LocalDocuments implements LocalDocumentsInterface {
       String startKey,
       String startKeyDocId,
       bool updateSeq = false}) async {
-    ApiResponse result;
-
     final path =
         '$dbName/_local_docs?conflicts=$conflicts&descending=$descending&'
         '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
@@ -76,11 +67,7 @@ class LocalDocuments implements LocalDocumentsInterface {
         '${includeNonNullParam('startkey_docid', startKeyDocId)}&update_seq=$updateSeq';
     final body = <String, List<String>>{'keys': keys};
 
-    try {
-      result = await _client.post(path, body: body);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.post(path, body: body);
     return LocalDocumentsResponse.from(result);
   }
 
@@ -96,39 +83,22 @@ class LocalDocuments implements LocalDocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    ApiResponse result;
-
     final path =
         '$dbName/$docId?conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
         'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
         '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
 
-    try {
-      result = await _client.get(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.get(path, reqHeaders: headers);
     return LocalDocumentsResponse.from(result);
   }
 
   @override
-  Future<LocalDocumentsResponse> putLocalDoc(
-      String dbName, String docId, Map<String, Object> body,
-      {Map<String, String> headers,
-      String rev,
-      String batch,
-      bool newEdits = true}) async {
-    ApiResponse result;
-
-    final path =
-        '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
+  Future<LocalDocumentsResponse> copyLocalDoc(String dbName, String docId,
+      {Map<String, String> headers, String rev, String batch}) async {
+    final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
-    try {
-      result = await _client.put(path, reqHeaders: headers, body: body);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.copy(path, reqHeaders: headers);
     return LocalDocumentsResponse.from(result);
   }
 
@@ -136,32 +106,26 @@ class LocalDocuments implements LocalDocumentsInterface {
   Future<LocalDocumentsResponse> deleteLocalDoc(
       String dbName, String docId, String rev,
       {Map<String, String> headers, String batch}) async {
-    ApiResponse result;
-
     final path =
         '$dbName/$docId?rev=$rev&${includeNonNullParam('batch', batch)}';
 
-    try {
-      result = await _client.delete(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.delete(path, reqHeaders: headers);
     return LocalDocumentsResponse.from(result);
   }
 
   @override
-  Future<LocalDocumentsResponse> copyLocalDoc(String dbName, String docId,
-      {Map<String, String> headers, String rev, String batch}) async {
-    ApiResponse result;
-
-    final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
+  Future<LocalDocumentsResponse> putLocalDoc(
+      String dbName, String docId, Map<String, Object> body,
+      {Map<String, String> headers,
+        String rev,
+        String batch,
+        bool newEdits = true}) async {
+    final path =
+        '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
-    try {
-      result = await _client.copy(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result =
+    await _client.put(path, reqHeaders: headers, body: body);
     return LocalDocumentsResponse.from(result);
   }
 }

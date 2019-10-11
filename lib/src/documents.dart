@@ -1,16 +1,15 @@
 import 'package:meta/meta.dart';
 
-import 'client.dart';
+import 'interfaces/client_interface.dart';
+import 'interfaces/documents_interface.dart';
 import 'responses/api_response.dart';
 import 'responses/documents_response.dart';
-import 'exceptions/couchdb_exception.dart';
 import 'utils/includer_path.dart';
-import 'interfaces/documents_interface.dart';
 
 /// Class that implements methods for create, read, update and delete documents within a database
 class Documents implements DocumentsInterface {
   /// Instance of connected client
-  final Client _client;
+  final ClientInterface _client;
 
   /// Create Documents by accepting web-based or server-based client
   Documents(this._client);
@@ -30,19 +29,13 @@ class Documents implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    ApiResponse result;
-
     final path =
         '$dbName/$docId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
         '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
         'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
         '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
 
-    try {
-      result = await _client.head(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.head(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
@@ -61,19 +54,13 @@ class Documents implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    ApiResponse result;
-
     final path =
         '$dbName/$docId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
         '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
         'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
         '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
 
-    try {
-      result = await _client.get(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.get(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
@@ -84,34 +71,22 @@ class Documents implements DocumentsInterface {
       String rev,
       String batch,
       bool newEdits = true}) async {
-    ApiResponse result;
-
     final path =
         '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
-    try {
-      result = await _client.put(path, reqHeaders: headers, body: body);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result =
+        await _client.put(path, reqHeaders: headers, body: body);
     return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentsResponse> deleteDoc(
-      String dbName, String docId, String rev,
+  Future<DocumentsResponse> deleteDoc(String dbName, String docId, String rev,
       {Map<String, String> headers, String batch}) async {
-    ApiResponse result;
-
     final path =
         '$dbName/$docId?rev=$rev&${includeNonNullParam('batch', batch)}';
 
-    try {
-      result = await _client.delete(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.delete(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
@@ -122,7 +97,6 @@ class Documents implements DocumentsInterface {
       String rev,
       String destinationRev,
       String batch}) async {
-    ApiResponse result;
 
     final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
@@ -134,11 +108,7 @@ class Documents implements DocumentsInterface {
     headers ??= <String, String>{};
     headers['Destination'] = destination;
 
-    try {
-      result = await _client.copy(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.copy(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
@@ -146,15 +116,9 @@ class Documents implements DocumentsInterface {
   Future<DocumentsResponse> attachmentInfo(
       String dbName, String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    ApiResponse result;
-
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
-    try {
-      result = await _client.head(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.head(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
@@ -162,15 +126,9 @@ class Documents implements DocumentsInterface {
   Future<DocumentsResponse> attachment(
       String dbName, String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    ApiResponse result;
-
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
-    try {
-      result = await _client.get(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.get(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
@@ -178,15 +136,10 @@ class Documents implements DocumentsInterface {
   Future<DocumentsResponse> uploadAttachment(
       String dbName, String docId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
-    ApiResponse result;
-
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
-    try {
-      result = await _client.put(path, reqHeaders: headers, body: body);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result =
+        await _client.put(path, reqHeaders: headers, body: body);
     return DocumentsResponse.from(result);
   }
 
@@ -194,16 +147,10 @@ class Documents implements DocumentsInterface {
   Future<DocumentsResponse> deleteAttachment(
       String dbName, String docId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
-    ApiResponse result;
-
     final path = '$dbName/$docId/$attName?rev=$rev&'
         '${includeNonNullParam('batch', batch)}';
 
-    try {
-      result = await _client.delete(path, reqHeaders: headers);
-    } on CouchDbException {
-      rethrow;
-    }
+    ApiResponse result = await _client.delete(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 }
