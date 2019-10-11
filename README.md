@@ -114,8 +114,6 @@ around categories, each providing a more specific `...Response` class.
 
 You can find more information below and in the [package API](https://pub.dev/documentation/couchdb/latest/).
 
-It contains various fields, which you can find in the [package API](https://pub.dev/documentation/couchdb/latest/).
-
 #### Categories
 
 The API is divided into five categories, or areas, each representing a
