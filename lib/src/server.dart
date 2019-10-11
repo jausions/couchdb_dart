@@ -2,9 +2,9 @@ import 'package:meta/meta.dart';
 
 import 'interfaces/client_interface.dart';
 import 'interfaces/server_interface.dart';
+import 'responses/api_response.dart';
 import 'responses/server_response.dart';
 import 'utils/includer_path.dart';
-import 'responses/api_response.dart';
 
 /// Server interface provides the basic interface to a CouchDB server
 /// for obtaining CouchDB information and getting and setting configuration information

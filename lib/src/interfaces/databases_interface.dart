@@ -105,7 +105,28 @@ abstract class DatabasesInterface {
   /// }
   /// ```
   Future<DatabasesResponse> allDocs(String dbName,
-      {bool includeDocs = false});
+      {bool conflicts = false,
+      bool descending = false,
+      Object endKey,
+      String endKeyDocId,
+      bool group = false,
+      int groupLevel,
+      bool includeDocs = false,
+      bool attachments = false,
+      bool altEncodingInfo = false,
+      bool inclusiveEnd = true,
+      Object key,
+      List<Object> keys,
+      int limit,
+      bool reduce,
+      int skip,
+      bool sorted = true,
+      bool stable = false,
+      String stale,
+      Object startKey,
+      String startKeyDocId,
+      String update,
+      bool updateSeq = false});
 
   /// Executes the built-in _all_docs view, returning specified documents in the database
   ///

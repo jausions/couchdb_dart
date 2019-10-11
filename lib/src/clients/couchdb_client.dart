@@ -180,7 +180,8 @@ class CouchDbClient implements ClientInterface {
   }
 
   /// HEAD method
-  Future<ApiResponse> head(String path, {Map<String, String> reqHeaders}) async {
+  Future<ApiResponse> head(String path,
+      {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
     final res =
@@ -212,7 +213,7 @@ class CouchDbClient implements ClientInterface {
         json = Map<String, Object>.from(resBody);
       }
     } else {
-      // When body isn't JSON-valid then DbResponse try parse field from [json]
+      // When body isn't JSON-valid then ApiResponse try parse field from [json]
       // and if it is null - error is thrown
       json = <String, Object>{};
     }

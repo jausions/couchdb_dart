@@ -1,10 +1,10 @@
 import 'package:couchdb/couchdb.dart';
 
 import '../responses/api_response.dart';
+import '../responses/error_response.dart';
 import 'database_model_response.dart';
 import 'design_document_model_response.dart';
 import 'document_model_response.dart';
-import 'error_response.dart';
 import 'local_document_model_response.dart';
 import 'server_model_response.dart';
 
