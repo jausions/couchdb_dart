@@ -127,18 +127,6 @@ different aspect of the database overall. These five categories are:
     4. Design documents
     5. Local documents
 
-In order to get concrete object representation of the response you may call
-methods of the `ApiResponse` class that can return:
-
-    - ServerResponse
-    - DatabasesResponse
-    - DocumentsResponse
-    - DesignDocumentsResponse
-    - LocalDocumentsResponse
-
-Each of these classes have specific properties that can be provided by CouchDB
-according to categories of API described below.
-
 ##### 1: Server
 
 Represented by the `Server` class. This class provides server level interaction
