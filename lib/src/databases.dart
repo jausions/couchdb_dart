@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:couchdb/src/validator.dart';
 import 'package:meta/meta.dart';
 
 import 'interfaces/client_interface.dart';
+import 'interfaces/validator_interface.dart';
 import 'responses/databases_response.dart';
 import 'responses/api_response.dart';
 import 'exceptions/couchdb_exception.dart';
@@ -18,8 +20,12 @@ class Databases implements DatabasesInterface {
   /// Create Databases by accepting web-based or server-based client
   Databases(this._client);
 
+  ValidatorInterface validator = Validator();
+
   @override
   Future<DatabasesResponse> headDbInfo(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result;
     try {
       result = await _client.head(dbName);
@@ -35,22 +41,15 @@ class Databases implements DatabasesInterface {
 
   @override
   Future<DatabasesResponse> dbInfo(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.get(dbName);
     return DatabasesResponse.from(result);
   }
 
   @override
   Future<DatabasesResponse> createDb(String dbName, {int q = 8}) async {
-    final regexp = RegExp(r'^[a-z][a-z0-9_$()+/-]*$');
-
-    if (!regexp.hasMatch(dbName)) {
-      throw ArgumentError(r'''Incorrect db name!
-      Name must be validating by this rules:
-        - Name must begin with a lowercase letter (a-z)
-        - Lowercase characters (a-z)
-        - Digits (0-9)
-        - Any of the characters _, $, (, ), +, -, and /.''');
-    }
+    validator.validateDatabaseName(dbName);
 
     final path = '$dbName?q=$q';
     ApiResponse result = await _client.put(path);
@@ -59,6 +58,8 @@ class Databases implements DatabasesInterface {
 
   @override
   Future<DatabasesResponse> deleteDb(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.delete(dbName);
     return DatabasesResponse.from(result);
   }
@@ -66,8 +67,9 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> createDocIn(String dbName, Map<String, Object> doc,
       {String batch, Map<String, String> headers}) async {
-    final path = '$dbName${includeNonNullParam('?batch', batch)}';
+    validator.validateDatabaseName(dbName);
 
+    final path = '$dbName${includeNonNullParam('?batch', batch)}';
     ApiResponse result =
         await _client.post(path, body: doc, reqHeaders: headers);
     return DatabasesResponse.from(result);
@@ -97,6 +99,7 @@ class Databases implements DatabasesInterface {
       String startKeyDocId,
       String update,
       bool updateSeq = false}) async {
+    validator.validateDatabaseName(dbName);
 
     ApiResponse result = await _client.get('$dbName/_all_docs'
         '?conflicts=$conflicts'
@@ -127,6 +130,7 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> docsByKeys(String dbName,
       {List<String> keys}) async {
+    validator.validateDatabaseName(dbName);
 
     final body = <String, List<String>>{'keys': keys};
 
@@ -151,6 +155,8 @@ class Databases implements DatabasesInterface {
       String startKey,
       String startKeyDocId,
       bool updateSeq = false}) async {
+    validator.validateDatabaseName(dbName);
+
     final path =
         '$dbName/_design_docs?conflicts=$conflicts&descending=$descending&'
         '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
@@ -166,6 +172,8 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> designDocsByKeys(
       String dbName, List<String> keys) async {
+    validator.validateDatabaseName(dbName);
+
     final body = <String, List<String>>{'keys': keys};
     ApiResponse result = await _client.post('$dbName/_design_docs', body: body);
     return DatabasesResponse.from(result);
@@ -174,6 +182,8 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> queriesDocsFrom(
       String dbName, List<Map<String, Object>> queries) async {
+    validator.validateDatabaseName(dbName);
+
     final body = <String, List<Map<String, Object>>>{'queries': queries};
     ApiResponse result =
         await _client.post('$dbName/_all_docs/queries', body: body);
@@ -183,6 +193,8 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> bulkDocs(String dbName, List<Object> docs,
       {@required bool revs}) async {
+    validator.validateDatabaseName(dbName);
+
     final body = <String, List<Object>>{'docs': docs};
     ApiResponse result = await _client.post('$dbName?revs=$revs', body: body);
     return DatabasesResponse.from(result);
@@ -191,6 +203,8 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> insertBulkDocs(String dbName, List<Object> docs,
       {bool newEdits = true, Map<String, String> headers}) async {
+    validator.validateDatabaseName(dbName);
+
     final body = <String, Object>{'docs': docs, 'new_edits': newEdits};
     ApiResponse result = await _client.post('$dbName/_bulk_docs',
         body: body, reqHeaders: headers);
@@ -210,6 +224,7 @@ class Databases implements DatabasesInterface {
       bool stable,
       String stale = 'false',
       bool executionStats = false}) async {
+    validator.validateDatabaseName(dbName);
 
     final body = <String, Object>{
       'selector': selector,
@@ -247,6 +262,7 @@ class Databases implements DatabasesInterface {
       String name,
       String type = 'json',
       Map<String, Object> partialFilterSelector}) async {
+    validator.validateDatabaseName(dbName);
 
     final body = <String, Object>{
       'index': <String, List<String>>{'fields': indexFields},
@@ -268,6 +284,8 @@ class Databases implements DatabasesInterface {
 
   @override
   Future<DatabasesResponse> indexesAt(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.get('$dbName/_index');
     return DatabasesResponse.from(result);
   }
@@ -275,6 +293,8 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> deleteIndexIn(
       String dbName, String designDoc, String name) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result =
         await _client.delete('$dbName/_index/$designDoc/json/$name');
     return DatabasesResponse.from(result);
@@ -293,6 +313,7 @@ class Databases implements DatabasesInterface {
       bool stable,
       String stale = 'false',
       bool executionStats = false}) async {
+    validator.validateDatabaseName(dbName);
 
     final body = <String, Object>{
       'selector': selector,
@@ -325,18 +346,24 @@ class Databases implements DatabasesInterface {
 
   @override
   Future<DatabasesResponse> shards(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.get('$dbName/_shards');
     return DatabasesResponse.from(result);
   }
 
   @override
   Future<DatabasesResponse> shard(String dbName, String docId) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.get('$dbName/_shards/$docId');
     return DatabasesResponse.from(result);
   }
 
   @override
   Future<DatabasesResponse> synchronizeShards(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.post('$dbName/_sync_shards');
     return DatabasesResponse.from(result);
   }
@@ -359,6 +386,8 @@ class Databases implements DatabasesInterface {
       int timeout = 60000,
       String view,
       int seqInterval}) async {
+    validator.validateDatabaseName(dbName);
+
     final path =
         '$dbName/_changes?${includeNonNullParam('doc_ids', docIds)}&conflicts=$conflicts&'
         'descending=$descending&feed=$feed&${includeNonNullParam('filter', filter)}&heartbeat=$heartbeat&'
@@ -417,6 +446,8 @@ class Databases implements DatabasesInterface {
       int timeout = 60000,
       String view,
       int seqInterval}) async {
+    validator.validateDatabaseName(dbName);
+
     final path = '$dbName/_changes?conflicts=$conflicts&'
         'descending=$descending&feed=$feed&filter=$filter&heartbeat=$heartbeat&'
         'include_docs=$includeDocs&attachments=$attachments&att_encoding_info=$attEncodingInfo&'
@@ -460,6 +491,8 @@ class Databases implements DatabasesInterface {
 
   @override
   Future<DatabasesResponse> compact(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.post('$dbName/_compact');
     return DatabasesResponse.from(result);
   }
@@ -467,24 +500,32 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> compactViewIndexesWith(
       String dbName, String ddocName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.post('$dbName/_compact/$ddocName');
     return DatabasesResponse.from(result);
   }
 
   @override
   Future<DatabasesResponse> ensureFullCommit(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.post('$dbName/_ensure_full_commit');
     return DatabasesResponse.from(result);
   }
 
   @override
   Future<DatabasesResponse> viewCleanup(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.post('$dbName/_view_cleanup');
     return DatabasesResponse.from(result);
   }
 
   @override
   Future<DatabasesResponse> securityOf(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.get('$dbName/_security');
     return DatabasesResponse.from(result);
   }
@@ -492,6 +533,8 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> setSecurityFor(
       String dbName, Map<String, Map<String, List<String>>> security) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.put('$dbName/_security', body: security);
     return DatabasesResponse.from(result);
   }
@@ -499,12 +542,16 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> purge(
       String dbName, Map<String, List<String>> docs) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.post('$dbName/_purge', body: docs);
     return DatabasesResponse.from(result);
   }
 
   @override
   Future<DatabasesResponse> purgedInfosLimit(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.get('$dbName/_purged_infos_limit');
     return DatabasesResponse.from(result);
   }
@@ -512,6 +559,8 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> setPurgedInfosLimit(
       String dbName, int limit) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result =
         await _client.put('$dbName/_purged_infos_limit', body: limit);
     return DatabasesResponse.from(result);
@@ -520,6 +569,8 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> missingRevs(
       String dbName, Map<String, List<String>> revs) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result =
         await _client.post('$dbName/_missing_revs', body: revs);
     return DatabasesResponse.from(result);
@@ -528,12 +579,16 @@ class Databases implements DatabasesInterface {
   @override
   Future<DatabasesResponse> revsDiff(
       String dbName, Map<String, List<String>> revs) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.post('$dbName/_revs_diff', body: revs);
     return DatabasesResponse.from(result);
   }
 
   @override
   Future<DatabasesResponse> revsLimitOf(String dbName) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.get('$dbName/_revs_limit');
     return DatabasesResponse.from(result);
   }
@@ -542,6 +597,8 @@ class Databases implements DatabasesInterface {
   /// even after compaction has occurred
   @override
   Future<DatabasesResponse> setRevsLimit(String dbName, int limit) async {
+    validator.validateDatabaseName(dbName);
+
     ApiResponse result = await _client.put('$dbName/_revs_limit', body: limit);
     return DatabasesResponse.from(result);
   }

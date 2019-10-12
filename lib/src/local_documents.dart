@@ -1,7 +1,9 @@
+import 'package:couchdb/src/validator.dart';
 import 'package:meta/meta.dart';
 
 import 'interfaces/client_interface.dart';
 import 'interfaces/local_documents_interface.dart';
+import 'interfaces/validator_interface.dart';
 import 'responses/api_response.dart';
 import 'responses/local_documents_response.dart';
 import 'utils/includer_path.dart';
@@ -14,6 +16,8 @@ class LocalDocuments implements LocalDocumentsInterface {
 
   /// Create LocalDocuments by accepting web-based or server-based client
   LocalDocuments(this._client);
+
+  ValidatorInterface validator = Validator();
 
   @override
   Future<LocalDocumentsResponse> localDocs(String dbName,
@@ -31,6 +35,8 @@ class LocalDocuments implements LocalDocumentsInterface {
       String startKeyDocId,
       bool updateSeq = false,
       Map<String, String> headers}) async {
+    validator.validateDatabaseName(dbName);
+
     final path =
         '$dbName/_local_docs?conflicts=$conflicts&descending=$descending&'
         '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
@@ -58,6 +64,8 @@ class LocalDocuments implements LocalDocumentsInterface {
       String startKey,
       String startKeyDocId,
       bool updateSeq = false}) async {
+    validator.validateDatabaseName(dbName);
+
     final path =
         '$dbName/_local_docs?conflicts=$conflicts&descending=$descending&'
         '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
@@ -83,6 +91,9 @@ class LocalDocuments implements LocalDocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateLocalDocId(docId);
+
     final path =
         '$dbName/$docId?conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
         'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
@@ -95,6 +106,9 @@ class LocalDocuments implements LocalDocumentsInterface {
   @override
   Future<LocalDocumentsResponse> copyLocalDoc(String dbName, String docId,
       {Map<String, String> headers, String rev, String batch}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateLocalDocId(docId);
+
     final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
@@ -106,6 +120,9 @@ class LocalDocuments implements LocalDocumentsInterface {
   Future<LocalDocumentsResponse> deleteLocalDoc(
       String dbName, String docId, String rev,
       {Map<String, String> headers, String batch}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateLocalDocId(docId);
+
     final path =
         '$dbName/$docId?rev=$rev&${includeNonNullParam('batch', batch)}';
 
@@ -120,6 +137,9 @@ class LocalDocuments implements LocalDocumentsInterface {
         String rev,
         String batch,
         bool newEdits = true}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateLocalDocId(docId);
+
     final path =
         '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';

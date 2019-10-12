@@ -4,7 +4,7 @@ import 'dart:convert';
 String includeNonNullParam(String name, Object value) =>
     value != null ? '$name=$value' : '';
 
-/// If value != null, returns value as a JSON-encoded value, for use in a url.
+/// If [value] != null, returns value as a JSON-encoded value, for use in a url.
 /// Otherwise returns an empty string
 ///
 /// Some URL parameters (e.g. startkey and endkey) expect JSON-encoded

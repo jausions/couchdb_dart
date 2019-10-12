@@ -1,7 +1,9 @@
+import 'package:couchdb/src/validator.dart';
 import 'package:meta/meta.dart';
 
 import 'interfaces/client_interface.dart';
 import 'interfaces/design_documents_interface.dart';
+import 'interfaces/validator_interface.dart';
 import 'responses/api_response.dart';
 import 'responses/design_documents_response.dart';
 import 'utils/includer_path.dart';
@@ -13,6 +15,8 @@ class DesignDocuments implements DesignDocumentsInterface {
 
   /// Create DesignDocument by accepting web-based or server-based client
   DesignDocuments(this._client);
+
+  ValidatorInterface validator = Validator();
 
   @override
   Future<DesignDocumentsResponse> designDocHeaders(String dbName, String ddocId,
@@ -29,6 +33,9 @@ class DesignDocuments implements DesignDocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path =
         '$dbName/$ddocId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
         '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
@@ -54,6 +61,9 @@ class DesignDocuments implements DesignDocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path =
         '$dbName/$ddocId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
         '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
@@ -71,6 +81,9 @@ class DesignDocuments implements DesignDocumentsInterface {
       String rev,
       String batch,
       bool newEdits = true}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path =
         '$dbName/$ddocId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
@@ -84,6 +97,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   Future<DesignDocumentsResponse> deleteDesignDoc(
       String dbName, String ddocId, String rev,
       {Map<String, String> headers, String batch}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path =
         '$dbName/$ddocId?rev=$rev&${includeNonNullParam('batch', batch)}';
 
@@ -94,6 +110,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   @override
   Future<DesignDocumentsResponse> copyDesignDoc(String dbName, String ddocId,
       {Map<String, String> headers, String rev, String batch}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path = '$dbName/$ddocId?${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
 
@@ -105,6 +124,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   Future<DesignDocumentsResponse> attachmentInfo(
       String dbName, String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
 
     ApiResponse result = await _client.head(path, reqHeaders: headers);
@@ -115,6 +137,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   Future<DesignDocumentsResponse> attachment(
       String dbName, String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
@@ -125,6 +150,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   Future<DesignDocumentsResponse> uploadAttachment(
       String dbName, String ddocId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
 
     ApiResponse result =
@@ -136,6 +164,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   Future<DesignDocumentsResponse> deleteAttachment(
       String dbName, String ddocId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path = '$dbName/$ddocId/$attName?rev=$rev&'
         '${includeNonNullParam('batch', batch)}';
 
@@ -146,6 +177,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   @override
   Future<DesignDocumentsResponse> designDocInfo(String dbName, String ddocId,
       {Map<String, String> headers}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final path = '$dbName/$ddocId/_info';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
@@ -178,6 +212,9 @@ class DesignDocuments implements DesignDocumentsInterface {
       String update = 'true',
       bool updateSeq = false,
       Map<String, String> headers}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     String path;
 
     if (reduce == true) {
@@ -233,6 +270,9 @@ class DesignDocuments implements DesignDocumentsInterface {
       String update = 'true',
       bool updateSeq = false,
       Map<String, String> headers}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     String path;
 
     if (reduce == true) {
@@ -268,6 +308,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   @override
   Future<DesignDocumentsResponse> executeViewQueries(String dbName,
       String ddocId, String viewName, List<Object> queries) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     final body = <String, List<Object>>{'queries': queries};
 
     ApiResponse result = await _client
@@ -279,6 +322,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   Future<DesignDocumentsResponse> executeShowFunctionForNull(
       String dbName, String ddocId, String funcName,
       {String format}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     ApiResponse result = await _client.get(
         '$dbName/$ddocId/_show/$funcName?${includeNonNullParam('format', format)}');
     return DesignDocumentsResponse.from(result);
@@ -288,6 +334,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   Future<DesignDocumentsResponse> executeShowFunctionForDocument(
       String dbName, String ddocId, String funcName, String docId,
       {String format}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     ApiResponse result = await _client.get(
         '$dbName/$ddocId/_show/$funcName/$docId?${includeNonNullParam('format', format)}');
     return DesignDocumentsResponse.from(result);
@@ -297,6 +346,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   Future<DesignDocumentsResponse> executeListFunctionForView(
       String dbName, String ddocId, String funcName, String view,
       {String format}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     ApiResponse result = await _client.get(
         '$dbName/$ddocId/_list/$funcName/$view?${includeNonNullParam('format', format)}');
     return DesignDocumentsResponse.from(result);
@@ -310,6 +362,9 @@ class DesignDocuments implements DesignDocumentsInterface {
       String otherDoc,
       String view,
       {String format}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     ApiResponse result = await _client.get(
         '$dbName/$ddocId/_list/$funcName/$otherDoc/$view?${includeNonNullParam('format', format)}');
     return DesignDocumentsResponse.from(result);
@@ -318,6 +373,9 @@ class DesignDocuments implements DesignDocumentsInterface {
   @override
   Future<DesignDocumentsResponse> executeUpdateFunctionForNull(
       String dbName, String ddocId, String funcName, Object body) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     ApiResponse result =
         await _client.post('$dbName/$ddocId/_update/$funcName', body: body);
     return DesignDocumentsResponse.from(result);
@@ -330,6 +388,9 @@ class DesignDocuments implements DesignDocumentsInterface {
       String funcName,
       String docId,
       Object body) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     ApiResponse result = await _client
         .put('$dbName/$ddocId/_update/$funcName/$docId', body: body);
     return DesignDocumentsResponse.from(result);
@@ -341,6 +402,9 @@ class DesignDocuments implements DesignDocumentsInterface {
     String ddocId,
     String path,
   ) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDesignDocId(ddocId);
+
     ApiResponse result = await _client.put('$dbName/$ddocId/_rewrite/$path');
     return DesignDocumentsResponse.from(result);
   }

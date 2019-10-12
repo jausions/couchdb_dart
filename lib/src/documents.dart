@@ -1,18 +1,25 @@
+import 'package:couchdb/src/validator.dart';
 import 'package:meta/meta.dart';
-
 import 'interfaces/client_interface.dart';
+
 import 'interfaces/documents_interface.dart';
+import 'interfaces/validator_interface.dart';
 import 'responses/api_response.dart';
 import 'responses/documents_response.dart';
 import 'utils/includer_path.dart';
 
-/// Class that implements methods for create, read, update and delete documents within a database
+/// Class that implements methods for create, read, update and delete documents
+/// within a database. This class only deals with none-special documents. For
+/// local documents use [LocalDocuments] and for design documents use
+/// [DesignDocuments].
 class Documents implements DocumentsInterface {
   /// Instance of connected client
   final ClientInterface _client;
 
-  /// Create Documents by accepting web-based or server-based client
+  /// Create [Documents] by accepting web-based or server-based client
   Documents(this._client);
+
+  ValidatorInterface validator = Validator();
 
   @override
   Future<DocumentsResponse> docInfo(String dbName, String docId,
@@ -29,6 +36,9 @@ class Documents implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
+
     final path =
         '$dbName/$docId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
         '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
@@ -54,6 +64,9 @@ class Documents implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
+
     final path =
         '$dbName/$docId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
         '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
@@ -71,6 +84,9 @@ class Documents implements DocumentsInterface {
       String rev,
       String batch,
       bool newEdits = true}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
+
     final path =
         '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
@@ -83,6 +99,9 @@ class Documents implements DocumentsInterface {
   @override
   Future<DocumentsResponse> deleteDoc(String dbName, String docId, String rev,
       {Map<String, String> headers, String batch}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
+
     final path =
         '$dbName/$docId?rev=$rev&${includeNonNullParam('batch', batch)}';
 
@@ -97,6 +116,8 @@ class Documents implements DocumentsInterface {
       String rev,
       String destinationRev,
       String batch}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
 
     final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
         '${includeNonNullParam('batch', batch)}';
@@ -116,6 +137,9 @@ class Documents implements DocumentsInterface {
   Future<DocumentsResponse> attachmentInfo(
       String dbName, String docId, String attName,
       {Map<String, String> headers, String rev}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
+
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
     ApiResponse result = await _client.head(path, reqHeaders: headers);
@@ -126,6 +150,9 @@ class Documents implements DocumentsInterface {
   Future<DocumentsResponse> attachment(
       String dbName, String docId, String attName,
       {Map<String, String> headers, String rev}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
+
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
@@ -136,6 +163,9 @@ class Documents implements DocumentsInterface {
   Future<DocumentsResponse> uploadAttachment(
       String dbName, String docId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
+
     final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
 
     ApiResponse result =
@@ -147,6 +177,9 @@ class Documents implements DocumentsInterface {
   Future<DocumentsResponse> deleteAttachment(
       String dbName, String docId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
+    validator.validateDatabaseName(dbName);
+    validator.validateDocId(docId);
+
     final path = '$dbName/$docId/$attName?rev=$rev&'
         '${includeNonNullParam('batch', batch)}';
 

@@ -339,7 +339,7 @@ class CouchDbClient implements ClientInterface {
   /// Checks if response is returned with status codes lower than
   /// `200` of greater than `202`
   ///
-  /// Returns `CouchDbException` if status code is out of range `200-202`.
+  /// Throws a `CouchDbException` if status code is out of range `200-202`.
   void _checkForErrorStatusCode(int code,
       {String body, Map<String, String> headers}) {
     if (code < 200 || code > 202) {
