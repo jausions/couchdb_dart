@@ -2,7 +2,6 @@ import '../responses/api_response.dart';
 
 /// Client for interacting with CouchDB server
 abstract class ClientInterface {
-
   /// HEAD method
   Future<ApiResponse> head(String path, {Map<String, String> reqHeaders});
 
@@ -18,8 +17,7 @@ abstract class ClientInterface {
       {Object body, Map<String, String> reqHeaders});
 
   /// DELETE method
-  Future<ApiResponse> delete(String path,
-      {Map<String, String> reqHeaders});
+  Future<ApiResponse> delete(String path, {Map<String, String> reqHeaders});
 
   /// COPY method
   Future<ApiResponse> copy(String path, {Map<String, String> reqHeaders});

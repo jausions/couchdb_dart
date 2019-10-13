@@ -33,5 +33,4 @@ abstract class ValidatorInterface {
   /// Validates [docId] against naming rules for local document ids.
   /// If the check fails an [ArgumentError] exception is thrown.
   void validateLocalDocId(String docId);
-
 }

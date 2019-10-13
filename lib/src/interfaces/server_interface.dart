@@ -5,7 +5,6 @@ import '../responses/server_response.dart';
 /// Server interface provides the basic interface to a CouchDB server
 /// for obtaining CouchDB information and getting and setting configuration information
 abstract class ServerInterface {
-
   /// Accessing the root of a CouchDB instance returns meta information about the instance
   ///
   /// Returns JSON like:
@@ -161,10 +160,10 @@ abstract class ServerInterface {
   ///
   /// Correspond to `POST /_cluster_setup` method.
   /// If [ensureDbsExist] isn't specified, it is defaults to `["_users","_replicator","_global_changes"]`.
-  /// [bindAdress] should be provided not [host], if CouchDB is configuring as `single_node`.
+  /// [bindAddress] should be provided not [host], if CouchDB is configuring as `single_node`.
   Future<ServerResponse> configureCouchDb(
       {@required String action,
-      @required String bindAdress,
+      @required String bindAddress,
       @required String username,
       @required String password,
       @required int port,
@@ -500,8 +499,7 @@ abstract class ServerInterface {
   ///     ]
   /// }
   /// ```
-  Future<ServerResponse> uuids(
-      {int count = 1, Map<String, String> headers});
+  Future<ServerResponse> uuids({int count = 1, Map<String, String> headers});
 
 // /// Binary content for the favicon.ico site icon
 // /// Returns 'Not found' if favicon isn't exist.

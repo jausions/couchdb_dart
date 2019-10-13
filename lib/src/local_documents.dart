@@ -37,13 +37,20 @@ class LocalDocuments implements LocalDocumentsInterface {
       Map<String, String> headers}) async {
     validator.validateDatabaseName(dbName);
 
-    final path =
-        '$dbName/_local_docs?conflicts=$conflicts&descending=$descending&'
-        '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
-        'include_docs=$includeDocs&inclusive_end=$inclusiveEnd&${includeNonNullParam('key', key)}&'
-        '${includeNonNullParam('keys', keys)}&${includeNonNullParam('limit', limit)}&'
-        'skip=$skip&${includeNonNullParam('startkey', startKey)}&'
-        '${includeNonNullParam('startkey_docid', startKeyDocId)}&update_seq=$updateSeq';
+    final path = '$dbName/_local_docs?'
+        'conflicts=$conflicts'
+        '&descending=$descending'
+        '&${includeNonNullParam('endkey', endKey)}'
+        '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
+        '&include_docs=$includeDocs'
+        '&inclusive_end=$inclusiveEnd'
+        '&${includeNonNullParam('key', key)}'
+        '&${includeNonNullParam('keys', keys)}'
+        '&${includeNonNullParam('limit', limit)}'
+        '&skip=$skip'
+        '&${includeNonNullParam('startkey', startKey)}'
+        '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
+        '&update_seq=$updateSeq';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
     return LocalDocumentsResponse.from(result);
@@ -66,13 +73,20 @@ class LocalDocuments implements LocalDocumentsInterface {
       bool updateSeq = false}) async {
     validator.validateDatabaseName(dbName);
 
-    final path =
-        '$dbName/_local_docs?conflicts=$conflicts&descending=$descending&'
-        '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
-        'include_docs=$includeDocs&inclusive_end=$inclusiveEnd&${includeNonNullParam('key', key)}&'
-        '${includeNonNullParam('limit', limit)}&'
-        'skip=$skip&${includeNonNullParam('startkey', startKey)}&'
-        '${includeNonNullParam('startkey_docid', startKeyDocId)}&update_seq=$updateSeq';
+    final path = '$dbName/_local_docs?'
+        'conflicts=$conflicts'
+        '&descending=$descending'
+        '&${includeNonNullParam('endkey', endKey)}'
+        '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
+        '&include_docs=$includeDocs'
+        '&inclusive_end=$inclusiveEnd'
+        '&${includeNonNullParam('key', key)}'
+        '&${includeNonNullParam('limit', limit)}'
+        '&skip=$skip'
+        '&${includeNonNullParam('startkey', startKey)}'
+        '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
+        '&update_seq=$updateSeq';
+
     final body = <String, List<String>>{'keys': keys};
 
     ApiResponse result = await _client.post(path, body: body);
@@ -94,10 +108,16 @@ class LocalDocuments implements LocalDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateLocalDocId(docId);
 
-    final path =
-        '$dbName/$docId?conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
-        'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
-        '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
+    final path = '$dbName/$docId?'
+        'conflicts=$conflicts'
+        '&deleted_conflicts=$deletedConflicts'
+        '&latest=$latest'
+        '&local_seq=$localSeq'
+        '&meta=$meta'
+        '&${includeNonNullParam('open_revs', openRevs)}'
+        '&${includeNonNullParam('rev', rev)}'
+        '&revs=$revs'
+        '&revs_info=$revsInfo';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
     return LocalDocumentsResponse.from(result);
@@ -109,8 +129,9 @@ class LocalDocuments implements LocalDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateLocalDocId(docId);
 
-    final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
-        '${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$docId?'
+        '${includeNonNullParam('rev', rev)}'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result = await _client.copy(path, reqHeaders: headers);
     return LocalDocumentsResponse.from(result);
@@ -123,29 +144,31 @@ class LocalDocuments implements LocalDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateLocalDocId(docId);
 
-    final path =
-        '$dbName/$docId?rev=$rev&${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$docId?'
+        'rev=$rev'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result = await _client.delete(path, reqHeaders: headers);
     return LocalDocumentsResponse.from(result);
   }
 
   @override
-  Future<LocalDocumentsResponse> putLocalDoc(
+  Future<LocalDocumentsResponse> insertLocalDoc(
       String dbName, String docId, Map<String, Object> body,
       {Map<String, String> headers,
-        String rev,
-        String batch,
-        bool newEdits = true}) async {
+      String rev,
+      String batch,
+      bool newEdits = true}) async {
     validator.validateDatabaseName(dbName);
     validator.validateLocalDocId(docId);
 
-    final path =
-        '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
-        '${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$docId?'
+        'new_edits=$newEdits'
+        '&${includeNonNullParam('rev', rev)}'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result =
-    await _client.put(path, reqHeaders: headers, body: body);
+        await _client.put(path, reqHeaders: headers, body: body);
     return LocalDocumentsResponse.from(result);
   }
 }

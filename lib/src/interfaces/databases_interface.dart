@@ -75,8 +75,7 @@ abstract class DatabasesInterface {
   ///     "rev": "1-9c65296036141e575d32ba9c034dd3ee"
   /// }
   /// ```
-  Future<DatabasesResponse> createDocIn(
-      String dbName, Map<String, Object> doc,
+  Future<DatabasesResponse> createDocIn(String dbName, Map<String, Object> doc,
       {String batch, Map<String, String> headers});
 
   /// Executes the built-in _all_docs view, returning all of the documents in the database
@@ -226,8 +225,7 @@ abstract class DatabasesInterface {
   ///     "total_rows": 6
   /// }
   /// ```
-  Future<DatabasesResponse> designDocsByKeys(
-      String dbName, List<String> keys);
+  Future<DatabasesResponse> designDocsByKeys(String dbName, List<String> keys);
 
   /// Executes multiple specified built-in view queries of all documents in this database
   ///
@@ -409,8 +407,7 @@ abstract class DatabasesInterface {
   ///     }
   /// }
   /// ```
-  Future<DatabasesResponse> find(
-      String dbName, Map<String, Object> selector,
+  Future<DatabasesResponse> find(String dbName, Map<String, Object> selector,
       {int limit = 25,
       int skip,
       List<Object> sort,
@@ -545,8 +542,7 @@ abstract class DatabasesInterface {
   ///     }
   /// }
   /// ```
-  Future<DatabasesResponse> explain(
-      String dbName, Map<String, Object> selector,
+  Future<DatabasesResponse> explain(String dbName, Map<String, Object> selector,
       {int limit = 25,
       int skip,
       List<Object> sort,

@@ -40,7 +40,8 @@ class Server implements ServerInterface {
   Future<ServerResponse> clusterSetupStatus(
       {List<String> ensureDbsExist, Map<String, String> headers}) async {
     ApiResponse result = await _client.get(
-        '_cluster_setup?${includeNonNullParam('ensure_dbs_exist', ensureDbsExist)}',
+        '_cluster_setup?'
+        '${includeNonNullParam('ensure_dbs_exist', ensureDbsExist)}',
         reqHeaders: headers);
     return ServerResponse.from(result);
   }
@@ -48,7 +49,7 @@ class Server implements ServerInterface {
   @override
   Future<ServerResponse> configureCouchDb(
       {@required String action,
-      String bindAdress,
+      String bindAddress,
       String username,
       String password,
       int port,
@@ -63,14 +64,14 @@ class Server implements ServerInterface {
 
     switch (action) {
       case 'enable_single_node':
-        body['bind_address'] = bindAdress;
+        body['bind_address'] = bindAddress;
         body['username'] = username;
         body['password'] = password;
         body['port'] = port;
         break;
 
       case 'enable_cluster':
-        body['bind_address'] = bindAdress;
+        body['bind_address'] = bindAddress;
         body['username'] = username;
         body['password'] = password;
         body['port'] = port;
@@ -113,10 +114,15 @@ class Server implements ServerInterface {
     String path;
 
     feed == 'longpoll' || feed == 'continuous' || feed == 'eventsource'
-        ? path =
-            '_db_updates?feed=$feed&timeout=$timeout&heartbeat=$heartbeat&${includeNonNullParam('since', since)}'
-        : path =
-            '_db_updates?feed=$feed&timeout=$timeout&${includeNonNullParam('since', since)}';
+        ? path = '_db_updates?'
+            'feed=$feed'
+            '&timeout=$timeout'
+            '&heartbeat=$heartbeat'
+            '&${includeNonNullParam('since', since)}'
+        : path = '_db_updates?'
+            'feed=$feed'
+            '&timeout=$timeout'
+            '&${includeNonNullParam('since', since)}';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
     return ServerResponse.from(result);
@@ -131,9 +137,9 @@ class Server implements ServerInterface {
   @override
   Future<ServerResponse> nodeStats(
       {String nodeName = '_local',
-        String statisticSection,
-        String statisticId,
-        Map<String, String> headers}) async {
+      String statisticSection,
+      String statisticId,
+      Map<String, String> headers}) async {
     final path = statisticSection != null && statisticId != null
         ? '_node/$nodeName/_stats/$statisticSection/$statisticId'
         : '_node/$nodeName/_stats';
@@ -187,23 +193,26 @@ class Server implements ServerInterface {
 
   @override
   Future<ServerResponse> schedulerJobs({int limit, int skip}) async {
-    ApiResponse result = await _client.get(
-        '_scheduler/jobs?${includeNonNullParam('limit', limit)}&${includeNonNullParam('skip', skip)}');
+    ApiResponse result = await _client.get('_scheduler/jobs?'
+        '${includeNonNullParam('limit', limit)}'
+        '&${includeNonNullParam('skip', skip)}');
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> schedulerDocs({int limit, int skip}) async {
-    ApiResponse result = await _client.get(
-        '_scheduler/docs?${includeNonNullParam('limit', limit)}&${includeNonNullParam('skip', skip)}');
+    ApiResponse result = await _client.get('_scheduler/docs?'
+        '${includeNonNullParam('limit', limit)}'
+        '&${includeNonNullParam('skip', skip)}');
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> schedulerDocsWithReplicatorDbName(
       {String replicator = '_replicator', int limit, int skip}) async {
-    ApiResponse result = await _client.get(
-        '_scheduler/docs/$replicator?${includeNonNullParam('limit', limit)}&${includeNonNullParam('skip', skip)}');
+    ApiResponse result = await _client.get('_scheduler/docs/$replicator?'
+        '${includeNonNullParam('limit', limit)}'
+        '&${includeNonNullParam('skip', skip)}');
     return ServerResponse.from(result);
   }
 
@@ -214,7 +223,6 @@ class Server implements ServerInterface {
         await _client.get('_scheduler/docs/$replicator/$docId');
     return ServerResponse.from(result);
   }
-
 
   @override
   Future<ServerResponse> systemStatsForNode(

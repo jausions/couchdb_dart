@@ -3,9 +3,9 @@ import 'package:meta/meta.dart';
 import '../responses/api_response.dart';
 import '../responses/documents_response.dart';
 
-/// Class that define methods for create, read, update and delete documents within a database
+/// Class that define methods for create, read, update and delete documents
+/// within a database.
 abstract class DocumentsInterface {
-
   /// Returns the HTTP Headers containing a minimal amount of information about the specified document
   Future<DocumentsResponse> docInfo(String dbName, String docId,
       {Map<String, String> headers,
@@ -80,8 +80,7 @@ abstract class DocumentsInterface {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentsResponse> deleteDoc(
-      String dbName, String docId, String rev,
+  Future<DocumentsResponse> deleteDoc(String dbName, String docId, String rev,
       {Map<String, String> headers, String batch});
 
   /// Copies an existing document to a new or existing document.

@@ -5,22 +5,21 @@ import '../local_documents.dart';
 /// Class that contains responses from `LocalDocuments` class
 class LocalDocumentsResponse {
   /// Creates instance of [LocalDocumentsResponse]
-  LocalDocumentsResponse(
-      {this.offset,
-      this.rows,
-      this.totalRows,
-      this.updateSeq,
-      this.doc,
-      this.ok,
-      this.id,
-      this.rev,
-      this.attachment,
-      this.conflicts,
-      this.deleted,
-      this.deletedConflicts,
-      this.localSeq,
-      this.revsInfo,
-      this.revisions});
+  LocalDocumentsResponse({this.offset,
+    this.rows,
+    this.totalRows,
+    this.updateSeq,
+    this.doc,
+    this.ok,
+    this.id,
+    this.rev,
+    this.attachment,
+    this.conflicts,
+    this.deleted,
+    this.deletedConflicts,
+    this.localSeq,
+    this.revsInfo,
+    this.revisions});
 
   LocalDocumentsResponse.from(ApiResponse response) : this(
       offset: response.json['offset'] as int,

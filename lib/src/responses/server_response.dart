@@ -113,8 +113,9 @@ class ServerResponse {
           MapEntry<String, Map<String, Map<String, Object>>>(
               k,
               (v as Map<String, Object>)?.map(
-                      (k, v) => MapEntry<String, Map<String, Object>>(
-                      k, v as Map<String, Object>)))),
+                      (k, v) =>
+                      MapEntry<String, Map<String, Object>>(
+                          k, v as Map<String, Object>)))),
       ddocCache: (response.json['ddoc_cache'] as Map<String, Object>)?.map((k,
           v) =>
           MapEntry<String, Map<String, Object>>(k, v as Map<String, Object>)),
@@ -133,10 +134,11 @@ class ServerResponse {
                   MapEntry<String, Map<String, Object>>(
                       k, v as Map<String, Object>)))),
       couchLog: (response.json['couch_log'] as Map<String, Object>)?.map((k,
-          v) => MapEntry<String, Map<String, Map<String, Object>>>(k,
-          (v as Map<String, Object>)?.map((k, v) =>
-              MapEntry<String, Map<String, Object>>(
-                  k, v as Map<String, Object>)))),
+          v) =>
+          MapEntry<String, Map<String, Map<String, Object>>>(k,
+              (v as Map<String, Object>)?.map((k, v) =>
+                  MapEntry<String, Map<String, Object>>(
+                      k, v as Map<String, Object>)))),
       rexi: (response.json['rexi'] as Map<String, Object>)?.map((k, v) =>
           MapEntry<String, Map<String, Object>>(k, v as Map<String, Object>)),
       globalChanges: (response.json['global_changes'] as Map<String, Object>)

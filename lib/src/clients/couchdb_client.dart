@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
+import '../exceptions/couchdb_exception.dart';
 import '../interfaces/client_interface.dart';
 import '../responses/api_response.dart';
-import '../exceptions/couchdb_exception.dart';
 
 /// Client for interacting with database via server-side and web applications
 class CouchDbClient implements ClientInterface {
@@ -26,14 +26,14 @@ class CouchDbClient implements ClientInterface {
   ///   - https (if `SSL` set to `true`)
   CouchDbClient(
       {String username,
-        String password,
-        String scheme = 'http',
-        String host = '0.0.0.0',
-        int port = 5984,
-        this.auth = 'basic',
-        this.cors = false,
-        String secret,
-        String path})
+      String password,
+      String scheme = 'http',
+      String host = '0.0.0.0',
+      int port = 5984,
+      this.auth = 'basic',
+      this.cors = false,
+      String secret,
+      String path})
       : secret = utf8.encode(secret != null ? secret : '') {
     if (username == null && password != null) {
       throw CouchDbException(401,
@@ -50,7 +50,7 @@ class CouchDbClient implements ClientInterface {
     }
 
     final userInfo =
-    username == null && password == null ? null : '$username:$password';
+        username == null && password == null ? null : '$username:$password';
 
     final regExp = RegExp(r'http[s]?://');
     if (host.startsWith(regExp)) {
@@ -185,7 +185,7 @@ class CouchDbClient implements ClientInterface {
     modifyRequestHeaders(reqHeaders);
 
     final res =
-    await _httpClient.head(Uri.parse('$origin/$path'), headers: headers);
+        await _httpClient.head(Uri.parse('$origin/$path'), headers: headers);
 
     _checkForErrorStatusCode(res.statusCode);
 
@@ -282,7 +282,7 @@ class CouchDbClient implements ClientInterface {
     modifyRequestHeaders(reqHeaders);
 
     final res =
-    await _httpClient.delete(Uri.parse('$origin/$path'), headers: headers);
+        await _httpClient.delete(Uri.parse('$origin/$path'), headers: headers);
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
     final resBody = jsonDecode(bodyUTF8);
@@ -295,7 +295,8 @@ class CouchDbClient implements ClientInterface {
   }
 
   /// COPY method
-  Future<ApiResponse> copy(String path, {Map<String, String> reqHeaders}) async {
+  Future<ApiResponse> copy(String path,
+      {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
     final request = http.Request('COPY', Uri.parse('$origin/$path'));
     request.headers.addAll(headers);
@@ -325,7 +326,7 @@ class CouchDbClient implements ClientInterface {
     request.headers.addAll(headers);
     if (body != null && (method == 'post' || method == 'put')) {
       request.body =
-      body is Map || body is List ? jsonEncode(body) : body.toString();
+          body is Map || body is List ? jsonEncode(body) : body.toString();
     }
     final res = await _httpClient.send(request);
 
@@ -345,7 +346,7 @@ class CouchDbClient implements ClientInterface {
     if (code < 200 || code > 202) {
       throw CouchDbException(code,
           response:
-          ApiResponse(jsonDecode(body), headers: headers).errorResponse());
+              ApiResponse(jsonDecode(body), headers: headers).errorResponse());
     }
   }
 

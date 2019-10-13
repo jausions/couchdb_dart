@@ -2,12 +2,11 @@ import 'package:meta/meta.dart';
 
 import '../responses/design_documents_response.dart';
 
-/// Class that contains methods that allow operate with design documents
+/// Class that contains methods that allow operation with design documents
 abstract class DesignDocumentsInterface {
-
-  /// Returns the HTTP Headers containing a minimal amount of information about the specified design document
-  Future<DesignDocumentsResponse> designDocHeaders(
-      String dbName, String ddocId,
+  /// Returns the HTTP Headers containing a minimal amount of information
+  /// about the specified design document
+  Future<DesignDocumentsResponse> designDocHeaders(String dbName, String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -22,8 +21,8 @@ abstract class DesignDocumentsInterface {
       bool revs = false,
       bool revsInfo = false});
 
-  /// Returns the contents of the design document specified with the name of the design document and
-  /// from the specified database
+  /// Returns the contents of the design document specified with the name
+  /// of the design document and from the specified database
   Future<DesignDocumentsResponse> designDoc(String dbName, String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
@@ -39,23 +38,24 @@ abstract class DesignDocumentsInterface {
       bool revs = false,
       bool revsInfo = false});
 
-  /// Creates a new named design document, or creates a new revision of the existing design document
+  /// Creates a new design document or creates a new revision of the existing design document
   ///
   /// The design documents have some agreement upon their fields and structure. Currently it is the following:
   ///
-  ///     1. language (string): Defines Query Server key to process design document functions
-  ///     2. options (object): View’s default options
-  ///     3. filters (object): Filter functions definition
-  ///     4. lists (object): List functions definition
-  ///     5. rewrites (array or string): Rewrite rules definition
-  ///     6. shows (object): Show functions definition
-  ///     7. updates (object): Update functions definition
-  ///     8. validate_doc_update (string): Validate document update function source
-  ///     9. views (object): View functions definition.
+  ///  1. `language` (string): Defines Query Server key to process design document functions
+  ///  2. `options` (object): View’s default options
+  ///  3. `filters` (object): Filter functions definition
+  ///  4. `lists` (object): List functions definition
+  ///  5. `rewrites` (array or string): Rewrite rules definition
+  ///  6. `shows` (object): Show functions definition
+  ///  7. `updates` (object): Update functions definition
+  ///  8. `validate_doc_update` (string): Validate document update function source
+  ///  9. `views` (object): View functions definition.
   ///
-  /// Note, that for `filters`, `lists`, `shows` and `updates` fields objects are mapping of function name to string function
-  /// source code. For `views` mapping is the same except that values are objects with `map` and `reduce` (optional) keys
-  /// which also contains functions source code.
+  /// Note, that for `filters`, `lists`, `shows` and `updates` fields objects
+  /// are mapping of function name to string function source code.
+  /// For `views` mapping is the same except that values are objects with `map`
+  /// and `reduce` (optional) keys which also contains functions source code.
   Future<DesignDocumentsResponse> insertDesignDoc(
       String dbName, String ddocId, Map<String, Object> body,
       {Map<String, String> headers,
@@ -69,17 +69,17 @@ abstract class DesignDocumentsInterface {
       {Map<String, String> headers, String batch});
 
   /// Copies an existing design document to a new or existing one
-  Future<DesignDocumentsResponse> copyDesignDoc(
-      String dbName, String ddocId,
+  Future<DesignDocumentsResponse> copyDesignDoc(String dbName, String ddocId,
       {Map<String, String> headers, String rev, String batch});
 
-  /// Returns the HTTP headers containing a minimal amount of information about the specified attachment
-  Future<DesignDocumentsResponse> attachmentInfo(
+  /// Returns the HTTP headers containing a minimal amount of information about
+  /// the specified attachment
+  Future<DesignDocumentsResponse> designDocAttachmentInfo(
       String dbName, String ddocId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Returns the file attachment associated with the design document
-  Future<DesignDocumentsResponse> attachment(
+  Future<DesignDocumentsResponse> designDocAttachment(
       String dbName, String ddocId, String attName,
       {Map<String, String> headers, String rev});
 
@@ -87,17 +87,18 @@ abstract class DesignDocumentsInterface {
   ///
   /// You must supply the `Content-Type` header, and for an existing document
   /// you must also supply either the [rev] query argument or the `If-Match` HTTP header
-  Future<DesignDocumentsResponse> uploadAttachment(
+  Future<DesignDocumentsResponse> uploadDesignDocAttachment(
       String dbName, String ddocId, String attName, Object body,
       {Map<String, String> headers, String rev});
 
   /// Deletes the attachment of the specified design document
-  Future<DesignDocumentsResponse> deleteAttachment(
+  Future<DesignDocumentsResponse> deleteDesignDocAttachment(
       String dbName, String ddocId, String attName,
       {@required String rev, Map<String, String> headers, String batch});
 
-  /// Obtains information about the specified design document, including the index, index size
-  /// and current status of the design document and associated index information
+  /// Obtains information about the specified design document, including the index,
+  /// index size and current status of the design document and associated index
+  /// information
   ///
   /// Returns JSON like:
   /// ```json
@@ -117,8 +118,7 @@ abstract class DesignDocumentsInterface {
   ///     }
   /// }
   /// ```
-  Future<DesignDocumentsResponse> designDocInfo(
-      String dbName, String ddocId,
+  Future<DesignDocumentsResponse> designDocInfo(String dbName, String ddocId,
       {Map<String, String> headers});
 
   /// Executes the specified view function from the specified design document
@@ -297,40 +297,36 @@ abstract class DesignDocumentsInterface {
 
   /// Applies show function for null document
   ///
-  /// Returns responce like:
+  /// Returns response like:
   ///
   /// `some data that returned by show function`
-  ///
   Future<DesignDocumentsResponse> executeShowFunctionForNull(
       String dbName, String ddocId, String funcName,
       {String format});
 
   /// Applies show function for the specified document
   ///
-  /// Returns responce like:
+  /// Returns response like:
   ///
   /// `some data that returned by show function`
-  ///
   Future<DesignDocumentsResponse> executeShowFunctionForDocument(
       String dbName, String ddocId, String funcName, String docId,
       {String format});
 
   /// Applies list function for the [view] function from the same design document
   ///
-  /// Returns responce like:
+  /// Returns response like:
   ///
   /// `some data that returned by show function`
-  ///
   Future<DesignDocumentsResponse> executeListFunctionForView(
       String dbName, String ddocId, String funcName, String view,
       {String format});
 
   /// Applies list function for the [view] function from the other design document
   ///
-  /// Returns responce like:
+  /// Returns response like:
   ///
   /// `some data that returned by show function`
-  ///
   Future<DesignDocumentsResponse> executeListFunctionForViewFromDoc(
       String dbName,
       String ddocId,
@@ -345,7 +341,7 @@ abstract class DesignDocumentsInterface {
   /// ```json
   /// {"status": "ok"}
   /// ```
-  /// for success exucution or error for fail.
+  /// for success execution or error for fail.
   Future<DesignDocumentsResponse> executeUpdateFunctionForNull(
       String dbName, String ddocId, String funcName, Object body);
 

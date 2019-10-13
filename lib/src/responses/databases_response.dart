@@ -114,8 +114,9 @@ class DatabasesResponse {
                       ?.map((e) => e as String)
                       ?.toList())))),
       missedRevs: (response.json['missed_revs'] as Map<String, Object>)?.map((k,
-          v) => MapEntry<String, List<String>>(
-          k, (v as List<Object>)?.map((e) => e as String)?.toList())),
+          v) =>
+          MapEntry<String, List<String>>(
+              k, (v as List<Object>)?.map((e) => e as String)?.toList())),
       revsDiff: response.json.keys.every(RegExp('[a-z0-9-]{32,36}').hasMatch)
           ? response.json?.map((k, v) =>
           MapEntry<String, Map<String, List<String>>>(k,
@@ -133,7 +134,7 @@ class DatabasesResponse {
       nodes: (response.json['nodes'] as List<Object>)
           ?.map((v) => v as String)
           ?.toList());
-  
+
   /// Holds cluster's info
   final Map<String, int> cluster;
 

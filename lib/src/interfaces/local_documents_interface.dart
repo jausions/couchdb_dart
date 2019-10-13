@@ -7,7 +7,6 @@ import '../responses/local_documents_response.dart';
 ///
 /// Local documents don't store attachments.
 abstract class LocalDocumentsInterface {
-
   /// Returns a JSON structure of all of the local documents in a given database
   ///
   /// Returns JSON like:
@@ -111,8 +110,6 @@ abstract class LocalDocumentsInterface {
       bool updateSeq = false});
 
   /// Gets the specified local document
-  ///
-  /// [docId] must match pattern - `_local/{id}`
   Future<LocalDocumentsResponse> localDoc(String dbName, String docId,
       {Map<String, String> headers,
       bool conflicts = false,
@@ -126,9 +123,7 @@ abstract class LocalDocumentsInterface {
       bool revsInfo = false});
 
   /// Stores the specified local document
-  ///
-  /// [docId] must match pattern - `_local/{id}`
-  Future<LocalDocumentsResponse> putLocalDoc(
+  Future<LocalDocumentsResponse> insertLocalDoc(
       String dbName, String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
@@ -136,15 +131,11 @@ abstract class LocalDocumentsInterface {
       bool newEdits = true});
 
   /// Deletes the specified local document
-  ///
-  /// [docId] must match pattern - `_local/{id}`
   Future<LocalDocumentsResponse> deleteLocalDoc(
       String dbName, String docId, String rev,
       {Map<String, String> headers, String batch});
 
   /// Copies the specified local document
-  ///
-  /// [docId] must match pattern - `_local/{id}`
   Future<LocalDocumentsResponse> copyLocalDoc(String dbName, String docId,
       {Map<String, String> headers, String rev, String batch});
 }

@@ -5,18 +5,17 @@ import '../documents.dart';
 /// Class that contains responses from `Documents` class
 class DocumentsResponse {
   /// Creates instance of [DocumentsResponse]
-  DocumentsResponse(
-      {this.doc,
-      this.ok,
-      this.id,
-      this.rev,
-      this.attachment,
-      this.conflicts,
-      this.deleted,
-      this.deletedConflicts,
-      this.localSeq,
-      this.revsInfo,
-      this.revisions});
+  DocumentsResponse({this.doc,
+    this.ok,
+    this.id,
+    this.rev,
+    this.attachment,
+    this.conflicts,
+    this.deleted,
+    this.deletedConflicts,
+    this.localSeq,
+    this.revsInfo,
+    this.revisions});
 
   DocumentsResponse.from(ApiResponse response) : this(
       doc: response.json,

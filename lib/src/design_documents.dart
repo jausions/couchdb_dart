@@ -36,11 +36,19 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path =
-        '$dbName/$ddocId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
-        '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
-        'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
-        '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
+    final path = '$dbName/$ddocId?'
+        'attachments=$attachments'
+        '&att_encoding_info=$attEncodingInfo'
+        '&${includeNonNullParam('atts_since', attsSince)}'
+        '&conflicts=$conflicts'
+        '&deleted_conflicts=$deletedConflicts'
+        '&latest=$latest'
+        '&local_seq=$localSeq'
+        '&meta=$meta'
+        '&${includeNonNullParam('open_revs', openRevs)}'
+        '&${includeNonNullParam('rev', rev)}'
+        '&revs=$revs'
+        '&revs_info=$revsInfo';
 
     ApiResponse result = await _client.head(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
@@ -64,11 +72,19 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path =
-        '$dbName/$ddocId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
-        '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
-        'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
-        '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
+    final path = '$dbName/$ddocId?'
+        'attachments=$attachments'
+        '&att_encoding_info=$attEncodingInfo'
+        '&${includeNonNullParam('atts_since', attsSince)}'
+        '&conflicts=$conflicts'
+        '&deleted_conflicts=$deletedConflicts'
+        '&latest=$latest'
+        '&local_seq=$localSeq'
+        '&meta=$meta'
+        '&${includeNonNullParam('open_revs', openRevs)}'
+        '&${includeNonNullParam('rev', rev)}'
+        '&revs=$revs'
+        '&revs_info=$revsInfo';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
@@ -84,9 +100,10 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path =
-        '$dbName/$ddocId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
-        '${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$ddocId?'
+        'new_edits=$newEdits'
+        '&${includeNonNullParam('rev', rev)}'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result =
         await _client.put(path, reqHeaders: headers, body: body);
@@ -100,8 +117,9 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path =
-        '$dbName/$ddocId?rev=$rev&${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$ddocId?'
+        'rev=$rev'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result = await _client.delete(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
@@ -113,47 +131,51 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path = '$dbName/$ddocId?${includeNonNullParam('rev', rev)}&'
-        '${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$ddocId?'
+        '${includeNonNullParam('rev', rev)}'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result = await _client.copy(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentsResponse> attachmentInfo(
+  Future<DesignDocumentsResponse> designDocAttachmentInfo(
       String dbName, String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
+    final path = '$dbName/$ddocId/$attName?'
+        '${includeNonNullParam('rev', rev)}';
 
     ApiResponse result = await _client.head(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentsResponse> attachment(
+  Future<DesignDocumentsResponse> designDocAttachment(
       String dbName, String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
+    final path = '$dbName/$ddocId/$attName?'
+        '${includeNonNullParam('rev', rev)}';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentsResponse> uploadAttachment(
+  Future<DesignDocumentsResponse> uploadDesignDocAttachment(
       String dbName, String ddocId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path = '$dbName/$ddocId/$attName?${includeNonNullParam('rev', rev)}';
+    final path = '$dbName/$ddocId/$attName?'
+        '${includeNonNullParam('rev', rev)}';
 
     ApiResponse result =
         await _client.put(path, reqHeaders: headers, body: body);
@@ -161,14 +183,15 @@ class DesignDocuments implements DesignDocumentsInterface {
   }
 
   @override
-  Future<DesignDocumentsResponse> deleteAttachment(
+  Future<DesignDocumentsResponse> deleteDesignDocAttachment(
       String dbName, String ddocId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    final path = '$dbName/$ddocId/$attName?rev=$rev&'
-        '${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$ddocId/$attName?'
+        'rev=$rev'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result = await _client.delete(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
@@ -218,26 +241,52 @@ class DesignDocuments implements DesignDocumentsInterface {
     String path;
 
     if (reduce == true) {
-      path = '$dbName/$ddocId/_view/$viewName?&descending=$descending&'
-          '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
-          'group=$group&${includeNonNullParam('group_level', groupLevel)}&include_docs=$includeDocs&'
-          'attachments=$attachments&att_encoding_info=$attEncodingInfo&inclusive_end=$inclusiveEnd&'
-          '${includeNonNullParam('key', key)}&${includeNonNullParam('keys', keys)}&'
-          '${includeNonNullParam('limit', limit)}&${includeNonNullParam('reduce', reduce)}&'
-          'skip=$skip&sorted=$sorted&stable=$stable&${includeNonNullParam('stale', stale)}&'
-          '${includeNonNullParam('startkey', startKey)}&${includeNonNullParam('startkey_docid', startKeyDocId)}&'
-          'update=$update&update_seq=$updateSeq';
+      path = '$dbName/$ddocId/_view/$viewName?'
+          'descending=$descending'
+          '&${includeNonNullParam('endkey', endKey)}'
+          '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
+          '&group=$group'
+          '&${includeNonNullParam('group_level', groupLevel)}'
+          '&include_docs=$includeDocs'
+          '&attachments=$attachments'
+          '&att_encoding_info=$attEncodingInfo'
+          '&inclusive_end=$inclusiveEnd'
+          '&${includeNonNullParam('key', key)}'
+          '&${includeNonNullParam('keys', keys)}'
+          '&${includeNonNullParam('limit', limit)}'
+          '&${includeNonNullParam('reduce', reduce)}'
+          '&skip=$skip'
+          '&sorted=$sorted'
+          '&stable=$stable'
+          '&${includeNonNullParam('stale', stale)}'
+          '&${includeNonNullParam('startkey', startKey)}'
+          '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
+          '&update=$update'
+          '&update_seq=$updateSeq';
     } else {
-      path =
-          '$dbName/$ddocId/_view/$viewName?conflicts=$conflicts&descending=$descending&'
-          '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
-          'group=$group&${includeNonNullParam('group_level', groupLevel)}&include_docs=$includeDocs&'
-          'attachments=$attachments&att_encoding_info=$attEncodingInfo&inclusive_end=$inclusiveEnd&'
-          '${includeNonNullParam('key', key)}&${includeNonNullParam('keys', keys)}&'
-          '${includeNonNullParam('limit', limit)}&${includeNonNullParam('reduce', reduce)}&'
-          'skip=$skip&sorted=$sorted&stable=$stable&${includeNonNullParam('stale', stale)}&'
-          '${includeNonNullParam('startkey', startKey)}&${includeNonNullParam('startkey_docid', startKeyDocId)}&'
-          'update=$update&update_seq=$updateSeq';
+      path = '$dbName/$ddocId/_view/$viewName?'
+          'conflicts=$conflicts'
+          '&descending=$descending'
+          '&${includeNonNullParam('endkey', endKey)}'
+          '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
+          '&group=$group'
+          '&${includeNonNullParam('group_level', groupLevel)}'
+          '&include_docs=$includeDocs'
+          '&attachments=$attachments'
+          '&att_encoding_info=$attEncodingInfo'
+          '&inclusive_end=$inclusiveEnd'
+          '&${includeNonNullParam('key', key)}'
+          '&${includeNonNullParam('keys', keys)}'
+          '&${includeNonNullParam('limit', limit)}'
+          '&${includeNonNullParam('reduce', reduce)}'
+          '&skip=$skip'
+          '&sorted=$sorted'
+          '&stable=$stable'
+          '&${includeNonNullParam('stale', stale)}'
+          '&${includeNonNullParam('startkey', startKey)}'
+          '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
+          '&update=$update'
+          '&update_seq=$updateSeq';
     }
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
@@ -276,26 +325,50 @@ class DesignDocuments implements DesignDocumentsInterface {
     String path;
 
     if (reduce == true) {
-      path = '$dbName/$ddocId/_view/$viewName?&descending=$descending&'
-          '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
-          'group=$group&${includeNonNullParam('group_level', groupLevel)}&include_docs=$includeDocs&'
-          'attachments=$attachments&att_encoding_info=$attEncodingInfo&inclusive_end=$inclusiveEnd&'
-          '${includeNonNullParam('key', key)}&'
-          '${includeNonNullParam('limit', limit)}&${includeNonNullParam('reduce', reduce)}&'
-          'skip=$skip&sorted=$sorted&stable=$stable&${includeNonNullParam('stale', stale)}&'
-          '${includeNonNullParam('startkey', startKey)}&${includeNonNullParam('startkey_docid', startKeyDocId)}&'
-          'update=$update&update_seq=$updateSeq';
+      path = '$dbName/$ddocId/_view/$viewName?'
+          'descending=$descending'
+          '&${includeNonNullParam('endkey', endKey)}'
+          '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
+          '&group=$group'
+          '&${includeNonNullParam('group_level', groupLevel)}'
+          '&include_docs=$includeDocs'
+          '&attachments=$attachments'
+          '&att_encoding_info=$attEncodingInfo'
+          '&inclusive_end=$inclusiveEnd'
+          '&${includeNonNullParam('key', key)}'
+          '&${includeNonNullParam('limit', limit)}'
+          '&${includeNonNullParam('reduce', reduce)}'
+          '&skip=$skip'
+          '&sorted=$sorted'
+          '&stable=$stable'
+          '&${includeNonNullParam('stale', stale)}'
+          '&${includeNonNullParam('startkey', startKey)}'
+          '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
+          '&update=$update'
+          '&update_seq=$updateSeq';
     } else {
-      path =
-          '$dbName/$ddocId/_view/$viewName?conflicts=$conflicts&descending=$descending&'
-          '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
-          'group=$group&${includeNonNullParam('group_level', groupLevel)}&include_docs=$includeDocs&'
-          'attachments=$attachments&att_encoding_info=$attEncodingInfo&inclusive_end=$inclusiveEnd&'
-          '${includeNonNullParam('key', key)}&'
-          '${includeNonNullParam('limit', limit)}&${includeNonNullParam('reduce', reduce)}&'
-          'skip=$skip&sorted=$sorted&stable=$stable&${includeNonNullParam('stale', stale)}&'
-          '${includeNonNullParam('startkey', startKey)}&${includeNonNullParam('startkey_docid', startKeyDocId)}&'
-          'update=$update&update_seq=$updateSeq';
+      path = '$dbName/$ddocId/_view/$viewName?'
+          'conflicts=$conflicts'
+          '&descending=$descending'
+          '&${includeNonNullParam('endkey', endKey)}'
+          '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
+          '&group=$group'
+          '&${includeNonNullParam('group_level', groupLevel)}'
+          '&include_docs=$includeDocs'
+          '&attachments=$attachments'
+          '&att_encoding_info=$attEncodingInfo'
+          '&inclusive_end=$inclusiveEnd'
+          '&${includeNonNullParam('key', key)}'
+          '&${includeNonNullParam('limit', limit)}'
+          '&${includeNonNullParam('reduce', reduce)}'
+          '&skip=$skip'
+          '&sorted=$sorted'
+          '&stable=$stable'
+          '&${includeNonNullParam('stale', stale)}'
+          '&${includeNonNullParam('startkey', startKey)}'
+          '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
+          '&update=$update'
+          '&update_seq=$updateSeq';
     }
 
     final body = <String, List<Object>>{'keys': keys};
@@ -325,8 +398,8 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    ApiResponse result = await _client.get(
-        '$dbName/$ddocId/_show/$funcName?${includeNonNullParam('format', format)}');
+    ApiResponse result = await _client.get('$dbName/$ddocId/_show/$funcName?'
+        '${includeNonNullParam('format', format)}');
     return DesignDocumentsResponse.from(result);
   }
 
@@ -337,8 +410,9 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    ApiResponse result = await _client.get(
-        '$dbName/$ddocId/_show/$funcName/$docId?${includeNonNullParam('format', format)}');
+    ApiResponse result =
+        await _client.get('$dbName/$ddocId/_show/$funcName/$docId?'
+            '${includeNonNullParam('format', format)}');
     return DesignDocumentsResponse.from(result);
   }
 
@@ -349,8 +423,9 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    ApiResponse result = await _client.get(
-        '$dbName/$ddocId/_list/$funcName/$view?${includeNonNullParam('format', format)}');
+    ApiResponse result =
+        await _client.get('$dbName/$ddocId/_list/$funcName/$view?'
+            '${includeNonNullParam('format', format)}');
     return DesignDocumentsResponse.from(result);
   }
 
@@ -365,8 +440,9 @@ class DesignDocuments implements DesignDocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDesignDocId(ddocId);
 
-    ApiResponse result = await _client.get(
-        '$dbName/$ddocId/_list/$funcName/$otherDoc/$view?${includeNonNullParam('format', format)}');
+    ApiResponse result =
+        await _client.get('$dbName/$ddocId/_list/$funcName/$otherDoc/$view?'
+            '${includeNonNullParam('format', format)}');
     return DesignDocumentsResponse.from(result);
   }
 

@@ -1,7 +1,7 @@
 import 'package:couchdb/src/validator.dart';
 import 'package:meta/meta.dart';
-import 'interfaces/client_interface.dart';
 
+import 'interfaces/client_interface.dart';
 import 'interfaces/documents_interface.dart';
 import 'interfaces/validator_interface.dart';
 import 'responses/api_response.dart';
@@ -39,11 +39,19 @@ class Documents implements DocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
 
-    final path =
-        '$dbName/$docId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
-        '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
-        'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
-        '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
+    final path = '$dbName/$docId?'
+        'attachments=$attachments'
+        '&att_encoding_info=$attEncodingInfo'
+        '&${includeNonNullParam('atts_since', attsSince)}'
+        '&conflicts=$conflicts'
+        '&deleted_conflicts=$deletedConflicts'
+        '&latest=$latest'
+        '&local_seq=$localSeq'
+        '&meta=$meta'
+        '&${includeNonNullParam('open_revs', openRevs)}'
+        '&${includeNonNullParam('rev', rev)}'
+        '&revs=$revs'
+        '&revs_info=$revsInfo';
 
     ApiResponse result = await _client.head(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
@@ -67,11 +75,19 @@ class Documents implements DocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
 
-    final path =
-        '$dbName/$docId?attachments=$attachments&att_encoding_info=$attEncodingInfo&'
-        '${includeNonNullParam('atts_since', attsSince)}&conflicts=$conflicts&deleted_conflicts=$deletedConflicts&'
-        'latest=$latest&local_seq=$localSeq&meta=$meta&${includeNonNullParam('open_revs', openRevs)}&'
-        '${includeNonNullParam('rev', rev)}&revs=$revs&revs_info=$revsInfo';
+    final path = '$dbName/$docId?'
+        'attachments=$attachments'
+        '&att_encoding_info=$attEncodingInfo'
+        '&${includeNonNullParam('atts_since', attsSince)}'
+        '&conflicts=$conflicts'
+        '&deleted_conflicts=$deletedConflicts'
+        '&latest=$latest'
+        '&local_seq=$localSeq'
+        '&meta=$meta'
+        '&${includeNonNullParam('open_revs', openRevs)}'
+        '&${includeNonNullParam('rev', rev)}'
+        '&revs=$revs'
+        '&revs_info=$revsInfo';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
@@ -87,9 +103,10 @@ class Documents implements DocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
 
-    final path =
-        '$dbName/$docId?new_edits=$newEdits&${includeNonNullParam('rev', rev)}&'
-        '${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$docId?'
+        'new_edits=$newEdits'
+        '&${includeNonNullParam('rev', rev)}'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result =
         await _client.put(path, reqHeaders: headers, body: body);
@@ -102,8 +119,9 @@ class Documents implements DocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
 
-    final path =
-        '$dbName/$docId?rev=$rev&${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$docId?'
+        'rev=$rev'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result = await _client.delete(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
@@ -118,9 +136,11 @@ class Documents implements DocumentsInterface {
       String batch}) async {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
+    validator.validateDocId(destinationId);
 
-    final path = '$dbName/$docId?${includeNonNullParam('rev', rev)}&'
-        '${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$docId?'
+        '${includeNonNullParam('rev', rev)}'
+        '&${includeNonNullParam('batch', batch)}';
 
     final destination = destinationRev == null
         ? destinationId
@@ -140,7 +160,8 @@ class Documents implements DocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
 
-    final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
+    final path = '$dbName/$docId/$attName?'
+        '${includeNonNullParam('rev', rev)}';
 
     ApiResponse result = await _client.head(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
@@ -153,7 +174,8 @@ class Documents implements DocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
 
-    final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
+    final path = '$dbName/$docId/$attName?'
+        '${includeNonNullParam('rev', rev)}';
 
     ApiResponse result = await _client.get(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
@@ -166,7 +188,8 @@ class Documents implements DocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
 
-    final path = '$dbName/$docId/$attName?${includeNonNullParam('rev', rev)}';
+    final path = '$dbName/$docId/$attName'
+        '?${includeNonNullParam('rev', rev)}';
 
     ApiResponse result =
         await _client.put(path, reqHeaders: headers, body: body);
@@ -180,8 +203,9 @@ class Documents implements DocumentsInterface {
     validator.validateDatabaseName(dbName);
     validator.validateDocId(docId);
 
-    final path = '$dbName/$docId/$attName?rev=$rev&'
-        '${includeNonNullParam('batch', batch)}';
+    final path = '$dbName/$docId/$attName?'
+        'rev=$rev'
+        '&${includeNonNullParam('batch', batch)}';
 
     ApiResponse result = await _client.delete(path, reqHeaders: headers);
     return DocumentsResponse.from(result);

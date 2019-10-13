@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:couchdb/src/validator.dart';
 import 'package:meta/meta.dart';
 
-import 'interfaces/client_interface.dart';
-import 'interfaces/validator_interface.dart';
-import 'responses/databases_response.dart';
-import 'responses/api_response.dart';
 import 'exceptions/couchdb_exception.dart';
-import 'utils/includer_path.dart';
+import 'interfaces/client_interface.dart';
 import 'interfaces/databases_interface.dart';
+import 'interfaces/validator_interface.dart';
+import 'responses/api_response.dart';
+import 'responses/databases_response.dart';
+import 'utils/includer_path.dart';
 
 /// Class that implements methods for interacting with entire database
 /// in CouchDB
@@ -101,8 +101,8 @@ class Databases implements DatabasesInterface {
       bool updateSeq = false}) async {
     validator.validateDatabaseName(dbName);
 
-    ApiResponse result = await _client.get('$dbName/_all_docs'
-        '?conflicts=$conflicts'
+    ApiResponse result = await _client.get('$dbName/_all_docs?'
+        'conflicts=$conflicts'
         '&descending=$descending'
         '&${includeNonNullJsonParam("endkey", endKey)}'
         '&${includeNonNullParam("endkey_docid", endKeyDocId)}'
@@ -157,13 +157,20 @@ class Databases implements DatabasesInterface {
       bool updateSeq = false}) async {
     validator.validateDatabaseName(dbName);
 
-    final path =
-        '$dbName/_design_docs?conflicts=$conflicts&descending=$descending&'
-        '${includeNonNullParam('endkey', endKey)}&${includeNonNullParam('endkey_docid', endKeyDocId)}&'
-        'include_docs=$includeDocs&inclusive_end=$inclusiveEnd&${includeNonNullParam('key', key)}&'
-        '${includeNonNullParam('keys', keys)}&${includeNonNullParam('limit', limit)}&'
-        'skip=$skip&${includeNonNullParam('startkey', startKey)}&${includeNonNullParam('startkey_docid', startKeyDocId)}&'
-        'update_seq=$updateSeq';
+    final path = '$dbName/_design_docs?'
+        'conflicts=$conflicts'
+        '&descending=$descending'
+        '&${includeNonNullParam('endkey', endKey)}'
+        '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
+        '&include_docs=$includeDocs'
+        '&inclusive_end=$inclusiveEnd'
+        '&${includeNonNullParam('key', key)}'
+        '&${includeNonNullParam('keys', keys)}'
+        '&${includeNonNullParam('limit', limit)}'
+        '&skip=$skip'
+        '&${includeNonNullParam('startkey', startKey)}'
+        '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
+        '&update_seq=$updateSeq';
 
     ApiResponse result = await _client.get(path);
     return DatabasesResponse.from(result);
@@ -196,7 +203,10 @@ class Databases implements DatabasesInterface {
     validator.validateDatabaseName(dbName);
 
     final body = <String, List<Object>>{'docs': docs};
-    ApiResponse result = await _client.post('$dbName?revs=$revs', body: body);
+    ApiResponse result = await _client.post(
+        '$dbName?'
+        'revs=$revs',
+        body: body);
     return DatabasesResponse.from(result);
   }
 
@@ -388,13 +398,23 @@ class Databases implements DatabasesInterface {
       int seqInterval}) async {
     validator.validateDatabaseName(dbName);
 
-    final path =
-        '$dbName/_changes?${includeNonNullParam('doc_ids', docIds)}&conflicts=$conflicts&'
-        'descending=$descending&feed=$feed&${includeNonNullParam('filter', filter)}&heartbeat=$heartbeat&'
-        'include_docs=$includeDocs&attachments=$attachments&att_encoding_info=$attEncodingInfo&'
-        '${includeNonNullParam('last-event-id', lastEventId)}&${includeNonNullParam('limit', limit)}&'
-        'since=$since&style=$style&timeout=$timeout&${includeNonNullParam('view', view)}&'
-        '${includeNonNullParam('seq_interval', seqInterval)}';
+    final path = '$dbName/_changes?'
+        '${includeNonNullParam('doc_ids', docIds)}'
+        '&conflicts=$conflicts'
+        '&descending=$descending'
+        '&feed=$feed'
+        '&${includeNonNullParam('filter', filter)}'
+        '&heartbeat=$heartbeat'
+        '&include_docs=$includeDocs'
+        '&attachments=$attachments'
+        '&att_encoding_info=$attEncodingInfo'
+        '&${includeNonNullParam('last-event-id', lastEventId)}'
+        '&${includeNonNullParam('limit', limit)}'
+        '&since=$since'
+        '&style=$style'
+        '&timeout=$timeout'
+        '&${includeNonNullParam('view', view)}'
+        '&${includeNonNullParam('seq_interval', seqInterval)}';
 
     final streamedRes = await _client.streamed('get', path);
 
@@ -448,12 +468,22 @@ class Databases implements DatabasesInterface {
       int seqInterval}) async {
     validator.validateDatabaseName(dbName);
 
-    final path = '$dbName/_changes?conflicts=$conflicts&'
-        'descending=$descending&feed=$feed&filter=$filter&heartbeat=$heartbeat&'
-        'include_docs=$includeDocs&attachments=$attachments&att_encoding_info=$attEncodingInfo&'
-        '${includeNonNullParam('last-event-id', lastEventId)}&${includeNonNullParam('limit', limit)}&'
-        'since=$since&style=$style&timeout=$timeout&${includeNonNullParam('view', view)}&'
-        '${includeNonNullParam('seq_interval', seqInterval)}';
+    final path = '$dbName/_changes?'
+        'conflicts=$conflicts'
+        '&descending=$descending'
+        '&feed=$feed'
+        '&filter=$filter'
+        '&heartbeat=$heartbeat'
+        '&include_docs=$includeDocs'
+        '&attachments=$attachments'
+        '&att_encoding_info=$attEncodingInfo'
+        '&${includeNonNullParam('last-event-id', lastEventId)}'
+        '&${includeNonNullParam('limit', limit)}'
+        '&since=$since'
+        '&style=$style'
+        '&timeout=$timeout'
+        '&${includeNonNullParam('view', view)}'
+        '&${includeNonNullParam('seq_interval', seqInterval)}';
 
     final body = <String, List<String>>{'doc_ids': docIds};
 
