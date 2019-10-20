@@ -1,11 +1,11 @@
 import 'package:couchdb/couchdb.dart';
 
-import '../databases.dart';
+import '../database.dart';
 
-/// Class that contains responses from `Databases` class
-class DatabasesResponse {
-  /// Creates instance of [DatabasesResponse]
-  DatabasesResponse({this.cluster,
+/// Class that contains responses from methods of [DatabaseInstance].
+class DatabaseResponse {
+  /// Creates instance of [DatabaseResponse]
+  DatabaseResponse({this.cluster,
     this.compactRunning,
     this.dbName,
     this.diskFormatVersion,
@@ -49,7 +49,7 @@ class DatabasesResponse {
 
   /// Returns response with fields that may be returned by `Databases`
   /// request methods
-  DatabasesResponse.from(ApiResponse response) : this(
+  DatabaseResponse.from(Response response) : this(
       cluster: (response.json['cluster'] as Map<String, Object>)
           ?.map((k, v) => MapEntry<String, int>(k, v as int)),
       compactRunning: response.json['compact_running'] as bool,
@@ -140,7 +140,7 @@ class DatabasesResponse {
 
   /// Is true if the database compaction routine is operating on this database
   ///
-  /// Returns by [Databases.dbInfo]
+  /// Returns by [Database.info]
   final bool compactRunning;
 
   /// Holds the name of the database
@@ -161,7 +161,7 @@ class DatabasesResponse {
   /// Do not rely on this string for counting the number of purge operations.
   final String purgeSeq;
 
-  /// Sizes info returned by [Databases.dbInfo]
+  /// Sizes info returned by [Database.info]
   final Map<String, int> sizes;
 
   /// An opaque string that describes the state of the database
@@ -189,8 +189,8 @@ class DatabasesResponse {
 
   /// Holds result objects - one for each query
   ///
-  /// Returned by [Databases.queriesDocsFrom], [Databases.bulkDocs],
-  /// [Databases.changesIn]
+  /// Returned by [Database.queriesDocsFrom], [Database.bulkDocs],
+  /// [Database.changes]
   final List<Map<String, Object>> results;
 
   /// Holds documents matching the search
@@ -226,7 +226,7 @@ class DatabasesResponse {
 
   /// Holds limit parameter used
   ///
-  /// Returns by [Databases.purgedInfosLimit], [Databases.explain]
+  /// Returns by [Database.purgedInfosLimit], [Database.explain]
   final int limit;
 
   /// Holds skip parameter used
@@ -258,12 +258,12 @@ class DatabasesResponse {
 
   /// Holds revs diffs for specified document
   ///
-  /// Returns by [Databases.revsDiff]
+  /// Returns by [Database.revsDiff]
   final Map<String, Map<String, List<String>>> revsDiff;
 
   /// List of some objects (if JSON itself is list)
   ///
-  /// Returned by [Databases.insertBulkDocs]
+  /// Returned by [Database.insertBulkDocs]
   final List<Map<String, Object>> list;
 
   /// Mapping of shard ranges to individual shard replicas on each

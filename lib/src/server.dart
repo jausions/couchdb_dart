@@ -1,10 +1,11 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 import 'interfaces/client_interface.dart';
 import 'interfaces/server_interface.dart';
-import 'responses/api_response.dart';
 import 'responses/server_response.dart';
-import 'utils/includer_path.dart';
+import 'utils/urls.dart';
 
 /// Server interface provides the basic interface to a CouchDB server
 /// for obtaining CouchDB information and getting and setting configuration information
@@ -17,14 +18,31 @@ class Server implements ServerInterface {
 
   @override
   Future<ServerResponse> activeTasks({Map<String, String> headers}) async {
-    ApiResponse result =
-        await _client.get('_active_tasks', reqHeaders: headers);
+    final result = await _client.get('_active_tasks', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerResponse> allDbs({Map<String, String> headers}) async {
-    ApiResponse result = await _client.get('_all_dbs', reqHeaders: headers);
+  Future<ServerResponse> allDbs({
+    Map<String, String> headers,
+    bool descending = false,
+    Object endKey,
+    int limit,
+    int skip,
+    Object startKey,
+  }) async {
+    final Map<String, Object> queryParams = {
+      'descending': descending,
+      if (endKey != null) 'endkey': jsonEncode(endKey),
+      if (limit != null) 'limit': limit,
+      if (skip != null) 'skip': skip,
+      if (startKey != null) 'startkey': jsonEncode(startKey),
+    };
+
+    final path = '_all_dbs?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await _client.get(path, reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -32,17 +50,22 @@ class Server implements ServerInterface {
   Future<ServerResponse> dbsInfo(List<String> keys) async {
     final body = <String, List<String>>{'keys': keys};
 
-    ApiResponse result = await _client.post('_dbs_info', body: body);
+    final result = await _client.post('_dbs_info', body: body);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> clusterSetupStatus(
       {List<String> ensureDbsExist, Map<String, String> headers}) async {
-    ApiResponse result = await _client.get(
-        '_cluster_setup?'
-        '${includeNonNullParam('ensure_dbs_exist', ensureDbsExist)}',
-        reqHeaders: headers);
+    //
+    final Map<String, Object> queryParams = {
+      if (ensureDbsExist != null) 'ensure_dbs_exist': ensureDbsExist,
+    };
+
+    final path = '_cluster_setup?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await _client.get(path, reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -93,14 +116,14 @@ class Server implements ServerInterface {
       body['ensure_dbs_exist'] = ensureDbsExist;
     }
 
-    ApiResponse result =
+    final result =
         await _client.post('_cluster_setup', reqHeaders: headers, body: body);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> couchDbInfo({Map<String, String> headers}) async {
-    ApiResponse result = await _client.get('', reqHeaders: headers);
+    final result = await _client.get('', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -111,26 +134,25 @@ class Server implements ServerInterface {
       int heartbeat = 60000,
       String since,
       Map<String, String> headers}) async {
-    String path;
+    //
+    final Map<String, Object> queryParams = {
+      'feed': feed,
+      'timeout': timeout,
+      if (feed == 'longpoll' || feed == 'continuous' || feed == 'eventsource')
+        'heartbeat': heartbeat,
+      if (since != null) 'since': since,
+    };
 
-    feed == 'longpoll' || feed == 'continuous' || feed == 'eventsource'
-        ? path = '_db_updates?'
-            'feed=$feed'
-            '&timeout=$timeout'
-            '&heartbeat=$heartbeat'
-            '&${includeNonNullParam('since', since)}'
-        : path = '_db_updates?'
-            'feed=$feed'
-            '&timeout=$timeout'
-            '&${includeNonNullParam('since', since)}';
+    final path = '_db_updates?'
+        '${queryStringFromMap(queryParams)}';
 
-    ApiResponse result = await _client.get(path, reqHeaders: headers);
+    final result = await _client.get(path, reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> membership({Map<String, String> headers}) async {
-    ApiResponse result = await _client.get('_membership', reqHeaders: headers);
+    final result = await _client.get('_membership', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -140,11 +162,11 @@ class Server implements ServerInterface {
       String statisticSection,
       String statisticId,
       Map<String, String> headers}) async {
-    final path = statisticSection != null && statisticId != null
+    final path = (statisticSection != null && statisticId != null)
         ? '_node/$nodeName/_stats/$statisticSection/$statisticId'
         : '_node/$nodeName/_stats';
 
-    ApiResponse result = await _client.get(path, reqHeaders: headers);
+    final result = await _client.get(path, reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -186,62 +208,76 @@ class Server implements ServerInterface {
       body['target'] = target;
     }
 
-    ApiResponse result =
+    final result =
         await _client.post('_replicate', reqHeaders: headers, body: body);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> schedulerJobs({int limit, int skip}) async {
-    ApiResponse result = await _client.get('_scheduler/jobs?'
-        '${includeNonNullParam('limit', limit)}'
-        '&${includeNonNullParam('skip', skip)}');
+    final Map<String, Object> queryParams = {
+      if (limit != null) 'limit': limit,
+      if (skip != null) 'skip': skip,
+    };
+    final path = '_scheduler/jobs?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await _client.get(path);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> schedulerDocs({int limit, int skip}) async {
-    ApiResponse result = await _client.get('_scheduler/docs?'
-        '${includeNonNullParam('limit', limit)}'
-        '&${includeNonNullParam('skip', skip)}');
+    final Map<String, Object> queryParams = {
+      if (limit != null) 'limit': limit,
+      if (skip != null) 'skip': skip,
+    };
+    final path = '_scheduler/docs?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await _client.get(path);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> schedulerDocsWithReplicatorDbName(
       {String replicator = '_replicator', int limit, int skip}) async {
-    ApiResponse result = await _client.get('_scheduler/docs/$replicator?'
-        '${includeNonNullParam('limit', limit)}'
-        '&${includeNonNullParam('skip', skip)}');
+    final Map<String, Object> queryParams = {
+      if (limit != null) 'limit': limit,
+      if (skip != null) 'skip': skip,
+    };
+    final path = '_scheduler/docs/$replicator?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await _client.get(path);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> schedulerDocsWithDocId(String docId,
       {String replicator = '_replicator'}) async {
-    ApiResponse result =
-        await _client.get('_scheduler/docs/$replicator/$docId');
+    final result = await _client.get('_scheduler/docs/$replicator/$docId');
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> systemStatsForNode(
       {String nodeName = '_local', Map<String, String> headers}) async {
-    ApiResponse result =
+    final result =
         await _client.get('_node/$nodeName/_system', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> up() async {
-    ApiResponse result = await _client.get('_up');
+    final result = await _client.get('_up');
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> uuids(
       {int count = 1, Map<String, String> headers}) async {
-    ApiResponse result =
+    final result =
         await _client.get('_uuids?count=$count', reqHeaders: headers);
     return ServerResponse.from(result);
   }

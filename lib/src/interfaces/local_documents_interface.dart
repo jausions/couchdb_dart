@@ -53,7 +53,7 @@ abstract class LocalDocumentsInterface {
   ///     "total_rows": null
   /// }
   /// ```
-  Future<LocalDocumentsResponse> localDocs(String dbName,
+  Future<LocalDocumentsResponse> localDocs(
       {bool conflicts = false,
       bool descending = false,
       String endKey,
@@ -94,7 +94,7 @@ abstract class LocalDocumentsInterface {
   ///     "offset" : null
   /// }
   /// ```
-  Future<LocalDocumentsResponse> localDocsWithKeys(String dbName,
+  Future<LocalDocumentsResponse> localDocsWithKeys(
       {@required List<String> keys,
       bool conflicts = false,
       bool descending = false,
@@ -110,7 +110,7 @@ abstract class LocalDocumentsInterface {
       bool updateSeq = false});
 
   /// Gets the specified local document
-  Future<LocalDocumentsResponse> localDoc(String dbName, String docId,
+  Future<LocalDocumentsResponse> localDoc(String docId,
       {Map<String, String> headers,
       bool conflicts = false,
       bool deletedConflicts = false,
@@ -124,18 +124,17 @@ abstract class LocalDocumentsInterface {
 
   /// Stores the specified local document
   Future<LocalDocumentsResponse> insertLocalDoc(
-      String dbName, String docId, Map<String, Object> body,
+      String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
       String batch,
       bool newEdits = true});
 
   /// Deletes the specified local document
-  Future<LocalDocumentsResponse> deleteLocalDoc(
-      String dbName, String docId, String rev,
+  Future<LocalDocumentsResponse> deleteLocalDoc(String docId, String rev,
       {Map<String, String> headers, String batch});
 
   /// Copies the specified local document
-  Future<LocalDocumentsResponse> copyLocalDoc(String dbName, String docId,
+  Future<LocalDocumentsResponse> copyLocalDoc(String docId,
       {Map<String, String> headers, String rev, String batch});
 }

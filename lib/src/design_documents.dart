@@ -1,25 +1,30 @@
-import 'package:couchdb/src/validator.dart';
 import 'package:meta/meta.dart';
 
 import 'interfaces/client_interface.dart';
 import 'interfaces/design_documents_interface.dart';
-import 'interfaces/validator_interface.dart';
-import 'responses/api_response.dart';
 import 'responses/design_documents_response.dart';
-import 'utils/includer_path.dart';
+import 'utils/urls.dart';
 
-/// Class that contains methods that allow operate with design documents
+/// Class to operate on design documents of a database
 class DesignDocuments implements DesignDocumentsInterface {
+  // Database name
+  final String dbName;
+
+  /// URL-encoded database name
+  final String _dbNameUrl;
+
   /// Instance of connected client
-  final ClientInterface _client;
+  final ClientInterface client;
 
-  /// Create DesignDocument by accepting web-based or server-based client
-  DesignDocuments(this._client);
-
-  ValidatorInterface validator = Validator();
+  /// The [DesignDocuments] class takes a [ClientInterface] implementation instance
+  /// and a database name [dbName].
+  DesignDocuments(this.client, String dbName)
+      : _dbNameUrl = Uri.encodeQueryComponent(
+            client.validator.validateDatabaseName(dbName)),
+        dbName = dbName;
 
   @override
-  Future<DesignDocumentsResponse> designDocHeaders(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> designDocHeaders(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -33,29 +38,33 @@ class DesignDocuments implements DesignDocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId?'
-        'attachments=$attachments'
-        '&att_encoding_info=$attEncodingInfo'
-        '&${includeNonNullParam('atts_since', attsSince)}'
-        '&conflicts=$conflicts'
-        '&deleted_conflicts=$deletedConflicts'
-        '&latest=$latest'
-        '&local_seq=$localSeq'
-        '&meta=$meta'
-        '&${includeNonNullParam('open_revs', openRevs)}'
-        '&${includeNonNullParam('rev', rev)}'
-        '&revs=$revs'
-        '&revs_info=$revsInfo';
+    final Map<String, Object> queryParams = {
+      'attachments': attachments,
+      'att_encoding_info': attEncodingInfo,
+      if (attsSince != null) 'atts_since': attsSince,
+      'conflicts': conflicts,
+      'deleted_conflicts': deletedConflicts,
+      'latest': latest,
+      'local_seq': localSeq,
+      'meta': meta,
+      if (openRevs != null) 'open_revs': openRevs,
+      if (rev != null) 'rev': rev,
+      'revs': revs,
+      'revs_info': revsInfo,
+    };
 
-    ApiResponse result = await _client.head(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$ddocIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.head(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentsResponse> designDoc(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> designDoc(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -69,149 +78,178 @@ class DesignDocuments implements DesignDocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId?'
-        'attachments=$attachments'
-        '&att_encoding_info=$attEncodingInfo'
-        '&${includeNonNullParam('atts_since', attsSince)}'
-        '&conflicts=$conflicts'
-        '&deleted_conflicts=$deletedConflicts'
-        '&latest=$latest'
-        '&local_seq=$localSeq'
-        '&meta=$meta'
-        '&${includeNonNullParam('open_revs', openRevs)}'
-        '&${includeNonNullParam('rev', rev)}'
-        '&revs=$revs'
-        '&revs_info=$revsInfo';
+    final Map<String, Object> queryParams = {
+      'attachments': attachments,
+      'att_encoding_info': attEncodingInfo,
+      if (attsSince != null) 'atts_since': attsSince,
+      'conflicts': conflicts,
+      'deleted_conflicts': deletedConflicts,
+      'latest': latest,
+      'local_seq': localSeq,
+      'meta': meta,
+      if (openRevs != null) 'open_revs': openRevs,
+      if (rev != null) 'rev': rev,
+      'revs': revs,
+      'revs_info': revsInfo,
+    };
 
-    ApiResponse result = await _client.get(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$ddocIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.get(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> insertDesignDoc(
-      String dbName, String ddocId, Map<String, Object> body,
+      String ddocId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
       String batch,
       bool newEdits = true}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId?'
-        'new_edits=$newEdits'
-        '&${includeNonNullParam('rev', rev)}'
-        '&${includeNonNullParam('batch', batch)}';
+    final Map<String, Object> queryParams = {
+      'new_edits': newEdits,
+      if (rev != null) 'rev': rev,
+      if (batch != null) 'batch': batch,
+    };
 
-    ApiResponse result =
-        await _client.put(path, reqHeaders: headers, body: body);
+    final path = '$_dbNameUrl$ddocIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.put(path, reqHeaders: headers, body: body);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentsResponse> deleteDesignDoc(
-      String dbName, String ddocId, String rev,
+  Future<DesignDocumentsResponse> deleteDesignDoc(String ddocId, String rev,
       {Map<String, String> headers, String batch}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId?'
-        'rev=$rev'
-        '&${includeNonNullParam('batch', batch)}';
+    final Map<String, Object> queryParams = {
+      'rev': rev,
+      if (batch != null) 'batch': batch,
+    };
 
-    ApiResponse result = await _client.delete(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$ddocIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.delete(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentsResponse> copyDesignDoc(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> copyDesignDoc(String ddocId,
       {Map<String, String> headers, String rev, String batch}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId?'
-        '${includeNonNullParam('rev', rev)}'
-        '&${includeNonNullParam('batch', batch)}';
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+      if (batch != null) 'batch': batch,
+    };
 
-    ApiResponse result = await _client.copy(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$ddocIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.copy(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> designDocAttachmentInfo(
-      String dbName, String ddocId, String attName,
+      String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId/$attName?'
-        '${includeNonNullParam('rev', rev)}';
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+    };
 
-    ApiResponse result = await _client.head(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.head(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> designDocAttachment(
-      String dbName, String ddocId, String attName,
+      String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId/$attName?'
-        '${includeNonNullParam('rev', rev)}';
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+    };
 
-    ApiResponse result = await _client.get(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.get(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> uploadDesignDocAttachment(
-      String dbName, String ddocId, String attName, Object body,
+      String ddocId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId/$attName?'
-        '${includeNonNullParam('rev', rev)}';
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+    };
 
-    ApiResponse result =
-        await _client.put(path, reqHeaders: headers, body: body);
+    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.put(path, reqHeaders: headers, body: body);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> deleteDesignDocAttachment(
-      String dbName, String ddocId, String attName,
+      String ddocId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId/$attName?'
-        'rev=$rev'
-        '&${includeNonNullParam('batch', batch)}';
+    final Map<String, Object> queryParams = {
+      'rev': rev,
+      if (batch != null) 'batch': batch,
+    };
 
-    ApiResponse result = await _client.delete(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.delete(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentsResponse> designDocInfo(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> designDocInfo(String ddocId,
       {Map<String, String> headers}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$dbName/$ddocId/_info';
+    final path = '$_dbNameUrl$ddocIdUrl/_info';
 
-    ApiResponse result = await _client.get(path, reqHeaders: headers);
+    final result = await client.get(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> executeViewFunction(
-      String dbName, String ddocId, String viewName,
+      String ddocId, String viewName,
       {bool conflicts = false,
       bool descending = false,
       Object endKey,
@@ -235,67 +273,44 @@ class DesignDocuments implements DesignDocumentsInterface {
       String update = 'true',
       bool updateSeq = false,
       Map<String, String> headers}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    String path;
+    final Map<String, Object> queryParams = {
+      if (!reduce) 'conflicts': conflicts,
+      'descending': descending,
+      if (endKey != null) 'endkey': endKey,
+      if (endKeyDocId != null) 'endkey_docid': endKeyDocId,
+      'group': group,
+      if (groupLevel != null) 'group_level': groupLevel,
+      'include_docs': includeDocs,
+      'attachments': attachments,
+      'att_encoding_info': attEncodingInfo,
+      'inclusive_end': inclusiveEnd,
+      if (key != null) 'key': key,
+      if (keys != null) 'keys': keys,
+      if (limit != null) 'limit': limit,
+      if (reduce != null) 'reduce': reduce,
+      'skip': skip,
+      'sorted': sorted,
+      'stable': stable,
+      if (stale != null) 'stale': stale,
+      if (startKey != null) 'startkey': startKey,
+      if (startKeyDocId != null) 'startkey_docid': startKeyDocId,
+      'update': update,
+      'update_seq': updateSeq,
+    };
 
-    if (reduce == true) {
-      path = '$dbName/$ddocId/_view/$viewName?'
-          'descending=$descending'
-          '&${includeNonNullParam('endkey', endKey)}'
-          '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
-          '&group=$group'
-          '&${includeNonNullParam('group_level', groupLevel)}'
-          '&include_docs=$includeDocs'
-          '&attachments=$attachments'
-          '&att_encoding_info=$attEncodingInfo'
-          '&inclusive_end=$inclusiveEnd'
-          '&${includeNonNullParam('key', key)}'
-          '&${includeNonNullParam('keys', keys)}'
-          '&${includeNonNullParam('limit', limit)}'
-          '&${includeNonNullParam('reduce', reduce)}'
-          '&skip=$skip'
-          '&sorted=$sorted'
-          '&stable=$stable'
-          '&${includeNonNullParam('stale', stale)}'
-          '&${includeNonNullParam('startkey', startKey)}'
-          '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
-          '&update=$update'
-          '&update_seq=$updateSeq';
-    } else {
-      path = '$dbName/$ddocId/_view/$viewName?'
-          'conflicts=$conflicts'
-          '&descending=$descending'
-          '&${includeNonNullParam('endkey', endKey)}'
-          '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
-          '&group=$group'
-          '&${includeNonNullParam('group_level', groupLevel)}'
-          '&include_docs=$includeDocs'
-          '&attachments=$attachments'
-          '&att_encoding_info=$attEncodingInfo'
-          '&inclusive_end=$inclusiveEnd'
-          '&${includeNonNullParam('key', key)}'
-          '&${includeNonNullParam('keys', keys)}'
-          '&${includeNonNullParam('limit', limit)}'
-          '&${includeNonNullParam('reduce', reduce)}'
-          '&skip=$skip'
-          '&sorted=$sorted'
-          '&stable=$stable'
-          '&${includeNonNullParam('stale', stale)}'
-          '&${includeNonNullParam('startkey', startKey)}'
-          '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
-          '&update=$update'
-          '&update_seq=$updateSeq';
-    }
+    final path = '$_dbNameUrl$ddocIdUrl/_view/$viewName?'
+        '${queryStringFromMap(queryParams)}';
 
-    ApiResponse result = await _client.get(path, reqHeaders: headers);
+    final result = await client.get(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> executeViewFunctionWithKeys(
-      String dbName, String ddocId, String viewName,
+      String ddocId, String viewName,
       {@required List<Object> keys,
       bool conflicts = false,
       bool descending = false,
@@ -319,169 +334,161 @@ class DesignDocuments implements DesignDocumentsInterface {
       String update = 'true',
       bool updateSeq = false,
       Map<String, String> headers}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    String path;
+    final Map<String, Object> queryParams = {
+      if (!reduce) 'conflicts': conflicts,
+      'descending': descending,
+      if (endKey != null) 'endkey': endKey,
+      if (endKeyDocId != null) 'endkey_docid': endKeyDocId,
+      'group': group,
+      if (groupLevel != null) 'group_level': groupLevel,
+      'include_docs': includeDocs,
+      'attachments': attachments,
+      'att_encoding_info': attEncodingInfo,
+      'inclusive_end': inclusiveEnd,
+      if (key != null) 'key': key,
+      if (limit != null) 'limit': limit,
+      if (reduce != null) 'reduce': reduce,
+      'skip': skip,
+      'sorted': sorted,
+      'stable': stable,
+      if (stale != null) 'stale': stale,
+      if (startKey != null) 'startkey': startKey,
+      if (startKeyDocId != null) 'startkey_docid': startKeyDocId,
+      'update': update,
+      'update_seq': updateSeq,
+    };
 
-    if (reduce == true) {
-      path = '$dbName/$ddocId/_view/$viewName?'
-          'descending=$descending'
-          '&${includeNonNullParam('endkey', endKey)}'
-          '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
-          '&group=$group'
-          '&${includeNonNullParam('group_level', groupLevel)}'
-          '&include_docs=$includeDocs'
-          '&attachments=$attachments'
-          '&att_encoding_info=$attEncodingInfo'
-          '&inclusive_end=$inclusiveEnd'
-          '&${includeNonNullParam('key', key)}'
-          '&${includeNonNullParam('limit', limit)}'
-          '&${includeNonNullParam('reduce', reduce)}'
-          '&skip=$skip'
-          '&sorted=$sorted'
-          '&stable=$stable'
-          '&${includeNonNullParam('stale', stale)}'
-          '&${includeNonNullParam('startkey', startKey)}'
-          '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
-          '&update=$update'
-          '&update_seq=$updateSeq';
-    } else {
-      path = '$dbName/$ddocId/_view/$viewName?'
-          'conflicts=$conflicts'
-          '&descending=$descending'
-          '&${includeNonNullParam('endkey', endKey)}'
-          '&${includeNonNullParam('endkey_docid', endKeyDocId)}'
-          '&group=$group'
-          '&${includeNonNullParam('group_level', groupLevel)}'
-          '&include_docs=$includeDocs'
-          '&attachments=$attachments'
-          '&att_encoding_info=$attEncodingInfo'
-          '&inclusive_end=$inclusiveEnd'
-          '&${includeNonNullParam('key', key)}'
-          '&${includeNonNullParam('limit', limit)}'
-          '&${includeNonNullParam('reduce', reduce)}'
-          '&skip=$skip'
-          '&sorted=$sorted'
-          '&stable=$stable'
-          '&${includeNonNullParam('stale', stale)}'
-          '&${includeNonNullParam('startkey', startKey)}'
-          '&${includeNonNullParam('startkey_docid', startKeyDocId)}'
-          '&update=$update'
-          '&update_seq=$updateSeq';
-    }
+    final path = '$_dbNameUrl$ddocIdUrl/_view/$viewName?'
+        '${queryStringFromMap(queryParams)}';
 
     final body = <String, List<Object>>{'keys': keys};
 
-    ApiResponse result =
-        await _client.post(path, reqHeaders: headers, body: body);
+    final result = await client.post(path, reqHeaders: headers, body: body);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
-  Future<DesignDocumentsResponse> executeViewQueries(String dbName,
+  Future<DesignDocumentsResponse> executeViewQueries(
       String ddocId, String viewName, List<Object> queries) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+
+    final path = '$_dbNameUrl$ddocIdUrl/_view/$viewName/queries';
 
     final body = <String, List<Object>>{'queries': queries};
 
-    ApiResponse result = await _client
-        .post('$dbName/$ddocId/_view/$viewName/queries', body: body);
+    final result = await client.post(path, body: body);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> executeShowFunctionForNull(
-      String dbName, String ddocId, String funcName,
+      String ddocId, String funcName,
       {String format}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    ApiResponse result = await _client.get('$dbName/$ddocId/_show/$funcName?'
-        '${includeNonNullParam('format', format)}');
+    final Map<String, Object> queryParams = {
+      if (format != null) 'format': format,
+    };
+
+    final path = '$_dbNameUrl$ddocIdUrl/_show/$funcName?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.get(path);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> executeShowFunctionForDocument(
-      String dbName, String ddocId, String funcName, String docId,
+      String ddocId, String funcName, String docId,
       {String format}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    ApiResponse result =
-        await _client.get('$dbName/$ddocId/_show/$funcName/$docId?'
-            '${includeNonNullParam('format', format)}');
+    final Map<String, Object> queryParams = {
+      if (format != null) 'format': format,
+    };
+
+    final path = '$_dbNameUrl$ddocIdUrl/_show/$funcName/$docId?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.get(path);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> executeListFunctionForView(
-      String dbName, String ddocId, String funcName, String view,
+      String ddocId, String funcName, String view,
       {String format}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    ApiResponse result =
-        await _client.get('$dbName/$ddocId/_list/$funcName/$view?'
-            '${includeNonNullParam('format', format)}');
+    final Map<String, Object> queryParams = {
+      if (format != null) 'format': format,
+    };
+
+    final path = '$_dbNameUrl$ddocIdUrl/_list/$funcName/$view?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.get(path);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> executeListFunctionForViewFromDoc(
-      String dbName,
-      String ddocId,
-      String funcName,
-      String otherDoc,
-      String view,
+      String ddocId, String funcName, String otherDoc, String view,
       {String format}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    ApiResponse result =
-        await _client.get('$dbName/$ddocId/_list/$funcName/$otherDoc/$view?'
-            '${includeNonNullParam('format', format)}');
+    final Map<String, Object> queryParams = {
+      if (format != null) 'format': format,
+    };
+
+    final path = '$_dbNameUrl$ddocIdUrl/_list/$funcName/$otherDoc/$view?'
+        '${queryStringFromMap(queryParams)}';
+
+    final result = await client.get(path);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> executeUpdateFunctionForNull(
-      String dbName, String ddocId, String funcName, Object body) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+      String ddocId, String funcName, Object body) async {
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    ApiResponse result =
-        await _client.post('$dbName/$ddocId/_update/$funcName', body: body);
+    final path = '$_dbNameUrl$ddocIdUrl/_update/$funcName';
+
+    final result = await client.post(path, body: body);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> executeUpdateFunctionForDocument(
-      String dbName,
-      String ddocId,
-      String funcName,
-      String docId,
-      Object body) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+      String ddocId, String funcName, String docId, Object body) async {
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    ApiResponse result = await _client
-        .put('$dbName/$ddocId/_update/$funcName/$docId', body: body);
+    final path = '$_dbNameUrl$ddocIdUrl/_update/$funcName/$docId';
+
+    final result = await client.put(path, body: body);
     return DesignDocumentsResponse.from(result);
   }
 
   @override
   Future<DesignDocumentsResponse> rewritePath(
-    String dbName,
     String ddocId,
     String path,
   ) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDesignDocId(ddocId);
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
 
-    ApiResponse result = await _client.put('$dbName/$ddocId/_rewrite/$path');
+    final result = await client.put('$_dbNameUrl$ddocIdUrl/_rewrite/$path');
     return DesignDocumentsResponse.from(result);
   }
 }

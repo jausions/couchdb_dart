@@ -1,3 +1,59 @@
+# 0.7.0-alpha.1
+
+This is a major rework of the package, with a lot of breaking changes.
+  
+- Refactored a lot of classes to allow to be more easily testable by decoupling
+  with interfaces and introducing dependency injection. The base `Component` class
+  was deleted.
+- The _`...Response`_ classes now have a `.from()` constructor that takes a `Response`
+  instance. The specialized conversion methods from `Response` were removed.
+- The `Database`, `Documents`, `LocalDocuments`, `DesignDocuments` classes now
+  take the database name in their constructor and it was removed from all their methods.
+- Added proactive validation of database names and document ids before sending
+  *some* API requests to CouchDB. This can be bypassed or customized with your own
+  validator.
+- Added sorting and pagination parameters for `Server.allDbs()` method.
+- Bug fix: The credentials were not properly sent to the server when they
+  contained special characters.
+- Bug fix: URL parameters were not properly escaped.
+- Updated README for clarity and usage.
+- Updated dependencies in _pubspec.yaml_.
+- Added the start of a test suite.
+
+### Renamed classes
+
+- `DesignDocument` to `DesignDocuments`
+- `DesignDocumentResponse` to `DesignDocumentsResponse`
+- `Document` to `Documents`,
+- `DocumentResponse` to `DocumentsResponse`,
+- `LocalDocument` to `LocalDocuments`,
+- `LocalDocumentResponse` to `LocalDocumentsResponse`.
+
+### Renamed methods
+
+- `Database.changesIn()` to `Database.changes()`,
+- `Database.createDb()` to `Database.create()`,
+- `Database.createDocIn()` to `Database.createDoc()`,
+- `Database.createIndexIn()` to `Database.createIndex()`,
+- `Database.dbInfo()` to `Database.info()`,
+- `Database.deleteDb()` to `Database.delete()`,
+- `Database.headDbInfo()` to `Database.summaryInfo()`,
+- `Database.indexesAt()` to `Database.indexes()`,
+- `Database.postChangesIn()` to `Database.postChanges()`,
+- `Database.revsLimitOf()` to `Database.revsLimit()`,
+- `Database.securityOf()` to `Database.security()`,
+- `Database.setSecurityFor()` to `Database.setSecurity()`.
+
+### Removed methods
+
+- `Response.databaseResponse()`,
+- `Response.designDocumentResponse()`,
+- `Response.documentResponse()`,
+- `Response.localDocumentResponse()`,
+- `Response.serverResponse()`.
+
+Thanks to [Philippe Jausions](https://github.com/jausions)
+
 # 0.6.0
 
 - Remove models classes and relative concept. Now `Component` is the base class for others derivative. And all transitive files was deleted (`DocumentModelBase` and so on...). `Model` word is removed from all classes. `DbResponse` is renamed into `Response`.

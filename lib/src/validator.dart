@@ -36,7 +36,7 @@ class Validator implements ValidatorInterface {
 
   /// Validates [dbName] against naming rules for database names.
   /// If the check fails an [ArgumentError] exception is thrown.
-  void validateDatabaseName(String dbName) {
+  String validateDatabaseName(String dbName) {
     if (!isValidDatabaseName(dbName)) {
       throw ArgumentError(r'''Incorrect database name!
       Name must be composed by following next rules:
@@ -45,32 +45,36 @@ class Validator implements ValidatorInterface {
         - Digits (0-9)
         - Any of the characters _, $, (, ), +, -, and /.''');
     }
+    return dbName;
   }
 
   /// Validates [ddocId] against naming rules for design document ids.
   /// If the check fails an [ArgumentError] exception is thrown.
-  void validateDesignDocId(String ddocId) {
+  String validateDesignDocId(String ddocId) {
     if (!isValidDesignDocumentId(ddocId)) {
       throw ArgumentError(
           'Malformed design document id: The id must start with "_design/".');
     }
+    return ddocId;
   }
 
   /// Validates [docId] against naming rules for "regular" document ids.
   /// If the check fails an [ArgumentError] exception is thrown.
-  void validateDocId(String docId) {
+  String validateDocId(String docId) {
     if (!isValidDocumentId(docId)) {
       throw ArgumentError(
           'Invalid document id: The id cannot start with an underscore "_".');
     }
+    return docId;
   }
 
   /// Validates [docId] against naming rules for local document ids.
   /// If the check fails an [ArgumentError] exception is thrown.
-  void validateLocalDocId(String docId) {
+  String validateLocalDocId(String docId) {
     if (!isValidLocalDocumentId(docId)) {
       throw ArgumentError(
           'Malformed local document id: The id must start with "_local/".');
     }
+    return docId;
   }
 }

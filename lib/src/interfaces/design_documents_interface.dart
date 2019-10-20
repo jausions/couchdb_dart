@@ -1,3 +1,4 @@
+import 'package:couchdb/couchdb.dart';
 import 'package:meta/meta.dart';
 
 import '../responses/design_documents_response.dart';
@@ -6,7 +7,7 @@ import '../responses/design_documents_response.dart';
 abstract class DesignDocumentsInterface {
   /// Returns the HTTP Headers containing a minimal amount of information
   /// about the specified design document
-  Future<DesignDocumentsResponse> designDocHeaders(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> designDocHeaders(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -23,7 +24,7 @@ abstract class DesignDocumentsInterface {
 
   /// Returns the contents of the design document specified with the name
   /// of the design document and from the specified database
-  Future<DesignDocumentsResponse> designDoc(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> designDoc(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -57,30 +58,29 @@ abstract class DesignDocumentsInterface {
   /// For `views` mapping is the same except that values are objects with `map`
   /// and `reduce` (optional) keys which also contains functions source code.
   Future<DesignDocumentsResponse> insertDesignDoc(
-      String dbName, String ddocId, Map<String, Object> body,
+      String ddocId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
       String batch,
       bool newEdits = true});
 
   /// Deletes the specified document from the database
-  Future<DesignDocumentsResponse> deleteDesignDoc(
-      String dbName, String ddocId, String rev,
+  Future<DesignDocumentsResponse> deleteDesignDoc(String ddocId, String rev,
       {Map<String, String> headers, String batch});
 
   /// Copies an existing design document to a new or existing one
-  Future<DesignDocumentsResponse> copyDesignDoc(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> copyDesignDoc(String ddocId,
       {Map<String, String> headers, String rev, String batch});
 
   /// Returns the HTTP headers containing a minimal amount of information about
   /// the specified attachment
   Future<DesignDocumentsResponse> designDocAttachmentInfo(
-      String dbName, String ddocId, String attName,
+      String ddocId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Returns the file attachment associated with the design document
   Future<DesignDocumentsResponse> designDocAttachment(
-      String dbName, String ddocId, String attName,
+      String ddocId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Uploads the supplied content as an attachment to the specified design document
@@ -88,12 +88,12 @@ abstract class DesignDocumentsInterface {
   /// You must supply the `Content-Type` header, and for an existing document
   /// you must also supply either the [rev] query argument or the `If-Match` HTTP header
   Future<DesignDocumentsResponse> uploadDesignDocAttachment(
-      String dbName, String ddocId, String attName, Object body,
+      String ddocId, String attName, Object body,
       {Map<String, String> headers, String rev});
 
   /// Deletes the attachment of the specified design document
   Future<DesignDocumentsResponse> deleteDesignDocAttachment(
-      String dbName, String ddocId, String attName,
+      String ddocId, String attName,
       {@required String rev, Map<String, String> headers, String batch});
 
   /// Obtains information about the specified design document, including the index,
@@ -118,7 +118,7 @@ abstract class DesignDocumentsInterface {
   ///     }
   /// }
   /// ```
-  Future<DesignDocumentsResponse> designDocInfo(String dbName, String ddocId,
+  Future<DesignDocumentsResponse> designDocInfo(String ddocId,
       {Map<String, String> headers});
 
   /// Executes the specified view function from the specified design document
@@ -154,7 +154,7 @@ abstract class DesignDocumentsInterface {
   /// }
   /// ```
   Future<DesignDocumentsResponse> executeViewFunction(
-      String dbName, String ddocId, String viewName,
+      String ddocId, String viewName,
       {bool conflicts = false,
       bool descending = false,
       Object endKey,
@@ -204,7 +204,7 @@ abstract class DesignDocumentsInterface {
   /// }
   /// ```
   Future<DesignDocumentsResponse> executeViewFunctionWithKeys(
-      String dbName, String ddocId, String viewName,
+      String ddocId, String viewName,
       {@required List<Object> keys,
       bool conflicts = false,
       bool descending = false,
@@ -293,7 +293,7 @@ abstract class DesignDocumentsInterface {
   /// }
   /// ```
   Future<DesignDocumentsResponse> executeViewQueries(
-      String dbName, String ddocId, String viewName, List<Object> queries);
+      String ddocId, String viewName, List<Object> queries);
 
   /// Applies show function for null document
   ///
@@ -301,7 +301,7 @@ abstract class DesignDocumentsInterface {
   ///
   /// `some data that returned by show function`
   Future<DesignDocumentsResponse> executeShowFunctionForNull(
-      String dbName, String ddocId, String funcName,
+      String ddocId, String funcName,
       {String format});
 
   /// Applies show function for the specified document
@@ -310,7 +310,7 @@ abstract class DesignDocumentsInterface {
   ///
   /// `some data that returned by show function`
   Future<DesignDocumentsResponse> executeShowFunctionForDocument(
-      String dbName, String ddocId, String funcName, String docId,
+      String ddocId, String funcName, String docId,
       {String format});
 
   /// Applies list function for the [view] function from the same design document
@@ -319,7 +319,7 @@ abstract class DesignDocumentsInterface {
   ///
   /// `some data that returned by show function`
   Future<DesignDocumentsResponse> executeListFunctionForView(
-      String dbName, String ddocId, String funcName, String view,
+      String ddocId, String funcName, String view,
       {String format});
 
   /// Applies list function for the [view] function from the other design document
@@ -328,11 +328,7 @@ abstract class DesignDocumentsInterface {
   ///
   /// `some data that returned by show function`
   Future<DesignDocumentsResponse> executeListFunctionForViewFromDoc(
-      String dbName,
-      String ddocId,
-      String funcName,
-      String otherDoc,
-      String view,
+      String ddocId, String funcName, String otherDoc, String view,
       {String format});
 
   /// Executes update function on server side for null document
@@ -343,16 +339,15 @@ abstract class DesignDocumentsInterface {
   /// ```
   /// for success execution or error for fail.
   Future<DesignDocumentsResponse> executeUpdateFunctionForNull(
-      String dbName, String ddocId, String funcName, Object body);
+      String ddocId, String funcName, Object body);
 
   /// Executes update function on server side for the specified document
   Future<DesignDocumentsResponse> executeUpdateFunctionForDocument(
-      String dbName, String ddocId, String funcName, String docId, Object body);
+      String ddocId, String funcName, String docId, Object body);
 
   /// Rewrites the specified path by rules defined in the specified design document
   ///
   /// The rewrite rules are defined by the `rewrites` field of the design document.
   /// The `rewrites` field can either be a string containing the a rewrite function or an array of rule definitions.
-  Future<DesignDocumentsResponse> rewritePath(
-      String dbName, String ddocId, String path);
+  Future<DesignDocumentsResponse> rewritePath(String ddocId, String path);
 }

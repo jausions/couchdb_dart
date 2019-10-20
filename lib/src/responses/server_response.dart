@@ -2,7 +2,7 @@ import 'package:couchdb/couchdb.dart';
 
 import '../server.dart';
 
-/// Class that contains responses from `Server` class
+/// Class that contains responses from methods of [ServerInterface]
 class ServerResponse {
   /// Creates instance of [ServerResponse]
   ServerResponse({this.couchDbMessage,
@@ -65,7 +65,7 @@ class ServerResponse {
     this.roles,
     this.userCtx});
 
-  ServerResponse.from(ApiResponse response) : this(
+  ServerResponse.from(Response response) : this(
     // [Server.nodeStats] returns JSON with `couchdb` field
     // which type is Map
       couchDbMessage:

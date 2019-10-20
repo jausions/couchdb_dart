@@ -11,9 +11,9 @@ Created under a MIT-style
 A basic understanding of CouchDB is required to use this library. Detailed
 information can be found at the [official documentation site](http://docs.couchdb.org/en/stable/api/basics.html).
 
-### API
+## Authentication
 
-The connection to the database, along with authentication, is handled via
+The connection to the CouchDB server, along with authentication, is handled via
 `CouchDbClient` for both web and server environments.
 
 Three types of authentication are available:
@@ -77,7 +77,7 @@ c.modifyRequestHeaders(<String, String>{
     [chttpd]
     authentication_handlers = {chttpd_auth, cookie_authentication_handler}, {chttpd_auth, proxy_authentication_handler}, {chttpd_auth, default_authentication_handler}
 
-#### Anonymous user
+### Anonymous access
 
 You can configure access to your database to anonymous users.
 To achieve this you must provide the following option (and don't set
@@ -88,7 +88,7 @@ username and password to `CouchDbClient` constructor):
 
 Otherwise, no requests will be allowed from anonymous users.
 
-#### Client
+## Client
 
 If you wish you can communicate with the server directly via the client's
 methods such as `get()` and `post()`, however, other classes provide functions
@@ -100,21 +100,21 @@ header with a default value of `application/json`, and `POST` and `PUT` both hav
 a `Content-Type` header with a default value of `application/json`.
 You can override this if you need.
 
-Most of the client's methods return a `Future<ApiResponse>` object.
+Most of the client's methods return a `Future<Response>` object.
 When the future completes normally, it will contain:
-- an `ApiResponse.json` property (`Map` type) containing JSON that was sent by CouchDB,
-- an `ApiResponse.raw` property (`String` type) for responses that are not
+- a `Response.json` property (`Map` type) containing JSON that was sent by CouchDB,
+- a `Response.raw` property (`String` type) for responses that are not
   a JSON object (numbers, lists, files,)
-- an `ApiResponse.headers` property that contains headers of the HTTP response.
+- a `Response.headers` property that contains headers of the HTTP response.
 
 In case of failure, the exception payload `response` will be an `ErrorResponse` object.
 
-Because of the sheet number of response information, the package has been organized
+Because of the sheer number of response information, the package has been organized
 around categories, each providing a more specific `...Response` class.
 
 You can find more information below and in the [package API](https://pub.dev/documentation/couchdb/latest/).
 
-#### Categories
+## Categories
 
 The API is divided into five categories, or areas, each representing a
 different aspect of the database overall. These five categories are:
@@ -125,7 +125,7 @@ different aspect of the database overall. These five categories are:
     4. Design documents
     5. Local documents
 
-##### 1: Server
+### 1. Server
 
 Represented by the `Server` class. This class provides server level interaction
 with CouchDB, such as managing replication or obtaining basic information about
@@ -134,16 +134,20 @@ the server. It also includes info about authentication and current user
 
 The `Server` class methods return a `Future<ServerResponse>`.
 
-##### 2: Databases
+> Note: Do not confuse `ServerResponse` with `Response`. `ServerResponse` is for
+> responses for server-related calls, while `Response` is the class representing
+> generic responses from the CouchDB server for any API calls.
+
+### 2. Databases
 
 A Database in CouchDB is a single document store located on the given database
-server. This part of the API is represented by the `Databases` class. You use
+server. This part of the API is represented by the `Database` class. You use
 this class for interacting with your data on a database level; for example
 creating a new database or preforming a query to search for certain documents.
 
-The `Databases` class methods return  a `Future<DatabasesResponse>`.
+The `Database` class methods return  a `Future<DatabaseResponse>`.
 
-##### 3: Documents
+### 3. Documents
 
 You use the `Documents` class to interact with the data on a document level.
 This would include functions such as fetching a specific document, adding a new
@@ -153,14 +157,14 @@ The documents themselves are represented as `Map`s.
 
 The `Documents` class methods return a `Future<DocumentsResponse>`.
 
-##### 4: Design Documents
+### 4. Design Documents
 
 Design documents provide views of data in the database.
 You interact with them with the `DesignDocuments` class.
 
 The `DesignDocuments` class methods return a `Future<DesignDocumentsResponse>`.
 
-##### 5: Local Documents
+### 5. Local Documents
 
 Local documents are no different than normal documents, with the exception that
 they are not copied to other instances of CouchDB during replication.
@@ -168,12 +172,12 @@ You interact with them via the `LocalDocuments` class.
 
 The `LocalDocuments` class methods return a `Future<LocalDocumentsResponse>`.
 
-### CORS
+## CORS
 
 CORS is a method of enabling a web app to talk to a server other than the server
 hosting it. It is only necessary if the application is running in the browser.
 
-#### CouchDB Server Configuration for CORS
+### CouchDB Server Configuration for CORS
 
 If the application is not on the same origin with CouchDB instance (or you using
 different ports on server), then the remote CouchDB must be configured with
@@ -191,7 +195,7 @@ Change these settings either in Fauxton configuration utility or in the CouchDb
 _local.ini_ file. For better security, specify specific domains instead
 of * in the `origins` section.
 
-#### Browser Client Configuration for CORS
+### Browser Client Configuration for CORS
 
 Depending on the browser, you might also need to pass `cors=true` to the
 `CouchDbClient` constructor. However, most of the time the browser will handle
@@ -205,19 +209,19 @@ A simple usage example:
 ```dart
 import 'package:couchdb/couchdb.dart';
 
-Future<void> main() async {
+void main() async {
   final client = CouchDbClient(username: 'name', password: 'password');
-  final dbs = Databases(client);
-  final docs = Documents(client);
+  final db1 = Database(client, 'some_db');
+  final docs2 = Documents(client, 'another_db');
 
   try {
-    final DatabasesResponse response1 = await dbs.allDocs('some_db');
+    final DatabaseResponse response1 = await db1.allDocs();
 
     for (var i in response1.rows) {
       // Some code here
     }
 
-    final DocumentsResponse response2 = await docs.doc('another_db', 'some_id');
+    final DocumentsResponse response2 = await docs2.doc('some_id');
 
     var thing = response2.doc['some_attribute'];
 

@@ -2,8 +2,9 @@ import 'package:meta/meta.dart';
 
 import '../responses/server_response.dart';
 
-/// Server interface provides the basic interface to a CouchDB server
-/// for obtaining CouchDB information and getting and setting configuration information
+/// [ServerInterface] declares the basic interface to a CouchDB server
+/// for obtaining CouchDB information and getting and setting configuration
+/// information.
 abstract class ServerInterface {
   /// Accessing the root of a CouchDB instance returns meta information about the instance
   ///
@@ -71,7 +72,14 @@ abstract class ServerInterface {
   ///   "locations"
   /// ]
   /// ```
-  Future<ServerResponse> allDbs({Map<String, String> headers});
+  Future<ServerResponse> allDbs({
+    Map<String, String> headers,
+    bool descending = false,
+    Object endKey,
+    int limit,
+    int skip,
+    Object startKey,
+  });
 
   /// Returns information of a list of the specified databases in the CouchDB instance
   ///
@@ -148,19 +156,20 @@ abstract class ServerInterface {
   /// {"state": "cluster_enabled"}
   /// ```
   /// May be one of the following:
-  /// - `cluster_disabled`,
-  /// - `single_node_disabled`,
-  /// - `single_node_enabled`,
-  /// - `cluster_enabled`,
-  /// - `cluster_finished`
+  ///
+  ///   - `cluster_disabled`,
+  ///   - `single_node_disabled`,
+  ///   - `single_node_enabled`,
+  ///   - `cluster_enabled`,
+  ///   - `cluster_finished`.
   Future<ServerResponse> clusterSetupStatus(
       {List<String> ensureDbsExist, Map<String, String> headers});
 
   /// Configure a node as a single (standalone) node, as part of a cluster, or finalise a cluster
   ///
   /// Correspond to `POST /_cluster_setup` method.
-  /// If [ensureDbsExist] isn't specified, it is defaults to `["_users","_replicator","_global_changes"]`.
-  /// [bindAddress] should be provided not [host], if CouchDB is configuring as `single_node`.
+  /// If [ensureDbsExist] is not specified, it defaults to `["_users","_replicator","_global_changes"]`.
+  /// [bindAddress] should be provided not [host], if CouchDB is configured as `single_node`.
   Future<ServerResponse> configureCouchDb(
       {@required String action,
       @required String bindAddress,
@@ -467,11 +476,6 @@ abstract class ServerInterface {
   Future<ServerResponse> systemStatsForNode(
       {String nodeName = '_local', Map<String, String> headers});
 
-  // /// Accesses the built-in Fauxton administration interface for CouchDB.
-  // ///
-  // /// Don't work in browser environment!
-  // Future<void> utils();
-
   /// Confirms that the server is up, running, and ready to respond to requests
   ///
   /// Returns JSON like:
@@ -500,9 +504,4 @@ abstract class ServerInterface {
   /// }
   /// ```
   Future<ServerResponse> uuids({int count = 1, Map<String, String> headers});
-
-// /// Binary content for the favicon.ico site icon
-// /// Returns 'Not found' if favicon isn't exist.
-// /// Throws `FormatException` all time. **Don't use it!**
-// Future<DbResponse> favicon();
 }

@@ -1,26 +1,33 @@
-import '../responses/api_response.dart';
+import 'package:couchdb/couchdb.dart';
+
+import '../responses/response.dart';
 
 /// Client for interacting with CouchDB server
 abstract class ClientInterface {
+  /// To validate database names, document ids, and so on
+  final ValidatorInterface validator;
+
+  ClientInterface(this.validator);
+
   /// HEAD method
-  Future<ApiResponse> head(String path, {Map<String, String> reqHeaders});
+  Future<Response> head(String path, {Map<String, String> reqHeaders});
 
   /// GET method
-  Future<ApiResponse> get(String path, {Map<String, String> reqHeaders});
+  Future<Response> get(String path, {Map<String, String> reqHeaders});
 
   /// PUT method
-  Future<ApiResponse> put(String path,
+  Future<Response> put(String path,
       {Object body, Map<String, String> reqHeaders});
 
   /// POST method
-  Future<ApiResponse> post(String path,
+  Future<Response> post(String path,
       {Object body, Map<String, String> reqHeaders});
 
   /// DELETE method
-  Future<ApiResponse> delete(String path, {Map<String, String> reqHeaders});
+  Future<Response> delete(String path, {Map<String, String> reqHeaders});
 
   /// COPY method
-  Future<ApiResponse> copy(String path, {Map<String, String> reqHeaders});
+  Future<Response> copy(String path, {Map<String, String> reqHeaders});
 
   /// Makes request with specific [method] and with long or
   /// continuous connection
@@ -41,7 +48,7 @@ abstract class ClientInterface {
   /// ```json
   /// {'ok': true, 'name': 'root', 'roles': ['_admin']}
   /// ```
-  Future<ApiResponse> authenticate([String next]);
+  Future<Response> authenticate([String next]);
 
   /// Closes user’s session by instructing the browser to clear the cookie
   ///
@@ -51,7 +58,7 @@ abstract class ClientInterface {
   /// ```json
   /// {'ok': true}
   /// ```
-  Future<ApiResponse> logout();
+  Future<Response> logout();
 
   /// Returns information about the authenticated user, including a
   /// User Context Object, the authentication method and database
@@ -80,5 +87,5 @@ abstract class ClientInterface {
   ///     }
   /// }
   /// ```
-  Future<ApiResponse> userInfo({bool basic = false});
+  Future<Response> userInfo({bool basic = false});
 }

@@ -2,7 +2,7 @@ import 'package:couchdb/couchdb.dart';
 
 import '../local_documents.dart';
 
-/// Class that contains responses from `LocalDocuments` class
+/// Class that contains responses from methods of [LocalDocumentsInterface]
 class LocalDocumentsResponse {
   /// Creates instance of [LocalDocumentsResponse]
   LocalDocumentsResponse({this.offset,
@@ -21,7 +21,7 @@ class LocalDocumentsResponse {
     this.revsInfo,
     this.revisions});
 
-  LocalDocumentsResponse.from(ApiResponse response) : this(
+  LocalDocumentsResponse.from(Response response) : this(
       offset: response.json['offset'] as int,
       rows: (response.json['rows']
       as List<Object>)
@@ -63,6 +63,7 @@ class LocalDocumentsResponse {
   /// Holds local document object
   ///
   /// May contain:
+  ///
   /// - `_id` (string) – Document ID
   /// - `_rev` (string) – Revision MVCC token
   /// - `_deleted` (boolean) – Deletion flag. Available if document was removed

@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:couchdb/couchdb.dart';
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http show BaseClient, Client, Request;
 
 import '../exceptions/couchdb_exception.dart';
 import '../interfaces/client_interface.dart';
-import '../responses/api_response.dart';
+import '../interfaces/validator_interface.dart';
+import '../responses/response.dart';
 
 /// Client for interacting with database via server-side and web applications
 class CouchDbClient implements ClientInterface {
@@ -24,6 +26,9 @@ class CouchDbClient implements ClientInterface {
   ///
   ///   - http
   ///   - https (if `SSL` set to `true`)
+  ///
+  /// A [httpClient] instance can be provided to use instead of the standard
+  /// client from package:http.
   CouchDbClient(
       {String username,
       String password,
@@ -33,24 +38,30 @@ class CouchDbClient implements ClientInterface {
       this.auth = 'basic',
       this.cors = false,
       String secret,
-      String path})
-      : secret = utf8.encode(secret != null ? secret : '') {
+      String path,
+      http.BaseClient httpClient,
+      ValidatorInterface validator})
+      : secret = utf8.encode(secret != null ? secret : ''),
+        _httpClient = httpClient ?? http.Client(),
+        validator = validator ?? Validator() {
     if (username == null && password != null) {
       throw CouchDbException(401,
-          response: ApiResponse(<String, Object>{
+          response: Response(<String, Object>{
             'error': 'Authorization failed',
             'reason': 'You must provide username if password is non null!'
           }).errorResponse());
     } else if (username != null && password == null) {
       throw CouchDbException(401,
-          response: ApiResponse(<String, Object>{
+          response: Response(<String, Object>{
             'error': 'Authorization failed',
             'reason': 'You must provide password if username is non null!'
           }).errorResponse());
     }
 
-    final userInfo =
-        username == null && password == null ? null : '$username:$password';
+    final userInfo = username == null && password == null
+        ? null
+//        : '$username:$password';
+        : '${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}';
 
     final regExp = RegExp(r'http[s]?://');
     if (host.startsWith(regExp)) {
@@ -62,24 +73,39 @@ class CouchDbClient implements ClientInterface {
 
   /// Create [CouchDbClient] instance from [uri] and
   /// [auth], [cors] and [secret] params.
+  ///
+  /// A [httpClient] instance can be provided to use instead of the standard
+  /// client from package:http.
   CouchDbClient.fromUri(Uri uri,
-      {this.auth = 'basic', this.cors = false, String secret})
-      : secret = utf8.encode(secret != null ? secret : '') {
+      {this.auth = 'basic',
+      this.cors = false,
+      String secret,
+      http.BaseClient httpClient,
+        ValidatorInterface validator})
+      : secret = utf8.encode(secret != null ? secret : ''),
+        _httpClient = httpClient ?? http.Client(),
+        validator = validator ?? Validator() {
     final properUri = Uri(
-        scheme: uri.scheme == '' ? 'http' : uri.scheme,
-        userInfo: uri.userInfo,
-        host: uri.host == '' ? '0.0.0.0' : uri.host,
-        port: uri.port == 0 || uri.port == 80 || uri.port == 443
-            ? 5984
-            : uri.port);
+      scheme: (uri.scheme == '') ? 'http' : uri.scheme,
+      userInfo: uri.userInfo,
+      host: (uri.host == '') ? '127.0.0.1' : uri.host,
+      port: (uri.port <= 0) ? 5984 : uri.port,
+    );
     _connectUri = properUri;
   }
 
   /// Create [Client] instance from [uri] and
   /// [auth], [cors] and [secret] params.
+  ///
+  /// A [httpClient] instance can be provided to use instead of the standard
+  /// client from package:http.
   CouchDbClient.fromString(String uri,
-      {String auth = 'basic', bool cors = false, String secret})
-      : this.fromUri(Uri.tryParse(uri), auth: auth, cors: cors, secret: secret);
+      {String auth = 'basic',
+      bool cors = false,
+      String secret,
+      http.BaseClient httpClient})
+      : this.fromUri(Uri.tryParse(uri),
+            auth: auth, cors: cors, secret: secret, httpClient: httpClient);
 
   /// Host of database instance
   String get host => _connectUri.host;
@@ -89,20 +115,21 @@ class CouchDbClient implements ClientInterface {
 
   /// Username of database user
   String get username => _connectUri.userInfo.isNotEmpty
-      ? _connectUri.userInfo.split(':')[0]
-      : _connectUri.userInfo;
+      ? Uri.decodeQueryComponent(_connectUri.userInfo.split(':')[0])
+      : '';
 
   /// Password of database user
   String get password => _connectUri.userInfo.isNotEmpty
-      ? _connectUri.userInfo.split(':')[1]
-      : _connectUri.userInfo;
+      ? Uri.decodeQueryComponent(_connectUri.userInfo.split(':')[1])
+      : '';
 
   /// Origin to be sent in CORS header
   String get origin => _connectUri.origin;
 
   /// Base64 encoded [username] and [password]
   String get authCredentials => username.isNotEmpty && password.isNotEmpty
-      ? const Base64Encoder().convert(_connectUri.userInfo.codeUnits)
+      ? base64
+          .encode(utf8.encode(Uri.decodeQueryComponent(_connectUri.userInfo)))
       : '';
 
   /// Gets unmodifiable request headers of this client
@@ -128,7 +155,10 @@ class CouchDbClient implements ClientInterface {
   final List<int> secret;
 
   /// Web Client for requests
-  final http.Client _httpClient = http.Client();
+  final http.BaseClient _httpClient;
+
+  /// Value validator
+  final ValidatorInterface validator;
 
   /// Request headers
   ///
@@ -138,7 +168,7 @@ class CouchDbClient implements ClientInterface {
     'Content-Type': 'application/json'
   };
 
-  /// Store connection info about coonection like **scheme**,
+  /// Store connection info about connection like **scheme**,
   /// **host**, **port**, **userInfo**
   Uri _connectUri;
 
@@ -170,8 +200,9 @@ class CouchDbClient implements ClientInterface {
         }
         break;
       default:
-        if (authCredentials.isNotEmpty) {
-          _headers['Authorization'] = 'Basic $authCredentials';
+        final basicAuth = authCredentials;
+        if (basicAuth.isNotEmpty) {
+          _headers['Authorization'] = 'Basic $basicAuth';
         }
     }
     if (cors) {
@@ -180,7 +211,7 @@ class CouchDbClient implements ClientInterface {
   }
 
   /// HEAD method
-  Future<ApiResponse> head(String path,
+  Future<Response> head(String path,
       {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
@@ -189,11 +220,11 @@ class CouchDbClient implements ClientInterface {
 
     _checkForErrorStatusCode(res.statusCode);
 
-    return ApiResponse(null, headers: res.headers);
+    return Response(null, headers: res.headers);
   }
 
   /// GET method
-  Future<ApiResponse> get(String path, {Map<String, String> reqHeaders}) async {
+  Future<Response> get(String path, {Map<String, String> reqHeaders}) async {
     Map<String, Object> json;
 
     modifyRequestHeaders(reqHeaders);
@@ -213,7 +244,7 @@ class CouchDbClient implements ClientInterface {
         json = Map<String, Object>.from(resBody);
       }
     } else {
-      // When body isn't JSON-valid then ApiResponse try parse field from [json]
+      // When body isn't JSON-valid then Response try parse field from [json]
       // and if it is null - error is thrown
       json = <String, Object>{};
     }
@@ -221,11 +252,11 @@ class CouchDbClient implements ClientInterface {
     _checkForErrorStatusCode(res.statusCode,
         body: bodyUTF8, headers: res.headers);
 
-    return ApiResponse(json, raw: bodyUTF8, headers: res.headers);
+    return Response(json, raw: bodyUTF8, headers: res.headers);
   }
 
   /// PUT method
-  Future<ApiResponse> put(String path,
+  Future<Response> put(String path,
       {Object body, Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
@@ -234,8 +265,8 @@ class CouchDbClient implements ClientInterface {
       body is Map ? encodedBody = jsonEncode(body) : encodedBody = body;
     }
 
-    final res = await _httpClient.put(Uri.parse('$origin/$path'),
-        headers: headers, body: encodedBody);
+    final url = Uri.parse('$origin/$path');
+    final res = await _httpClient.put(url, headers: headers, body: encodedBody);
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
     final resBody = jsonDecode(bodyUTF8);
@@ -244,17 +275,17 @@ class CouchDbClient implements ClientInterface {
     _checkForErrorStatusCode(res.statusCode,
         body: bodyUTF8, headers: res.headers);
 
-    return ApiResponse(json, headers: res.headers);
+    return Response(json, headers: res.headers);
   }
 
   /// POST method
-  Future<ApiResponse> post(String path,
+  Future<Response> post(String path,
       {Object body, Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
     Object encodedBody;
     if (body != null) {
-      body is Map ? encodedBody = jsonEncode(body) : encodedBody = body;
+      encodedBody = (body is Map) ? jsonEncode(body) : body;
     }
 
     final res = await _httpClient.post(Uri.parse('$origin/$path'),
@@ -273,11 +304,11 @@ class CouchDbClient implements ClientInterface {
     _checkForErrorStatusCode(res.statusCode,
         body: bodyUTF8, headers: res.headers);
 
-    return ApiResponse(json, headers: res.headers);
+    return Response(json, headers: res.headers);
   }
 
   /// DELETE method
-  Future<ApiResponse> delete(String path,
+  Future<Response> delete(String path,
       {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
@@ -291,11 +322,11 @@ class CouchDbClient implements ClientInterface {
     _checkForErrorStatusCode(res.statusCode,
         body: bodyUTF8, headers: res.headers);
 
-    return ApiResponse(json, headers: res.headers);
+    return Response(json, headers: res.headers);
   }
 
   /// COPY method
-  Future<ApiResponse> copy(String path,
+  Future<Response> copy(String path,
       {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
     final request = http.Request('COPY', Uri.parse('$origin/$path'));
@@ -310,7 +341,7 @@ class CouchDbClient implements ClientInterface {
 
     _checkForErrorStatusCode(res.statusCode, body: body, headers: res.headers);
 
-    return ApiResponse(json, headers: res.headers);
+    return Response(json, headers: res.headers);
   }
 
   /// Makes request with specific [method] and with long or
@@ -346,7 +377,7 @@ class CouchDbClient implements ClientInterface {
     if (code < 200 || code > 202) {
       throw CouchDbException(code,
           response:
-              ApiResponse(jsonDecode(body), headers: headers).errorResponse());
+              Response(jsonDecode(body), headers: headers).errorResponse());
     }
   }
 
@@ -356,42 +387,32 @@ class CouchDbClient implements ClientInterface {
   /// If [next] parameter was provided the response will trigger redirection
   /// to the specified location in case of successful authentication.
   ///
-  /// Structured response is available in `ServerModelResponse`.
+  /// Structured response is available in `ServerResponse`.
   ///
   /// Returns JSON like:
   /// ```json
   /// {'ok': true, 'name': 'root', 'roles': ['_admin']}
   /// ```
-  Future<ApiResponse> authenticate([String next]) async {
-    ApiResponse res;
-    final path = next != null ? '_session?next=$next' : '_session';
+  Future<Response> authenticate([String next]) async {
+    final path = (next != null) ? '_session?next=$next' : '_session';
 
-    try {
-      res = await post(path,
-          body: <String, String>{'name': username, 'password': password});
-    } on CouchDbException {
-      rethrow;
-    }
+    Response res = await post(path,
+        body: <String, String>{'name': username, 'password': password});
     _cookies = res.headers['set-cookie'];
+
     return res;
   }
 
   /// Closes user’s session by instructing the browser to clear the cookie
   ///
-  /// Structured response is available in `ServerModelResponse`.
+  /// Structured response is available in `ServerResponse`.
   ///
   /// Returns JSON like:
   /// ```json
   /// {'ok': true}
   /// ```
-  Future<ApiResponse> logout() async {
-    ApiResponse res;
-
-    try {
-      res = await delete('_session');
-    } on CouchDbException {
-      rethrow;
-    }
+  Future<Response> logout() async {
+    Response res = await delete('_session');
     _cookies = null;
     return res;
   }
@@ -401,7 +422,7 @@ class CouchDbClient implements ClientInterface {
   /// that were used, and a list of configured
   /// authentication handlers on the server
   ///
-  /// Structured response is available in `ServerModelResponse`.
+  /// Structured response is available in `ServerResponse`.
   ///
   /// Returns JSON like:
   /// ```json
@@ -423,19 +444,15 @@ class CouchDbClient implements ClientInterface {
   ///     }
   /// }
   /// ```
-  Future<ApiResponse> userInfo({bool basic = false}) async {
-    ApiResponse res;
+  Future<Response> userInfo({bool basic = false}) async {
+    Response res;
     final prevAuth = auth;
 
     if (basic) {
       auth = 'basic';
     }
 
-    try {
-      res = await get('_session');
-    } on CouchDbException {
-      rethrow;
-    }
+    res = await get('_session');
 
     auth = prevAuth;
     return res;

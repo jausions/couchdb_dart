@@ -1,13 +1,14 @@
 import 'package:meta/meta.dart';
 
-import '../responses/api_response.dart';
 import '../responses/documents_response.dart';
+import '../responses/response.dart';
 
 /// Class that define methods for create, read, update and delete documents
 /// within a database.
 abstract class DocumentsInterface {
-  /// Returns the HTTP Headers containing a minimal amount of information about the specified document
-  Future<DocumentsResponse> docInfo(String dbName, String docId,
+  /// Returns the HTTP Headers containing a minimal amount of information
+  /// about the specified document
+  Future<DocumentsResponse> docInfo(String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -22,7 +23,7 @@ abstract class DocumentsInterface {
       bool revs = false,
       bool revsInfo = false});
 
-  /// Returns document by the specified [docId] from the specified [dbName]
+  /// Returns document by the specified [docId] from the database
   ///
   /// Returns JSON like:
   /// ```json
@@ -38,7 +39,7 @@ abstract class DocumentsInterface {
   ///     "name": "Spaghetti with meatballs"
   /// }
   /// ```
-  Future<DocumentsResponse> doc(String dbName, String docId,
+  Future<DocumentsResponse> doc(String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -63,8 +64,7 @@ abstract class DocumentsInterface {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentsResponse> insertDoc(
-      String dbName, String docId, Map<String, Object> body,
+  Future<DocumentsResponse> insertDoc(String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
       String batch,
@@ -80,7 +80,7 @@ abstract class DocumentsInterface {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentsResponse> deleteDoc(String dbName, String docId, String rev,
+  Future<DocumentsResponse> deleteDoc(String docId, String rev,
       {Map<String, String> headers, String batch});
 
   /// Copies an existing document to a new or existing document.
@@ -96,23 +96,21 @@ abstract class DocumentsInterface {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentsResponse> copyDoc(
-      String dbName, String docId, String destinationId,
+  Future<DocumentsResponse> copyDoc(String docId, String destinationId,
       {Map<String, String> headers,
       String rev,
       String destinationRev,
       String batch});
 
-  /// Returns the HTTP headers containing a minimal amount of information about the specified attachment
-  Future<DocumentsResponse> attachmentInfo(
-      String dbName, String docId, String attName,
+  /// Returns the HTTP headers containing a minimal amount of information about
+  /// the specified attachment
+  Future<DocumentsResponse> attachmentInfo(String docId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Returns the file attachment associated with the document
   ///
-  /// Result is available in [DocumentsResponse.attachment] or [ApiResponse.raw] field as bytes of data.
-  Future<DocumentsResponse> attachment(
-      String dbName, String docId, String attName,
+  /// Result is available in [DocumentsResponse.attachment] or [Response.raw] field as bytes of data.
+  Future<DocumentsResponse> attachment(String docId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Uploads the supplied content as an attachment to the specified document
@@ -129,7 +127,7 @@ abstract class DocumentsInterface {
   /// }
   /// ```
   Future<DocumentsResponse> uploadAttachment(
-      String dbName, String docId, String attName, Object body,
+      String docId, String attName, Object body,
       {Map<String, String> headers, String rev});
 
   /// Deletes the attachment with filename [attName] of the specified [docId]
@@ -142,7 +140,6 @@ abstract class DocumentsInterface {
   ///     "rev": "1-917fa2381192822767f010b95b45325b"
   /// }
   /// ```
-  Future<DocumentsResponse> deleteAttachment(
-      String dbName, String docId, String attName,
+  Future<DocumentsResponse> deleteAttachment(String docId, String attName,
       {@required String rev, Map<String, String> headers, String batch});
 }

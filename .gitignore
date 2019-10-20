@@ -6,5 +6,7 @@ pubspec.lock
 
 /build
 /doc/api
-.vscode
 /.idea/
+.env
+.env.test
+.vscode

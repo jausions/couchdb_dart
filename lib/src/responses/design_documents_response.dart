@@ -2,7 +2,7 @@ import 'package:couchdb/couchdb.dart';
 
 import '../design_documents.dart';
 
-/// Class that contains responses from `DesignDocumentModel` class
+/// Class that contains responses from methods of [DesignDocumentsInterface]
 class DesignDocumentsResponse {
   /// Creates instance of [DesignDocumentsResponse]
   DesignDocumentsResponse(
@@ -27,7 +27,7 @@ class DesignDocumentsResponse {
       this.status,
       this.raw});
 
-  DesignDocumentsResponse.from(ApiResponse response)
+  DesignDocumentsResponse.from(Response response)
       : this(
             ddoc: response.json,
             ok: response.json['ok'] as bool,
@@ -64,6 +64,7 @@ class DesignDocumentsResponse {
   /// Holds document object
   ///
   /// May contain:
+  ///
   /// - `_id` (string) – Document ID
   /// - `_rev` (string) – Revision MVCC token
   /// - `_deleted` (boolean) – Deletion flag. Available if document was removed

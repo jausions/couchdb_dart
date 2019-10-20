@@ -20,17 +20,17 @@ abstract class ValidatorInterface {
 
   /// Validates [dbName] against naming rules for database names.
   /// If the check fails an [ArgumentError] exception is thrown.
-  void validateDatabaseName(String dbName);
+  String validateDatabaseName(String dbName);
 
   /// Validates [ddocId] against naming rules for design document ids.
   /// If the check fails an [ArgumentError] exception is thrown.
-  void validateDesignDocId(String ddocId);
+  String validateDesignDocId(String ddocId);
 
   /// Validates [docId] against naming rules for "regular" document ids.
   /// If the check fails an [ArgumentError] exception is thrown.
-  void validateDocId(String docId);
+  String validateDocId(String docId);
 
   /// Validates [docId] against naming rules for local document ids.
   /// If the check fails an [ArgumentError] exception is thrown.
-  void validateLocalDocId(String docId);
+  String validateLocalDocId(String docId);
 }

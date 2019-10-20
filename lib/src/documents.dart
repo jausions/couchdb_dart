@@ -1,28 +1,36 @@
-import 'package:couchdb/src/validator.dart';
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 import 'interfaces/client_interface.dart';
 import 'interfaces/documents_interface.dart';
-import 'interfaces/validator_interface.dart';
-import 'responses/api_response.dart';
 import 'responses/documents_response.dart';
-import 'utils/includer_path.dart';
+import 'responses/response.dart';
+import 'utils/urls.dart';
 
-/// Class that implements methods for create, read, update and delete documents
-/// within a database. This class only deals with none-special documents. For
+/// Class that implements methods to create, read, update and delete documents
+/// within the database. This class only deals with _non-special_ documents. For
 /// local documents use [LocalDocuments] and for design documents use
 /// [DesignDocuments].
 class Documents implements DocumentsInterface {
   /// Instance of connected client
-  final ClientInterface _client;
+  final ClientInterface client;
 
-  /// Create [Documents] by accepting web-based or server-based client
-  Documents(this._client);
+  /// URL-encoded database name
+  final String _dbNameUrl;
 
-  ValidatorInterface validator = Validator();
+  // Database name
+  final String dbName;
+
+  /// The [Documents] class takes a [ClientInterface] implementation instance
+  /// and a database name [dbName].
+  Documents(this.client, String dbName)
+      : _dbNameUrl = Uri.encodeQueryComponent(
+            client.validator.validateDatabaseName(dbName)),
+        dbName = dbName;
 
   @override
-  Future<DocumentsResponse> docInfo(String dbName, String docId,
+  Future<DocumentsResponse> docInfo(String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -36,29 +44,32 @@ class Documents implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId?'
-        'attachments=$attachments'
-        '&att_encoding_info=$attEncodingInfo'
-        '&${includeNonNullParam('atts_since', attsSince)}'
-        '&conflicts=$conflicts'
-        '&deleted_conflicts=$deletedConflicts'
-        '&latest=$latest'
-        '&local_seq=$localSeq'
-        '&meta=$meta'
-        '&${includeNonNullParam('open_revs', openRevs)}'
-        '&${includeNonNullParam('rev', rev)}'
-        '&revs=$revs'
-        '&revs_info=$revsInfo';
+    final Map<String, Object> queryParams = {
+      'attachments': attachments,
+      'att_encoding_info': attEncodingInfo,
+      if (attsSince != null) 'atts_since': attsSince,
+      'conflicts': conflicts,
+      'deleted_conflicts': deletedConflicts,
+      'latest': latest,
+      'local_seq': localSeq,
+      'meta': meta,
+      if (openRevs != null) 'open_revs': openRevs,
+      if (rev != null) 'rev': rev,
+      'revs': revs,
+      'revs_info': revsInfo,
+    };
 
-    ApiResponse result = await _client.head(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$docIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    Response result = await client.head(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentsResponse> doc(String dbName, String docId,
+  Future<DocumentsResponse> doc(String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -72,142 +83,162 @@ class Documents implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId?'
-        'attachments=$attachments'
-        '&att_encoding_info=$attEncodingInfo'
-        '&${includeNonNullParam('atts_since', attsSince)}'
-        '&conflicts=$conflicts'
-        '&deleted_conflicts=$deletedConflicts'
-        '&latest=$latest'
-        '&local_seq=$localSeq'
-        '&meta=$meta'
-        '&${includeNonNullParam('open_revs', openRevs)}'
-        '&${includeNonNullParam('rev', rev)}'
-        '&revs=$revs'
-        '&revs_info=$revsInfo';
+    final Map<String, Object> queryParams = {
+      'attachments': attachments,
+      'att_encoding_info': attEncodingInfo,
+      if (attsSince != null) 'atts_since': attsSince,
+      'conflicts': conflicts,
+      'deleted_conflicts': deletedConflicts,
+      'latest': latest,
+      'local_seq': localSeq,
+      'meta': meta,
+      if (openRevs != null) 'open_revs': openRevs,
+      if (rev != null) 'rev': rev,
+      'revs': revs,
+      'revs_info': revsInfo,
+    };
 
-    ApiResponse result = await _client.get(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$docIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    Response result = await client.get(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentsResponse> insertDoc(
-      String dbName, String docId, Map<String, Object> body,
+  Future<DocumentsResponse> insertDoc(String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
       String batch,
       bool newEdits = true}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId?'
-        'new_edits=$newEdits'
-        '&${includeNonNullParam('rev', rev)}'
-        '&${includeNonNullParam('batch', batch)}';
+    final Map<String, Object> queryParams = {
+      'new_edits': newEdits,
+      if (rev != null) 'rev': rev,
+      if (batch != null) 'batch': batch,
+    };
 
-    ApiResponse result =
-        await _client.put(path, reqHeaders: headers, body: body);
+    final path = '$_dbNameUrl$docIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    Response result = await client.put(path, reqHeaders: headers, body: body);
     return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentsResponse> deleteDoc(String dbName, String docId, String rev,
+  Future<DocumentsResponse> deleteDoc(String docId, String rev,
       {Map<String, String> headers, String batch}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId?'
-        'rev=$rev'
-        '&${includeNonNullParam('batch', batch)}';
+    final Map<String, Object> queryParams = {
+      'rev': rev,
+      if (batch != null) 'batch': batch,
+    };
 
-    ApiResponse result = await _client.delete(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$docIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    Response result = await client.delete(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentsResponse> copyDoc(
-      String dbName, String docId, String destinationId,
+  Future<DocumentsResponse> copyDoc(String docId, String destinationId,
       {Map<String, String> headers,
       String rev,
       String destinationRev,
       String batch}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
-    validator.validateDocId(destinationId);
+    client.validator.validateDocId(destinationId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId?'
-        '${includeNonNullParam('rev', rev)}'
-        '&${includeNonNullParam('batch', batch)}';
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+      if (batch != null) 'batch': batch,
+    };
 
-    final destination = destinationRev == null
-        ? destinationId
-        : '$destinationId?rev=$destinationRev';
+    final path = '$_dbNameUrl$docIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    final destinationQS = queryStringFromMap({
+      if (destinationRev != null) 'rev': destinationRev,
+    });
+
+    final destination =
+        (destinationQS == '') ? destinationId : '$destinationId?$destinationQS';
 
     headers ??= <String, String>{};
     headers['Destination'] = destination;
 
-    ApiResponse result = await _client.copy(path, reqHeaders: headers);
+    Response result = await client.copy(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentsResponse> attachmentInfo(
-      String dbName, String docId, String attName,
+  Future<DocumentsResponse> attachmentInfo(String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId/$attName?'
-        '${includeNonNullParam('rev', rev)}';
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+    };
 
-    ApiResponse result = await _client.head(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$docIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    Response result = await client.head(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentsResponse> attachment(
-      String dbName, String docId, String attName,
+  Future<DocumentsResponse> attachment(String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId/$attName?'
-        '${includeNonNullParam('rev', rev)}';
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+    };
 
-    ApiResponse result = await _client.get(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$docIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    Response result = await client.get(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
   @override
   Future<DocumentsResponse> uploadAttachment(
-      String dbName, String docId, String attName, Object body,
+      String docId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId/$attName'
-        '?${includeNonNullParam('rev', rev)}';
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+    };
 
-    ApiResponse result =
-        await _client.put(path, reqHeaders: headers, body: body);
+    final path = '$_dbNameUrl$docIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    Response result = await client.put(path, reqHeaders: headers, body: body);
     return DocumentsResponse.from(result);
   }
 
   @override
-  Future<DocumentsResponse> deleteAttachment(
-      String dbName, String docId, String attName,
+  Future<DocumentsResponse> deleteAttachment(String docId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
-    validator.validateDatabaseName(dbName);
-    validator.validateDocId(docId);
+    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
 
-    final path = '$dbName/$docId/$attName?'
-        'rev=$rev'
-        '&${includeNonNullParam('batch', batch)}';
+    final Map<String, Object> queryParams = {
+      'rev': rev,
+      if (batch != null) 'batch': batch,
+    };
 
-    ApiResponse result = await _client.delete(path, reqHeaders: headers);
+    final path = '$_dbNameUrl$docIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    Response result = await client.delete(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 }

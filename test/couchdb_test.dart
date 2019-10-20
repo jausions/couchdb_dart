@@ -1,23 +1,190 @@
 import 'package:couchdb/couchdb.dart';
+import 'package:dotenv/dotenv.dart' as dotenv show load, env;
+import 'package:http/http.dart' as http;
+import "package:test/test.dart";
 
-Future<void> main() async {
-  final c = CouchDbClient.fromString('http://localhost:5984');
-  final da = Databases(c);
-  final ddm = DesignDocuments(c);
-  final dm = Documents(c);
-  final sm = Server(c);
+import 'credentials.dart';
+import 'mock_http_client.dart';
 
-  final queries = <Map<String, Object>>[{'keys': <String>['_design/yyy', 'FishStew']}];
+/// To run the tests, a local .env.test file is required.
+/// A sample .env.test.sample file is provided for you to copy into your local
+/// environment.
+main() {
+  dotenv.load('.env.test');
 
-  try {
-    final headers = <String, String>{'Accept': 'text/plain'};
+  final dbName = dotenv.env['COUCHDB_TEST_DB'] ?? 'couchdb_dart-test';
+  final host = dotenv.env['COUCHDB_TEST_HOST'] ?? 'localhost';
+  final port = dotenv.env['COUCHDB_TEST_PORT'] ?? 5984;
+  final scheme = dotenv.env['COUCHDB_TEST_SCHEME'] ?? 'http';
 
-    //final r = await c.authenticate();
+  /// Mock HTTP client to process API requests
+  final _mockHttpClient = MockHttpClient().client;
 
-    final o = await da.shards('denta');
-    print(o.shards);
-  } on CouchDbException catch (e) {
-    print(e);
+  /// Standard HTTP client
+  final _httpClient = http.Client();
+
+  /// To bypass any input validation to not interfere with talking
+  /// with the CouchDB server.
+  /// The validator is tested separately.
+  final _noValidation = PassthruValidator();
+
+  CouchDbClient _makeClient([String username, String password]) {
+    final user = username ?? dotenv.env['COUCHDB_TEST_USERNAME'];
+    final pass = password ?? dotenv.env['COUCHDB_TEST_PASSWORD'];
+
+    return CouchDbClient(
+      username: user,
+      password: pass,
+      scheme: scheme,
+      host: host,
+      port: port,
+      httpClient: _httpClient,
+      validator: _noValidation,
+    );
   }
-}
 
+  CouchDbClient _makeMockClient(String username, String password,
+      [String auth = 'basic']) {
+    return CouchDbClient(
+      username: username,
+      password: password,
+      scheme: scheme,
+      host: host,
+      port: port,
+      auth: auth,
+      httpClient: _mockHttpClient,
+      validator: _noValidation,
+    );
+  }
+
+  final c = _makeClient();
+  final s = Server(c);
+  final db = Database(c, dbName);
+  final dds = DesignDocuments(c, dbName);
+  final ds = Documents(c, dbName);
+
+  group("Server operations", () {
+    test("_all_dbs", () async {
+      final result = await s.allDbs(startKey: '_users', endKey: '_users');
+      expect(result, isA<ServerResponse>());
+      expect(result.list.contains('_users'), isTrue);
+    });
+
+    test("_dbs_info", () async {
+      final result = await s.dbsInfo(['_users']);
+      expect(result, isA<ServerResponse>());
+      expect(result.list.length, equals(1));
+    });
+  });
+
+  group("Database operations", () {
+    test("Create then delete database", () async {
+      expect(await db.create(), isA<DatabaseResponse>());
+      expect(db.delete(), completion(isA<DatabaseResponse>()));
+    });
+  });
+
+  group("Basic Authentication", () {
+    credentials.forEach((username, password) {
+      test(
+          "Credentials with special characters are properly sent: $username / $password",
+          () {
+        final mockClient = _makeMockClient(username, password);
+        final server = Server(mockClient);
+        expect(server.allDbs(), completion(isA<ServerResponse>()));
+      });
+
+      test(
+          ".fromUri(): Credentials with special characters are properly sent: $username / $password",
+          () {
+        final uri = Uri(
+          scheme: scheme,
+          userInfo:
+              "${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}",
+          host: host,
+          port: port,
+        );
+        final mockClient =
+            CouchDbClient.fromUri(uri, httpClient: _mockHttpClient);
+        final server = Server(mockClient);
+        expect(server.allDbs(), completion(isA<ServerResponse>()));
+      });
+
+      test(
+          ".fromString(): Credentials with special characters are properly sent: $username / $password",
+          () {
+        final userInfo =
+            "${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}";
+        final uri = "$scheme://$userInfo@$host:$port";
+        final mockClient =
+            CouchDbClient.fromString(uri, httpClient: _mockHttpClient);
+        final server = Server(mockClient);
+        expect(server.allDbs(), completion(isA<ServerResponse>()));
+      });
+    });
+
+    /// This test checks that our mock server detects wrong passwords.
+    test("The mock client detects wrong passwords", () async {
+      await Future.forEach(credentials.keys, (username) async {
+        final password = credentials[username];
+        final mockClient = _makeMockClient(username, "wrong-$password");
+        expect(() async => await mockClient.authenticate(), throwsException);
+      });
+    });
+  });
+
+  group("Cookie Authentication", () {
+    credentials.forEach((username, password) {
+      test(
+          "Credentials with special characters are properly sent: $username / $password",
+          () async {
+        final mockClient = _makeMockClient(username, password, 'cookie');
+        expect(await mockClient.authenticate(), isA<Response>());
+        final server = Server(mockClient);
+        expect(server.allDbs(), completion(isA<ServerResponse>()));
+      });
+
+      test(
+          ".fromUri(): Credentials with special characters are properly sent: $username / $password",
+          () async {
+        final uri = Uri(
+          scheme: scheme,
+          userInfo:
+              "${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}",
+          host: host,
+          port: port,
+        );
+        final mockClient = CouchDbClient.fromUri(uri,
+            httpClient: _mockHttpClient, auth: 'cookie');
+        expect(await mockClient.authenticate(), isA<Response>());
+        final server = Server(mockClient);
+        expect(server.allDbs(), completion(isA<ServerResponse>()));
+      });
+
+      test(
+          ".fromString(): Credentials with special characters are properly sent: $username / $password",
+          () async {
+        final userInfo =
+            "${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}";
+        final uri = "$scheme://$userInfo@$host:$port";
+        final mockClient = CouchDbClient.fromString(uri,
+            httpClient: _mockHttpClient, auth: 'cookie');
+        expect(await mockClient.authenticate(), isA<Response>());
+        final server = Server(mockClient);
+        expect(server.allDbs(), completion(isA<ServerResponse>()));
+      });
+    });
+
+    /// This test checks that our mock server detects wrong passwords.
+    /// If we don't do that type of test we won't know if the mock server
+    /// knows the difference between right and wrong passwords.
+    test("The mock client detects wrong passwords", () async {
+      await Future.forEach(credentials.keys, (username) async {
+        final password = credentials[username];
+        final mockClient =
+            _makeMockClient(username, "wrong-$password", 'cookie');
+        expect(() async => await mockClient.authenticate(), throwsException);
+      });
+    });
+  });
+}

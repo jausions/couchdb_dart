@@ -1,14 +1,14 @@
 import 'package:meta/meta.dart';
 
-import '../responses/databases_response.dart';
+import '../responses/database_response.dart';
 
-/// Class that define methods for interacting with entire database in CouchDB
-abstract class DatabasesInterface {
+/// Class that define methods for interacting with one database in CouchDB.
+abstract class DatabaseInterface {
   /// Returns the HTTP Headers containing a minimal amount of information
-  /// about the specified database
-  Future<DatabasesResponse> headDbInfo(String dbName);
+  /// about the database
+  Future<DatabaseResponse> summaryInfo();
 
-  /// Gets information about the specified database
+  /// Gets information about the database
   ///
   /// Returns JSON like:
   /// ```json
@@ -39,7 +39,7 @@ abstract class DatabasesInterface {
   ///     "update_seq": "292786-g1AAAAF..."
   /// }
   /// ```
-  Future<DatabasesResponse> dbInfo(String dbName);
+  Future<DatabaseResponse> info();
 
   /// Creates a new database
   ///
@@ -51,9 +51,9 @@ abstract class DatabasesInterface {
   /// ```
   ///
   /// Otherwise error response is returned.
-  Future<DatabasesResponse> createDb(String dbName, {int q = 8});
+  Future<DatabaseResponse> create({int q = 8});
 
-  /// Deletes the specified database, and all the documents and attachments contained within it
+  /// Deletes the database, and all the documents and attachments contained within it
   ///
   /// Returns JSON like:
   /// ```json
@@ -63,9 +63,9 @@ abstract class DatabasesInterface {
   /// ```
   ///
   /// Otherwise error response is returned.
-  Future<DatabasesResponse> deleteDb(String dbName);
+  Future<DatabaseResponse> delete();
 
-  /// Creates a new document in the specified database, using the supplied JSON document structure
+  /// Creates a new document in the database, using the supplied JSON document structure
   ///
   /// Returns JSON like:
   /// ```json
@@ -75,7 +75,7 @@ abstract class DatabasesInterface {
   ///     "rev": "1-9c65296036141e575d32ba9c034dd3ee"
   /// }
   /// ```
-  Future<DatabasesResponse> createDocIn(String dbName, Map<String, Object> doc,
+  Future<DatabaseResponse> createDoc(Map<String, Object> doc,
       {String batch, Map<String, String> headers});
 
   /// Executes the built-in _all_docs view, returning all of the documents in the database
@@ -103,7 +103,7 @@ abstract class DatabasesInterface {
   ///     "total_rows": 2
   /// }
   /// ```
-  Future<DatabasesResponse> allDocs(String dbName,
+  Future<DatabaseResponse> allDocs(
       {bool conflicts = false,
       bool descending = false,
       Object endKey,
@@ -155,7 +155,7 @@ abstract class DatabasesInterface {
   ///     "total_rows": 2453
   /// }
   /// ```
-  Future<DatabasesResponse> docsByKeys(String dbName, {List<String> keys});
+  Future<DatabaseResponse> docsByKeys({List<String> keys});
 
   /// Returns a JSON structure of all of the design documents in a given database
   ///
@@ -182,7 +182,7 @@ abstract class DatabasesInterface {
   ///     "total_rows": 2
   /// }
   /// ```
-  Future<DatabasesResponse> allDesignDocs(String dbName,
+  Future<DatabaseResponse> allDesignDocs(
       {bool conflicts = false,
       bool descending = false,
       String endKey,
@@ -225,7 +225,7 @@ abstract class DatabasesInterface {
   ///     "total_rows": 6
   /// }
   /// ```
-  Future<DatabasesResponse> designDocsByKeys(String dbName, List<String> keys);
+  Future<DatabaseResponse> designDocsByKeys(List<String> keys);
 
   /// Executes multiple specified built-in view queries of all documents in this database
   ///
@@ -286,8 +286,7 @@ abstract class DatabasesInterface {
   ///     ]
   /// }
   /// ```
-  Future<DatabasesResponse> queriesDocsFrom(
-      String dbName, List<Map<String, Object>> queries);
+  Future<DatabaseResponse> queriesDocsFrom(List<Map<String, Object>> queries);
 
   /// Queries several documents in bulk
   ///
@@ -356,8 +355,7 @@ abstract class DatabasesInterface {
   ///   ]
   /// }
   /// ```
-  Future<DatabasesResponse> bulkDocs(String dbName, List<Object> docs,
-      {@required bool revs});
+  Future<DatabaseResponse> bulkDocs(List<Object> docs, {@required bool revs});
 
   /// Creates and updates multiple documents at the same time within a single request
   ///
@@ -376,7 +374,7 @@ abstract class DatabasesInterface {
   ///     }
   /// ]
   /// ```
-  Future<DatabasesResponse> insertBulkDocs(String dbName, List<Object> docs,
+  Future<DatabaseResponse> insertBulkDocs(List<Object> docs,
       {bool newEdits = true, Map<String, String> headers});
 
   /// Find documents using a declarative JSON querying syntax
@@ -407,7 +405,7 @@ abstract class DatabasesInterface {
   ///     }
   /// }
   /// ```
-  Future<DatabasesResponse> find(String dbName, Map<String, Object> selector,
+  Future<DatabaseResponse> find(Map<String, Object> selector,
       {int limit = 25,
       int skip,
       List<Object> sort,
@@ -430,7 +428,7 @@ abstract class DatabasesInterface {
   ///     "name": "foo-index"
   /// }
   /// ```
-  Future<DatabasesResponse> createIndexIn(String dbName,
+  Future<DatabaseResponse> createIndex(
       {@required List<String> indexFields,
       String ddoc,
       String name,
@@ -471,9 +469,9 @@ abstract class DatabasesInterface {
   ///   ]
   /// }
   /// ```
-  Future<DatabasesResponse> indexesAt(String dbName);
+  Future<DatabaseResponse> indexes();
 
-  /// Delets index in the database
+  /// Deletes index in the database
   ///
   /// Returns JSON like:
   /// ```json
@@ -481,8 +479,7 @@ abstract class DatabasesInterface {
   ///     "ok": "true"
   /// }
   /// ```
-  Future<DatabasesResponse> deleteIndexIn(
-      String dbName, String designDoc, String name);
+  Future<DatabaseResponse> deleteIndex(String designDoc, String name);
 
   /// Shows which index is being used by the query
   ///
@@ -542,7 +539,7 @@ abstract class DatabasesInterface {
   ///     }
   /// }
   /// ```
-  Future<DatabasesResponse> explain(String dbName, Map<String, Object> selector,
+  Future<DatabaseResponse> explain(Map<String, Object> selector,
       {int limit = 25,
       int skip,
       List<Object> sort,
@@ -575,7 +572,7 @@ abstract class DatabasesInterface {
   ///   }
   /// }
   /// ```
-  Future<DatabasesResponse> shards(String dbName);
+  Future<DatabaseResponse> shards();
 
   /// Returns information about the specific shard into which a given document
   /// has been stored, along with information about the nodes on which that
@@ -592,7 +589,7 @@ abstract class DatabasesInterface {
   ///   ]
   /// }
   /// ```
-  Future<DatabasesResponse> shard(String dbName, String docId);
+  Future<DatabaseResponse> shard(String docId);
 
   /// For the given database, force-starts internal shard synchronization
   /// for all replicas of all database shards
@@ -606,7 +603,7 @@ abstract class DatabasesInterface {
   ///     "ok": true
   /// }
   /// ```
-  Future<DatabasesResponse> synchronizeShards(String dbName);
+  Future<DatabaseResponse> synchronizeShards();
 
   /// Returns a sorted list of changes made to documents in the database
   ///
@@ -678,7 +675,7 @@ abstract class DatabasesInterface {
   ///     ]
   /// }
   /// ```
-  Future<Stream<DatabasesResponse>> changesIn(String dbName,
+  Future<Stream<DatabaseResponse>> changes(
       {List<String> docIds,
       bool conflicts = false,
       bool descending = false,
@@ -718,7 +715,7 @@ abstract class DatabasesInterface {
   ///     ]
   /// }
   /// ```
-  Future<Stream<DatabasesResponse>> postChangesIn(String dbName,
+  Future<Stream<DatabaseResponse>> postChanges(
       {List<String> docIds,
       bool conflicts = false,
       bool descending = false,
@@ -736,7 +733,7 @@ abstract class DatabasesInterface {
       String view,
       int seqInterval});
 
-  /// Request compaction of the specified database
+  /// Request compaction of the database
   ///
   /// Returns JSON like:
   /// ```json
@@ -744,7 +741,7 @@ abstract class DatabasesInterface {
   ///     "ok": true
   /// }
   /// ```
-  Future<DatabasesResponse> compact(String dbName);
+  Future<DatabaseResponse> compact();
 
   /// Compacts the view indexes associated with the specified design document
   ///
@@ -754,10 +751,9 @@ abstract class DatabasesInterface {
   ///     "ok": true
   /// }
   /// ```
-  Future<DatabasesResponse> compactViewIndexesWith(
-      String dbName, String ddocName);
+  Future<DatabaseResponse> compactViewIndexesWith(String ddocName);
 
-  /// Commits any recent changes to the specified database to disk
+  /// Commits any recent changes to the database to disk
   ///
   /// Returns JSON like:
   /// ```json
@@ -767,7 +763,7 @@ abstract class DatabasesInterface {
   ///     "ok": true
   /// }
   /// ```
-  Future<DatabasesResponse> ensureFullCommit(String dbName);
+  Future<DatabaseResponse> ensureFullCommit();
 
   /// Removes view index files that are no longer required by CouchDB as a result of changed views within design documents
   ///
@@ -777,9 +773,9 @@ abstract class DatabasesInterface {
   ///     "ok": true
   /// }
   /// ```
-  Future<DatabasesResponse> viewCleanup(String dbName);
+  Future<DatabaseResponse> viewCleanup();
 
-  /// Returns the current security object from the specified database
+  /// Returns the current security object from the database
   ///
   /// Returns JSON like:
   /// ```json
@@ -803,7 +799,7 @@ abstract class DatabasesInterface {
   ///     }
   /// }
   /// ```
-  Future<DatabasesResponse> securityOf(String dbName);
+  Future<DatabaseResponse> security();
 
   /// Sets the security object for the given database
   ///
@@ -813,8 +809,8 @@ abstract class DatabasesInterface {
   ///     "ok": true
   /// }
   /// ```
-  Future<DatabasesResponse> setSecurityFor(
-      String dbName, Map<String, Map<String, List<String>>> security);
+  Future<DatabaseResponse> setSecurity(
+      Map<String, Map<String, List<String>>> security);
 
   /// Permanently removes the references to deleted documents from the database
   ///
@@ -831,8 +827,7 @@ abstract class DatabasesInterface {
   ///   }
   /// }
   /// ```
-  Future<DatabasesResponse> purge(
-      String dbName, Map<String, List<String>> docs);
+  Future<DatabaseResponse> purge(Map<String, List<String>> docs);
 
   /// Gets the current purged_infos_limit (purged documents limit) setting,
   /// the maximum number of historical purges (purged document Ids with their revisions)
@@ -842,7 +837,7 @@ abstract class DatabasesInterface {
   /// ```json
   /// 1000
   /// ```
-  Future<DatabasesResponse> purgedInfosLimit(String dbName);
+  Future<DatabaseResponse> purgedInfosLimit();
 
   /// Sets the maximum number of purges (requested purged Ids with their revisions)
   /// that will be tracked in the database, even after compaction has occurred
@@ -853,7 +848,7 @@ abstract class DatabasesInterface {
   ///     "ok": true
   /// }
   /// ```
-  Future<DatabasesResponse> setPurgedInfosLimit(String dbName, int limit);
+  Future<DatabaseResponse> setPurgedInfosLimit(int limit);
 
   /// Returns the document revisions that do not exist in the database
   ///
@@ -867,8 +862,7 @@ abstract class DatabasesInterface {
   ///     }
   /// }
   /// ```
-  Future<DatabasesResponse> missingRevs(
-      String dbName, Map<String, List<String>> revs);
+  Future<DatabaseResponse> missingRevs(Map<String, List<String>> revs);
 
   /// Returns the subset of those that do not correspond to revisions stored in the database
   ///
@@ -886,8 +880,7 @@ abstract class DatabasesInterface {
   ///     }
   /// }
   /// ```
-  Future<DatabasesResponse> revsDiff(
-      String dbName, Map<String, List<String>> revs);
+  Future<DatabaseResponse> revsDiff(Map<String, List<String>> revs);
 
   /// Gets the current **revs_limit** (revision limit) setting
   ///
@@ -895,7 +888,7 @@ abstract class DatabasesInterface {
   /// ```json
   /// 1000
   /// ```
-  Future<DatabasesResponse> revsLimitOf(String dbName);
+  Future<DatabaseResponse> revsLimit();
 
   /// Sets the maximum number of document revisions that will be tracked by CouchDB, even after compaction has occurred
   ///
@@ -905,5 +898,5 @@ abstract class DatabasesInterface {
   ///     "ok": true
   /// }
   /// ```
-  Future<DatabasesResponse> setRevsLimit(String dbName, int limit);
+  Future<DatabaseResponse> setRevsLimit(int limit);
 }
