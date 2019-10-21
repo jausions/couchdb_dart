@@ -65,8 +65,7 @@ This is a major rework of the package, with a lot of breaking changes.
 - `DesignDocument.attachment()` to `DesignDocuments.designDocAttachment()`,
 - `DesignDocument.attachmentInfo()` to `DesignDocuments.designDocAttachmentInfo()`,
 - `DesignDocument.deleteAttachment()` to `DesignDocuments.deleteDesignDocAttachment()`,
-- `DesignDocument.uploadAttachment()` to `DesignDocuments.uploadDesignDocAttachment()`,
-- `DesignDocument.designDocHeaders()` to `DesignDocuments.designDocSummaryInfo()`.
+- `DesignDocument.uploadAttachment()` to `DesignDocuments.uploadDesignDocAttachment()`.
 
 ### Method signature changes
 
