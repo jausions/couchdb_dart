@@ -14,28 +14,28 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
   /// Database name (URL-encoded)
   final String _dbNameUrl;
 
-  DesignDocumentsInterface _designDocs;
-  DocumentsInterface _docs;
-  LocalDocumentsInterface _localDocs;
+  DesignDocuments _designDocs;
+  Documents _docs;
+  LocalDocuments _localDocs;
 
   // Database name
   final String dbName;
 
-  DesignDocumentsInterface get designDocuments {
+  DesignDocuments get designDocuments {
     if (_designDocs == null) {
       _designDocs = DesignDocuments(client, dbName);
     }
     return _designDocs;
   }
 
-  DocumentsInterface get documents {
+  Documents get documents {
     if (_docs == null) {
       _docs = Documents(client, dbName);
     }
     return _docs;
   }
 
-  LocalDocumentsInterface get localDocuments {
+  LocalDocuments get localDocuments {
     if (_localDocs == null) {
       _localDocs = LocalDocuments(client, dbName);
     }

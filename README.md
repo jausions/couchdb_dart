@@ -54,8 +54,8 @@ For `Proxy` authentication pass `username` to constructor and provide:
 Headers:
 
 ```dart
-final c = CouchDbClient(username: 'name', auth: 'proxy', secret: '92de07df7e7a3fe14808cef90a7cc0d91');
-c.modifyRequestHeaders(<String, String>{
+final client = CouchDbClient(username: 'name', auth: 'proxy', secret: '92de07df7e7a3fe14808cef90a7cc0d91');
+client.modifyRequestHeaders(<String, String>{
   'X-Auth-CouchDB-Roles': 'users,blogger'
 });
 ```

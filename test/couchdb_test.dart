@@ -57,22 +57,22 @@ main() {
     );
   }
 
-  final c = _makeClient();
-  final s = Server(c);
-  final db = Database(c, dbName);
-  final dds = db.designDocuments;
-  final ds = db.documents;
-  final ls = db.localDocuments;
+  final client = _makeClient();
+  final server = Server(client);
+  final database = server.database(dbName);
+  final designDocs = database.designDocuments;
+  final docs = database.documents;
+  final localDocs = database.localDocuments;
 
   group("Server operations", () {
     test("_all_dbs", () async {
-      final result = await s.allDbs(startKey: '_users', endKey: '_users');
+      final result = await server.allDbs(startKey: '_users', endKey: '_users');
       expect(result, isList);
       expect(result.contains('_users'), isTrue);
     });
 
     test("_dbs_info", () async {
-      final result = await s.dbsInfo(['_users']);
+      final result = await server.dbsInfo(['_users']);
       expect(result, isA<ServerResponse>());
       expect(result.list.length, equals(1));
     });
@@ -80,30 +80,30 @@ main() {
 
   group("Database operations", () {
     test("Create then delete database", () async {
-      expect(await db.create(), isA<DatabaseResponse>());
-      expect(db.delete(), completion(isA<DatabaseResponse>()));
+      expect(await database.create(), isA<DatabaseResponse>());
+      expect(database.delete(), completion(isA<DatabaseResponse>()));
     });
 
     test("_users database exists", () {
-      final usersDb = Database(c, '_users');
+      final usersDb = Database(client, '_users');
       expect(usersDb.exists(), completion(isTrue));
     });
 
     test("Fake database does not exist", () {
       final unknownDb =
-          Database(c, '_unknown_db_520b0dde-82b6-4da7-94eb-ab61233acafa');
+          Database(client, '_unknown_db_520b0dde-82b6-4da7-94eb-ab61233acafa');
       expect(unknownDb.exists(), completion(isFalse));
     });
   });
 
   group("Document operations", () {
-    setUp(() async => await db.create());
-    tearDown(() async => await db.delete());
+    setUp(() async => await database.create());
+    tearDown(() async => await database.delete());
 
     test("Create then delete document", () async {
-      final doc = await ds.insertDoc("my_test_doc", {'centent': "blank"});
+      final doc = await docs.insertDoc("my_test_doc", {'centent': "blank"});
       expect(doc, isA<DocumentsResponse>());
-      expect(ds.deleteDoc(doc.id, doc.rev), completion(isA<DocumentsResponse>()));
+      expect(docs.deleteDoc(doc.id, doc.rev), completion(isA<DocumentsResponse>()));
     });
   });
 

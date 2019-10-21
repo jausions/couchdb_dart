@@ -14,6 +14,7 @@ This is a major rework of the package, with a lot of breaking changes.
   all their methods. For convenience, new getters have been added to `Database`
   to obtain instances of `Documents`, `LocalDocuments`, and `DesignDocuments`.
   _Note, that those getters are **purposely not** part of the `DatabaseInterface`._
+- There is also a _factory_ in `Server` to get `Database` instances.
 - The _`...Response`_ classes now have a `.from()` constructor that takes a `Response`
   instance. The specialized conversion methods were removed from `Response`.
 - The `Response.headers` member is now a `CaseInsensitiveMap<String>` instead
