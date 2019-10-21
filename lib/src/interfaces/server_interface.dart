@@ -72,7 +72,7 @@ abstract class ServerInterface {
   ///   "locations"
   /// ]
   /// ```
-  Future<ServerResponse> allDbs({
+  Future<List<String>> allDbs({
     Map<String, String> headers,
     bool descending = false,
     Object endKey,

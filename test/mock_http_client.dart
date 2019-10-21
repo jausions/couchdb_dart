@@ -45,6 +45,10 @@ class MockHttpClient {
     "reason": "Wrong HTTP method for URL (mock HTTP client)",
   });
 
+  final Map<String, String> _responseHttpHeaders = {
+    'Content-Type': 'application/json',
+  };
+
   bool _isJsonContentType(Request request) {
     final contentType = request.headers['content-type'];
     if (contentType == null) {
@@ -88,8 +92,8 @@ class MockHttpClient {
 
   Future<Response> requestHandler(Request request) {
     if (!_isAuthorizedAccess(request)) {
-      return Future.value(
-          Response(_failedAuthenticationPayload, 401, request: request));
+      return Future.value(Response(_failedAuthenticationPayload, 401,
+          request: request, headers: _responseHttpHeaders));
     }
 
     final pathSegments = request.url.pathSegments;
@@ -100,17 +104,24 @@ class MockHttpClient {
         return Future.value(_sessionHandler(request));
     }
 
-    return Future.value(
-        Response(_notImplementedPayload, 501, request: request));
+    return Future.value(Response(_notImplementedPayload, 501,
+        request: request, headers: _responseHttpHeaders));
   }
 
   /// Handles the requests mode to the _all_dbs path
   Response _all_dbsHandler(Request request) {
     if (request.method == 'GET') {
-      final dbs = ["_global_changes", "_replicator", "_users", mockDatabaseName];
-      return Response(jsonEncode(dbs), 200, request: request);
+      final dbs = [
+        "_global_changes",
+        "_replicator",
+        "_users",
+        mockDatabaseName
+      ];
+      return Response(jsonEncode(dbs), 200,
+          request: request, headers: _responseHttpHeaders);
     }
-    return Response(_wrongHttpMethodPayload, 400, request: request);
+    return Response(_wrongHttpMethodPayload, 400,
+        request: request, headers: _responseHttpHeaders);
   }
 
   /// Handles the requests made to the _session path
@@ -124,12 +135,14 @@ class MockHttpClient {
       return _sessionLogoutHandler(request);
     }
 
-    return Response(_notImplementedPayload, 501, request: request);
+    return Response(_notImplementedPayload, 501,
+        request: request, headers: _responseHttpHeaders);
   }
 
   Response _sessionLoginHandler(Request request) {
     if (!_isJsonContentType(request)) {
-      return Response(_invalidMimeTypePayload, 400, request: request);
+      return Response(_invalidMimeTypePayload, 400,
+          request: request, headers: _responseHttpHeaders);
     }
 
     final bodyUTF8 = utf8.decode(request.bodyBytes);
@@ -137,11 +150,13 @@ class MockHttpClient {
     Map<String, Object> json = Map<String, Object>.from(resBody);
 
     if (!json.containsKey('name') || !json.containsKey('password')) {
-      return Response(_incompleteDataPayload, 400, request: request);
+      return Response(_incompleteDataPayload, 400,
+          request: request, headers: _responseHttpHeaders);
     }
 
     if (!_isValidUserPassword(json['name'], json['password'])) {
-      return Response(_failedAuthenticationPayload, 401, request: request);
+      return Response(_failedAuthenticationPayload, 401,
+          request: request, headers: _responseHttpHeaders);
     }
 
     // We store the username and password almost like a Basic HTTP authentication.
@@ -149,18 +164,24 @@ class MockHttpClient {
     final base64 =
         base64Encode(utf8.encode("${json['name']}:${json['password']}"));
 
-    final Map<String, String> headers = {
+    final Map<String, String> headers =
+        Map<String, String>.from(_responseHttpHeaders);
+
+    headers.addAll({
       'Set-Cookie': '$sessionCookieName=Basic+$base64',
-    };
+    });
 
     return Response(_simpleOkPayload, 200, request: request, headers: headers);
   }
 
   Response _sessionLogoutHandler(Request request) {
-    final Map<String, String> headers = {
+    final Map<String, String> headers =
+        Map<String, String>.from(_responseHttpHeaders);
+
+    headers.addAll({
       'Set-Cookie':
           "$sessionCookieName=; Expires=Wed, 21 Oct 2015 07:28:00 GMT",
-    };
+    });
     return Response(_simpleOkPayload, 200, request: request, headers: headers);
   }
 }

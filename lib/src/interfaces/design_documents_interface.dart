@@ -1,13 +1,30 @@
 import 'package:couchdb/couchdb.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:meta/meta.dart';
 
 import '../responses/design_documents_response.dart';
 
 /// Class that contains methods that allow operation with design documents
 abstract class DesignDocumentsInterface {
+  /// Returns whether the design document exists
+  Future<bool> designDocExists(String ddocId,
+      {Map<String, String> headers,
+      bool attachments = false,
+      bool attEncodingInfo = false,
+      List<String> attsSince,
+      bool conflicts = false,
+      bool deletedConflicts = false,
+      bool latest = false,
+      bool localSeq = false,
+      bool meta = false,
+      Object openRevs,
+      String rev,
+      bool revs = false,
+      bool revsInfo = false});
+
   /// Returns the HTTP Headers containing a minimal amount of information
   /// about the specified design document
-  Future<DesignDocumentsResponse> designDocHeaders(String ddocId,
+  Future<CaseInsensitiveMap<String>> designDocHeaders(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,

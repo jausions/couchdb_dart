@@ -1,30 +1,70 @@
+import 'package:couchdb/couchdb.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:meta/meta.dart';
 
-import 'interfaces/client_interface.dart';
-import 'interfaces/design_documents_interface.dart';
-import 'responses/design_documents_response.dart';
+import 'base.dart';
+import 'http_mixin.dart';
 import 'utils/urls.dart';
 
 /// Class to operate on design documents of a database
-class DesignDocuments implements DesignDocumentsInterface {
+class DesignDocuments extends Base
+    with HttpMixin
+    implements DesignDocumentsInterface {
   // Database name
   final String dbName;
 
   /// URL-encoded database name
   final String _dbNameUrl;
 
-  /// Instance of connected client
-  final ClientInterface client;
-
   /// The [DesignDocuments] class takes a [ClientInterface] implementation instance
   /// and a database name [dbName].
-  DesignDocuments(this.client, String dbName)
+  DesignDocuments(CouchDbClient client, String dbName)
       : _dbNameUrl = Uri.encodeQueryComponent(
             client.validator.validateDatabaseName(dbName)),
-        dbName = dbName;
+        dbName = dbName,
+        super(client);
 
   @override
-  Future<DesignDocumentsResponse> designDocHeaders(String ddocId,
+  Future<bool> designDocExists(String ddocId,
+      {Map<String, String> headers,
+      bool attachments = false,
+      bool attEncodingInfo = false,
+      List<String> attsSince,
+      bool conflicts = false,
+      bool deletedConflicts = false,
+      bool latest = false,
+      bool localSeq = false,
+      bool meta = false,
+      Object openRevs,
+      String rev,
+      bool revs = false,
+      bool revsInfo = false}) async {
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+
+    final Map<String, Object> queryParams = {
+      'attachments': attachments,
+      'att_encoding_info': attEncodingInfo,
+      if (attsSince != null) 'atts_since': attsSince,
+      'conflicts': conflicts,
+      'deleted_conflicts': deletedConflicts,
+      'latest': latest,
+      'local_seq': localSeq,
+      'meta': meta,
+      if (openRevs != null) 'open_revs': openRevs,
+      if (rev != null) 'rev': rev,
+      'revs': revs,
+      'revs_info': revsInfo,
+    };
+
+    final path = '$_dbNameUrl$ddocIdUrl?'
+        '${queryStringFromMap(queryParams)}';
+
+    return httpHeadExists(path, headers);
+  }
+
+  @override
+  Future<CaseInsensitiveMap<String>> designDocHeaders(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -60,7 +100,7 @@ class DesignDocuments implements DesignDocumentsInterface {
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.head(path, reqHeaders: headers);
-    return DesignDocumentsResponse.from(result);
+    return result.headers;
   }
 
   @override

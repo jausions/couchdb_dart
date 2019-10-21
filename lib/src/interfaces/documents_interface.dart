@@ -1,3 +1,4 @@
+import 'package:http_parser/http_parser.dart';
 import 'package:meta/meta.dart';
 
 import '../responses/documents_response.dart';
@@ -6,9 +7,25 @@ import '../responses/response.dart';
 /// Class that define methods for create, read, update and delete documents
 /// within a database.
 abstract class DocumentsInterface {
+  /// Returns whether the specified document exists.
+  Future<bool> docExists(String docId,
+      {Map<String, String> headers,
+      bool attachments = false,
+      bool attEncodingInfo = false,
+      List<String> attsSince,
+      bool conflicts = false,
+      bool deletedConflicts = false,
+      bool latest = false,
+      bool localSeq = false,
+      bool meta = false,
+      Object openRevs,
+      String rev,
+      bool revs = false,
+      bool revsInfo = false});
+
   /// Returns the HTTP Headers containing a minimal amount of information
   /// about the specified document
-  Future<DocumentsResponse> docInfo(String docId,
+  Future<CaseInsensitiveMap<String>> docInfo(String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -102,9 +119,13 @@ abstract class DocumentsInterface {
       String destinationRev,
       String batch});
 
+  /// Returns whether the attachment exists
+  Future<bool> attachmentExists(String docId, String attName,
+      {Map<String, String> headers, String rev});
+
   /// Returns the HTTP headers containing a minimal amount of information about
   /// the specified attachment
-  Future<DocumentsResponse> attachmentInfo(String docId, String attName,
+  Future<CaseInsensitiveMap<String>> attachmentInfo(String docId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Returns the file attachment associated with the document

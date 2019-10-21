@@ -30,7 +30,7 @@ class Response {
   }
 
   /// Check if this response is error
-  bool isError() => json['error'] != null;
+  bool isError() => (json ?? const {})['error'] != null;
 
   @override
   String toString() => '''

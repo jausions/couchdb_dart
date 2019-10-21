@@ -1,38 +1,65 @@
 import 'dart:convert';
 
+import 'package:couchdb/couchdb.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:meta/meta.dart';
 
-import 'exceptions/couchdb_exception.dart';
-import 'interfaces/client_interface.dart';
-import 'interfaces/database_interface.dart';
-import 'responses/database_response.dart';
-import 'responses/response.dart';
+import 'base.dart';
+import 'http_mixin.dart';
 import 'utils/urls.dart';
 
 /// Class that implements methods for interacting with entire database
 /// in CouchDB
-class Database implements DatabaseInterface {
+class Database extends Base with HttpMixin implements DatabaseInterface {
   /// Database name (URL-encoded)
   final String _dbNameUrl;
+
+  DesignDocumentsInterface _designDocs;
+  DocumentsInterface _docs;
+  LocalDocumentsInterface _localDocs;
 
   // Database name
   final String dbName;
 
-  /// Instance of connected client
-  final ClientInterface client;
+  DesignDocumentsInterface get designDocuments {
+    if (_designDocs == null) {
+      _designDocs = DesignDocuments(client, dbName);
+    }
+    return _designDocs;
+  }
+
+  DocumentsInterface get documents {
+    if (_docs == null) {
+      _docs = Documents(client, dbName);
+    }
+    return _docs;
+  }
+
+  LocalDocumentsInterface get localDocuments {
+    if (_localDocs == null) {
+      _localDocs = LocalDocuments(client, dbName);
+    }
+    return _localDocs;
+  }
 
   /// The [Database] class takes a [ClientInterface] implementation instance
   /// and a database name [dbName].
-  Database(this.client, String dbName)
+  Database(CouchDbClient client, String dbName)
       : _dbNameUrl = Uri.encodeQueryComponent(
             client.validator.validateDatabaseName(dbName)),
-        dbName = dbName;
+        dbName = dbName,
+        super(client);
 
   @override
-  Future<DatabaseResponse> summaryInfo() async {
-    Response result;
+  Future<bool> exists() async {
+    return httpHeadExists(_dbNameUrl, {});
+  }
+
+  @override
+  Future<CaseInsensitiveMap<String>> headDbInfo() async {
     try {
-      result = await client.head(_dbNameUrl);
+      final result = await client.head(_dbNameUrl);
+      return result.headers;
     } on CouchDbException catch (e) {
       e.response = Response(<String, String>{
         'error': 'Not found',
@@ -40,7 +67,6 @@ class Database implements DatabaseInterface {
       }).errorResponse();
       rethrow;
     }
-    return DatabaseResponse.from(result);
   }
 
   @override

@@ -1,29 +1,25 @@
 import 'dart:convert';
 
+import 'package:couchdb/couchdb.dart';
 import 'package:meta/meta.dart';
 
-import 'interfaces/client_interface.dart';
-import 'interfaces/server_interface.dart';
-import 'responses/server_response.dart';
+import 'base.dart';
 import 'utils/urls.dart';
 
 /// Server interface provides the basic interface to a CouchDB server
 /// for obtaining CouchDB information and getting and setting configuration information
-class Server implements ServerInterface {
-  /// Instance of connected client
-  final ClientInterface _client;
-
+class Server extends Base implements ServerInterface {
   /// Create Server by accepting web-based or server-based client
-  Server(this._client);
+  Server(CouchDbClient client) : super(client);
 
   @override
   Future<ServerResponse> activeTasks({Map<String, String> headers}) async {
-    final result = await _client.get('_active_tasks', reqHeaders: headers);
+    final result = await client.get('_active_tasks', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
   @override
-  Future<ServerResponse> allDbs({
+  Future<List<String>> allDbs({
     Map<String, String> headers,
     bool descending = false,
     Object endKey,
@@ -42,15 +38,15 @@ class Server implements ServerInterface {
     final path = '_all_dbs?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await _client.get(path, reqHeaders: headers);
-    return ServerResponse.from(result);
+    final result = await client.get(path, reqHeaders: headers);
+    return List<String>.from(ServerResponse.from(result).list);
   }
 
   @override
   Future<ServerResponse> dbsInfo(List<String> keys) async {
     final body = <String, List<String>>{'keys': keys};
 
-    final result = await _client.post('_dbs_info', body: body);
+    final result = await client.post('_dbs_info', body: body);
     return ServerResponse.from(result);
   }
 
@@ -65,7 +61,7 @@ class Server implements ServerInterface {
     final path = '_cluster_setup?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await _client.get(path, reqHeaders: headers);
+    final result = await client.get(path, reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -117,13 +113,13 @@ class Server implements ServerInterface {
     }
 
     final result =
-        await _client.post('_cluster_setup', reqHeaders: headers, body: body);
+        await client.post('_cluster_setup', reqHeaders: headers, body: body);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> couchDbInfo({Map<String, String> headers}) async {
-    final result = await _client.get('', reqHeaders: headers);
+    final result = await client.get('', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -146,13 +142,13 @@ class Server implements ServerInterface {
     final path = '_db_updates?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await _client.get(path, reqHeaders: headers);
+    final result = await client.get(path, reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> membership({Map<String, String> headers}) async {
-    final result = await _client.get('_membership', reqHeaders: headers);
+    final result = await client.get('_membership', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -166,7 +162,7 @@ class Server implements ServerInterface {
         ? '_node/$nodeName/_stats/$statisticSection/$statisticId'
         : '_node/$nodeName/_stats';
 
-    final result = await _client.get(path, reqHeaders: headers);
+    final result = await client.get(path, reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
@@ -209,7 +205,7 @@ class Server implements ServerInterface {
     }
 
     final result =
-        await _client.post('_replicate', reqHeaders: headers, body: body);
+        await client.post('_replicate', reqHeaders: headers, body: body);
     return ServerResponse.from(result);
   }
 
@@ -222,7 +218,7 @@ class Server implements ServerInterface {
     final path = '_scheduler/jobs?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await _client.get(path);
+    final result = await client.get(path);
     return ServerResponse.from(result);
   }
 
@@ -235,7 +231,7 @@ class Server implements ServerInterface {
     final path = '_scheduler/docs?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await _client.get(path);
+    final result = await client.get(path);
     return ServerResponse.from(result);
   }
 
@@ -249,14 +245,14 @@ class Server implements ServerInterface {
     final path = '_scheduler/docs/$replicator?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await _client.get(path);
+    final result = await client.get(path);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> schedulerDocsWithDocId(String docId,
       {String replicator = '_replicator'}) async {
-    final result = await _client.get('_scheduler/docs/$replicator/$docId');
+    final result = await client.get('_scheduler/docs/$replicator/$docId');
     return ServerResponse.from(result);
   }
 
@@ -264,21 +260,20 @@ class Server implements ServerInterface {
   Future<ServerResponse> systemStatsForNode(
       {String nodeName = '_local', Map<String, String> headers}) async {
     final result =
-        await _client.get('_node/$nodeName/_system', reqHeaders: headers);
+        await client.get('_node/$nodeName/_system', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> up() async {
-    final result = await _client.get('_up');
+    final result = await client.get('_up');
     return ServerResponse.from(result);
   }
 
   @override
   Future<ServerResponse> uuids(
       {int count = 1, Map<String, String> headers}) async {
-    final result =
-        await _client.get('_uuids?count=$count', reqHeaders: headers);
+    final result = await client.get('_uuids?count=$count', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 }

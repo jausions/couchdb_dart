@@ -1,12 +1,16 @@
+import 'package:http_parser/http_parser.dart';
 import 'package:meta/meta.dart';
 
 import '../responses/database_response.dart';
 
 /// Class that define methods for interacting with one database in CouchDB.
 abstract class DatabaseInterface {
+  /// Returns whether the database already exists.
+  Future<bool> exists();
+
   /// Returns the HTTP Headers containing a minimal amount of information
-  /// about the database
-  Future<DatabaseResponse> summaryInfo();
+  /// about the database.
+  Future<CaseInsensitiveMap<String>> headDbInfo();
 
   /// Gets information about the database
   ///

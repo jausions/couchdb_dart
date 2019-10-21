@@ -1,4 +1,4 @@
-import 'interfaces/validator_interface.dart';
+import 'package:couchdb/couchdb.dart';
 
 class Validator implements ValidatorInterface {
   final _dbNameRegexp = RegExp(r'^[a-z][a-z0-9_$()+/-]*$');

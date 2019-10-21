@@ -1,27 +1,25 @@
+import 'package:couchdb/couchdb.dart';
 import 'package:meta/meta.dart';
 
-import 'interfaces/client_interface.dart';
-import 'interfaces/local_documents_interface.dart';
-import 'responses/local_documents_response.dart';
+import 'base.dart';
 import 'utils/urls.dart';
 
 /// The Local (non-replicating) document interface allows to create local documents
 /// that are not replicated to other databases
-class LocalDocuments implements LocalDocumentsInterface {
+class LocalDocuments extends Base
+    implements LocalDocumentsInterface {
   // Database name
   final String dbName;
 
   /// URL-encoded database name
   final String _dbNameUrl;
 
-  /// Instance of connected client
-  final ClientInterface client;
-
   /// Create LocalDocuments by accepting web-based or server-based client
-  LocalDocuments(this.client, String dbName)
+  LocalDocuments(CouchDbClient client, String dbName)
       : _dbNameUrl = Uri.encodeQueryComponent(
             client.validator.validateDatabaseName(dbName)),
-        dbName = dbName;
+        dbName = dbName,
+        super(client);
 
   @override
   Future<LocalDocumentsResponse> localDocs(

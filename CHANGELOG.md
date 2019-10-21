@@ -4,18 +4,37 @@ This is a major rework of the package, with a lot of breaking changes.
   
 - Refactored a lot of classes to allow to be more easily testable by decoupling
   with interfaces and introducing dependency injection. The base `Component` class
-  was deleted.
-- The _`...Response`_ classes now have a `.from()` constructor that takes a `Response`
-  instance. The specialized conversion methods from `Response` were removed.
+  was removed from the exports of the package.
+- To better reflect their purpose, some classes are now of the plural forms:
+  `Document` becomes `Documents`, `DesignDocument` is now `DesignDocuments`,
+  and `LocalDocument` changed to `LocalDocuments`. The respective `...Response`
+  classes have also been renamed.
 - The `Database`, `Documents`, `LocalDocuments`, `DesignDocuments` classes now
-  take the database name in their constructor and it was removed from all their methods.
+  take the database name in their constructor and that argument was removed from
+  all their methods. For convenience, new getters have been added to `Database`
+  to obtain instances of `Documents`, `LocalDocuments`, and `DesignDocuments`.
+  _Note, that those getters are **purposely not** part of the `DatabaseInterface`._
+- The _`...Response`_ classes now have a `.from()` constructor that takes a `Response`
+  instance. The specialized conversion methods were removed from `Response`.
+- The `Response.headers` member is now a `CaseInsensitiveMap<String>` instead
+  of a `Map<String, String>`.  This is to be more tolerant with HTTP headers.
+  In the same vein, the response from the HTTP HEAD API calls / _`...Info()`_
+  methods now also return `Future<CaseInsensitiveMap<String>>`.
 - Added proactive validation of database names and document ids before sending
   *some* API requests to CouchDB. This can be bypassed or customized with your own
-  validator.
-- Added sorting and pagination parameters for `Server.allDbs()` method.
+  validator (see `ValidatorInterface`).
+- Added sorting and pagination parameters to `Server.allDbs()` method. The method
+  now also returns a `Future` of `List` of database names instead of a `ServerResponse`.
+- Added a `Database.exists()` method and changed the `Database.headDbInfo()`
+  to actually return the HTTP headers.
+- Added a `Documents.docExists()` method and changed the `Documents.docInfo()`
+  to actually return the HTTP headers..
+- Added a `Documents.attachmentExists()` method and changed the
+  `Documents.attachmentInfo()` to actually return the HTTP headers..
 - Bug fix: The credentials were not properly sent to the server when they
   contained special characters.
 - Bug fix: URL parameters were not properly escaped.
+- Bug fix: HTTP 304 status code is no longer considered an error.
 - Updated README for clarity and usage.
 - Updated dependencies in _pubspec.yaml_.
 - Added the start of a test suite.
@@ -31,18 +50,35 @@ This is a major rework of the package, with a lot of breaking changes.
 
 ### Renamed methods
 
-- `Database.changesIn()` to `Database.changes()`,
 - `Database.createDb()` to `Database.create()`,
 - `Database.createDocIn()` to `Database.createDoc()`,
 - `Database.createIndexIn()` to `Database.createIndex()`,
-- `Database.dbInfo()` to `Database.info()`,
 - `Database.deleteDb()` to `Database.delete()`,
-- `Database.headDbInfo()` to `Database.summaryInfo()`,
+- `Database.dbInfo()` to `Database.info()`,
 - `Database.indexesAt()` to `Database.indexes()`,
+- `Database.changesIn()` to `Database.changes()`,
 - `Database.postChangesIn()` to `Database.postChanges()`,
 - `Database.revsLimitOf()` to `Database.revsLimit()`,
 - `Database.securityOf()` to `Database.security()`,
-- `Database.setSecurityFor()` to `Database.setSecurity()`.
+- `Database.setSecurityFor()` to `Database.setSecurity()`,
+- `DesignDocument.attachment()` to `DesignDocuments.designDocAttachment()`,
+- `DesignDocument.attachmentInfo()` to `DesignDocuments.designDocAttachmentInfo()`,
+- `DesignDocument.deleteAttachment()` to `DesignDocuments.deleteDesignDocAttachment()`,
+- `DesignDocument.uploadAttachment()` to `DesignDocuments.uploadDesignDocAttachment()`,
+- `DesignDocument.designDocHeaders()` to `DesignDocuments.designDocSummaryInfo()`.
+
+### Method signature changes
+
+- Removal of the `dnName` argument from all the methods of `Database`, `Documents`,
+  `LocalDocuments` and `DesignDocuments`. The database name must now be provided
+  to the constructor.
+- `Server.allDbs()` now returns a `Future<List<String>>` instead of `Future<ServerResponse>`.
+- `Database.headDbInfo()` now returns a `Future<CaseInsensitiveMap<String>>`
+  instead of a `Future<DatabaseResponse>`.
+- `Documents.docInfo()` now returns a `Future<CaseInsensitiveMap<String>>`
+  instead of a `Future<DocumentResponse>`.
+- `Documents.attachmentInfo()` now returns a `Future<CaseInsensitiveMap<String>>`
+  instead of a `Future<DocumentResponse>`.
 
 ### Removed methods
 

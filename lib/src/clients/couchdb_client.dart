@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:couchdb/couchdb.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http show BaseClient, Client, Request;
+import 'package:http_parser/http_parser.dart';
 
 import '../exceptions/couchdb_exception.dart';
 import '../interfaces/client_interface.dart';
@@ -218,7 +219,7 @@ class CouchDbClient implements ClientInterface {
     final res =
         await _httpClient.head(Uri.parse('$origin/$path'), headers: headers);
 
-    _checkForErrorStatusCode(res.statusCode);
+    _checkForErrorStatusCode(res.statusCode, headers: res.headers);
 
     return Response(null, headers: res.headers);
   }
@@ -233,7 +234,8 @@ class CouchDbClient implements ClientInterface {
     final res = await _httpClient.get(Uri.parse(uriString), headers: headers);
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
-    if (res.headers['content-type'] == 'application/json') {
+    final responseHeaders = CaseInsensitiveMap<String>.from(res.headers);
+    if (responseHeaders['content-type'].startsWith(RegExp(r'^application/json;?'))) {
       final resBody = jsonDecode(bodyUTF8);
 
       if (resBody is int) {
@@ -369,15 +371,15 @@ class CouchDbClient implements ClientInterface {
   }
 
   /// Checks if response is returned with status codes lower than
-  /// `200` of greater than `202`
+  /// `200` of greater than `304`
   ///
-  /// Throws a `CouchDbException` if status code is out of range `200-202`.
+  /// Throws a `CouchDbException` if status code is out of range `200-304`.
   void _checkForErrorStatusCode(int code,
       {String body, Map<String, String> headers}) {
-    if (code < 200 || code > 202) {
+    if (code < 200 || code > 304) {
       throw CouchDbException(code,
           response:
-              Response(jsonDecode(body), headers: headers).errorResponse());
+              Response(jsonDecode(body ?? 'null'), headers: headers).errorResponse());
     }
   }
 
