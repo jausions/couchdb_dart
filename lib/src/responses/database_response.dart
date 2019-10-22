@@ -140,7 +140,7 @@ class DatabaseResponse {
 
   /// Is true if the database compaction routine is operating on this database
   ///
-  /// Returns by [Database.info]
+  /// Returned by [Database.info]
   final bool compactRunning;
 
   /// Holds the name of the database
@@ -226,7 +226,11 @@ class DatabaseResponse {
 
   /// Holds limit parameter used
   ///
-  /// Returns by [Database.purgedInfosLimit], [Database.explain]
+  /// Returned by:
+  ///
+  ///  - [Database.purgedInfosLimit]
+  ///  - [Database.explain]
+  ///  - [Database.revsLimit]
   final int limit;
 
   /// Holds skip parameter used
@@ -258,7 +262,7 @@ class DatabaseResponse {
 
   /// Holds revs diffs for specified document
   ///
-  /// Returns by [Database.revsDiff]
+  /// Returned by [Database.revsDiff]
   final Map<String, Map<String, List<String>>> revsDiff;
 
   /// List of some objects (if JSON itself is list)

@@ -894,7 +894,8 @@ abstract class DatabaseInterface {
   /// ```
   Future<DatabaseResponse> revsLimit();
 
-  /// Sets the maximum number of document revisions that will be tracked by CouchDB, even after compaction has occurred
+  /// Sets the maximum number of document revisions that will be tracked by CouchDB,
+  /// even after compaction has occurred
   ///
   /// Returns JSON like:
   /// ```json

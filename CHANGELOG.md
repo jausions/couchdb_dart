@@ -79,7 +79,7 @@ This is a major rework of the package, with a lot of breaking changes.
   to the constructor.
 - `Server.allDbs()` now returns a `Future<List<String>>` instead of a
   `Future<ServerResponse>`.
-- The methods that calls the CouchDB API with a HTTP HEAD now return a
+- The methods that call the CouchDB API with a HTTP HEAD now return a
   `Future<CaseInsensitiveMap<String>>` instead of a specialized `Future<...Response>`
   instance.
 
