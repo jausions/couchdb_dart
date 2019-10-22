@@ -74,7 +74,7 @@ This is a major rework of the package, with a lot of breaking changes.
 
 ### Method signature changes
 
-- Removal of the `dnName` argument from all the methods of `Database`, `Documents`,
+- Removal of the `dbName` argument from all the methods of `Database`, `Documents`,
   `LocalDocuments` and `DesignDocuments`. The database name must now be provided
   to the constructor.
 - `Server.allDbs()` now returns a `Future<List<String>>` instead of a
