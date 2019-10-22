@@ -25,7 +25,7 @@ abstract class DocumentsInterface {
 
   /// Returns the HTTP Headers containing a minimal amount of information
   /// about the specified document
-  Future<CaseInsensitiveMap<String>> docInfo(String docId,
+  Future<CaseInsensitiveMap<String>> docHeadersInfo(String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -125,7 +125,7 @@ abstract class DocumentsInterface {
 
   /// Returns the HTTP headers containing a minimal amount of information about
   /// the specified attachment
-  Future<CaseInsensitiveMap<String>> attachmentInfo(String docId, String attName,
+  Future<CaseInsensitiveMap<String>> attachmentHeadersInfo(String docId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Returns the file attachment associated with the document

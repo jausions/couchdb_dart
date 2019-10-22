@@ -56,7 +56,7 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
   }
 
   @override
-  Future<CaseInsensitiveMap<String>> headDbInfo() async {
+  Future<CaseInsensitiveMap<String>> headersInfo() async {
     try {
       final result = await client.head(_dbNameUrl);
       return result.headers;

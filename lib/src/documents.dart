@@ -63,7 +63,7 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   }
 
   @override
-  Future<CaseInsensitiveMap<String>> docInfo(String docId,
+  Future<CaseInsensitiveMap<String>> docHeadersInfo(String docId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -225,7 +225,7 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   }
 
   @override
-  Future<CaseInsensitiveMap<String>> attachmentInfo(
+  Future<CaseInsensitiveMap<String>> attachmentHeadersInfo(
       String docId, String attName,
       {Map<String, String> headers, String rev}) async {
     final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));

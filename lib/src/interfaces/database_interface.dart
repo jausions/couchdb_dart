@@ -10,7 +10,7 @@ abstract class DatabaseInterface {
 
   /// Returns the HTTP Headers containing a minimal amount of information
   /// about the database.
-  Future<CaseInsensitiveMap<String>> headDbInfo();
+  Future<CaseInsensitiveMap<String>> headersInfo();
 
   /// Gets information about the database
   ///

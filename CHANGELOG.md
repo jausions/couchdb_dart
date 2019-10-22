@@ -7,31 +7,32 @@ This is a major rework of the package, with a lot of breaking changes.
   was removed from the exports of the package.
 - To better reflect their purpose, some classes are now of the plural forms:
   `Document` becomes `Documents`, `DesignDocument` is now `DesignDocuments`,
-  and `LocalDocument` changed to `LocalDocuments`. The respective `...Response`
-  classes have also been renamed.
+  and `LocalDocument` changed to `LocalDocuments`. The respective specialized
+  `...Response` classes were also renamed.
 - The `Database`, `Documents`, `LocalDocuments`, `DesignDocuments` classes now
   take the database name in their constructor and that argument was removed from
   all their methods. For convenience, new getters have been added to `Database`
   to obtain instances of `Documents`, `LocalDocuments`, and `DesignDocuments`.
   _Note, that those getters are **purposely not** part of the `DatabaseInterface`._
-- There is also a _factory_ in `Server` to get `Database` instances.
-- The _`...Response`_ classes now have a `.from()` constructor that takes a `Response`
-  instance. The specialized conversion methods were removed from `Response`.
+- The specialized _`...Response`_ classes now have a `.from()` constructor that
+  takes a `Response` instance. The specialized conversion methods were removed
+  from `Response`.
 - The `Response.headers` member is now a `CaseInsensitiveMap<String>` instead
   of a `Map<String, String>`.  This is to be more tolerant with HTTP headers.
-  In the same vein, the response from the HTTP HEAD API calls / _`...Info()`_
-  methods now also return `Future<CaseInsensitiveMap<String>>`.
+- The name of methods that call the CouchDB API with HTTP HEAD requests have
+  now been standardized to end with _`...HeadersInfo()`_. These methods now
+  also return a `Future<CaseInsensitiveMap<String>>` instead of a specialized
+  _`Future<...Response>`_.
 - Added proactive validation of database names and document ids before sending
   *some* API requests to CouchDB. This can be bypassed or customized with your own
-  validator (see `ValidatorInterface`).
+  validator (see `ValidatorInterface`). The default implementation is to throw an
+  `ArgumentException` in case of unacceptable names or ids.
 - Added sorting and pagination parameters to `Server.allDbs()` method. The method
-  now also returns a `Future` of `List` of database names instead of a `ServerResponse`.
-- Added a `Database.exists()` method and changed the `Database.headDbInfo()`
-  to actually return the HTTP headers.
-- Added a `Documents.docExists()` method and changed the `Documents.docInfo()`
-  to actually return the HTTP headers..
-- Added a `Documents.attachmentExists()` method and changed the
-  `Documents.attachmentInfo()` to actually return the HTTP headers..
+  now also returns a `Future<List<String>>` of database names instead of a
+  `ServerResponse`.
+- Added `Database.exists()`, `DesignDocuments.exists()`, `Documents.docExists()`,
+  `Documents.attachmentExists()`, and `DesignDocuments.designDocAttachmentExists()`
+  methods.
 - Bug fix: The credentials were not properly sent to the server when they
   contained special characters.
 - Bug fix: URL parameters were not properly escaped.
@@ -56,29 +57,31 @@ This is a major rework of the package, with a lot of breaking changes.
 - `Database.createIndexIn()` to `Database.createIndex()`,
 - `Database.deleteDb()` to `Database.delete()`,
 - `Database.dbInfo()` to `Database.info()`,
+- `Database.headDbInfo()` to `Database.headersInfo()`,
 - `Database.indexesAt()` to `Database.indexes()`,
 - `Database.changesIn()` to `Database.changes()`,
 - `Database.postChangesIn()` to `Database.postChanges()`,
 - `Database.revsLimitOf()` to `Database.revsLimit()`,
 - `Database.securityOf()` to `Database.security()`,
 - `Database.setSecurityFor()` to `Database.setSecurity()`,
+- `DesignDocument.designDocHeaders()` to `DesignDocuments.designDocHeadersInfo()`,
 - `DesignDocument.attachment()` to `DesignDocuments.designDocAttachment()`,
-- `DesignDocument.attachmentInfo()` to `DesignDocuments.designDocAttachmentInfo()`,
+- `DesignDocument.attachmentInfo()` to `DesignDocuments.designDocAttachmentHeadersInfo()`,
 - `DesignDocument.deleteAttachment()` to `DesignDocuments.deleteDesignDocAttachment()`,
-- `DesignDocument.uploadAttachment()` to `DesignDocuments.uploadDesignDocAttachment()`.
+- `DesignDocument.uploadAttachment()` to `DesignDocuments.uploadDesignDocAttachment()`,
+- `Document.docInfo()` to `Documents.docHeadersInfo()`,
+- `Document.attachmentInfo()` to `Documents.attachmentHeadersInfo()`.
 
 ### Method signature changes
 
 - Removal of the `dnName` argument from all the methods of `Database`, `Documents`,
   `LocalDocuments` and `DesignDocuments`. The database name must now be provided
   to the constructor.
-- `Server.allDbs()` now returns a `Future<List<String>>` instead of `Future<ServerResponse>`.
-- `Database.headDbInfo()` now returns a `Future<CaseInsensitiveMap<String>>`
-  instead of a `Future<DatabaseResponse>`.
-- `Documents.docInfo()` now returns a `Future<CaseInsensitiveMap<String>>`
-  instead of a `Future<DocumentResponse>`.
-- `Documents.attachmentInfo()` now returns a `Future<CaseInsensitiveMap<String>>`
-  instead of a `Future<DocumentResponse>`.
+- `Server.allDbs()` now returns a `Future<List<String>>` instead of a
+  `Future<ServerResponse>`.
+- The methods that calls the CouchDB API with a HTTP HEAD now return a
+  `Future<CaseInsensitiveMap<String>>` instead of a specialized `Future<...Response>`
+  instance.
 
 ### Removed methods
 

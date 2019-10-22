@@ -24,7 +24,7 @@ abstract class DesignDocumentsInterface {
 
   /// Returns the HTTP Headers containing a minimal amount of information
   /// about the specified design document
-  Future<CaseInsensitiveMap<String>> designDocHeaders(String ddocId,
+  Future<CaseInsensitiveMap<String>> designDocHeadersInfo(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -89,9 +89,14 @@ abstract class DesignDocumentsInterface {
   Future<DesignDocumentsResponse> copyDesignDoc(String ddocId,
       {Map<String, String> headers, String rev, String batch});
 
+  /// Returns whether the specified design document attachment exists
+  Future<bool> designDocAttachmentExists(
+      String ddocId, String attName,
+      {Map<String, String> headers, String rev});
+
   /// Returns the HTTP headers containing a minimal amount of information about
   /// the specified attachment
-  Future<DesignDocumentsResponse> designDocAttachmentInfo(
+  Future<CaseInsensitiveMap<String>> designDocAttachmentHeadersInfo(
       String ddocId, String attName,
       {Map<String, String> headers, String rev});
 

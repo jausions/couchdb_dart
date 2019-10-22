@@ -123,10 +123,6 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  /// Returns a new instance of [Database] using the same [CouchDbClient]
-  /// as this [Server] instance.
-  Database database(String dbName) => Database(client, dbName);
-
   @override
   Future<ServerResponse> dbUpdates(
       {String feed = 'normal',

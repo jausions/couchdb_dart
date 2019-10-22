@@ -64,7 +64,7 @@ class DesignDocuments extends Base
   }
 
   @override
-  Future<CaseInsensitiveMap<String>> designDocHeaders(String ddocId,
+  Future<CaseInsensitiveMap<String>> designDocHeadersInfo(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
       bool attEncodingInfo = false,
@@ -203,7 +203,24 @@ class DesignDocuments extends Base
   }
 
   @override
-  Future<DesignDocumentsResponse> designDocAttachmentInfo(
+  Future<bool> designDocAttachmentExists(
+      String ddocId, String attName,
+      {Map<String, String> headers, String rev}) async {
+    final ddocIdUrl =
+        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+
+    final Map<String, Object> queryParams = {
+      if (rev != null) 'rev': rev,
+    };
+
+    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+        '${queryStringFromMap(queryParams)}';
+
+    return httpHeadExists(path, headers);
+  }
+
+  @override
+  Future<CaseInsensitiveMap<String>> designDocAttachmentHeadersInfo(
       String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
     final ddocIdUrl =
@@ -217,7 +234,7 @@ class DesignDocuments extends Base
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.head(path, reqHeaders: headers);
-    return DesignDocumentsResponse.from(result);
+    return result.headers;
   }
 
   @override

@@ -59,7 +59,7 @@ main() {
 
   final client = _makeClient();
   final server = Server(client);
-  final database = server.database(dbName);
+  final database = Database(client, dbName);
   final designDocs = database.designDocuments;
   final docs = database.documents;
   final localDocs = database.localDocuments;
