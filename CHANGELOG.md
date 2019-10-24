@@ -8,7 +8,7 @@ This is a major rework of the package, with a lot of breaking changes.
 - To better reflect their purpose, some classes are now of the plural forms:
   `Document` becomes `Documents`, `DesignDocument` is now `DesignDocuments`,
   and `LocalDocument` changed to `LocalDocuments`. The respective specialized
-  `...Response` classes were also renamed.
+  _`...Response`_ classes were also renamed.
 - The `Database`, `Documents`, `LocalDocuments`, `DesignDocuments` classes now
   take the database name in their constructor and that argument was removed from
   all their methods. For convenience, new getters have been added to `Database`
@@ -35,7 +35,8 @@ This is a major rework of the package, with a lot of breaking changes.
   methods.
 - Bug fix: The credentials were not properly sent to the server when they
   contained special characters.
-- Bug fix: URL parameters were not properly escaped.
+- Bug fix: URL query parameters were not properly escaped.
+- Bug fix: URL path was not properly escaped.
 - Bug fix: HTTP 304 status code is no longer considered an error.
 - Updated README for clarity and usage.
 - Updated dependencies in _pubspec.yaml_.
