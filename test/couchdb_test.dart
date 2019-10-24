@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import "package:test/test.dart";
 
 import 'credentials.dart';
+import 'database_names.dart';
 import 'mock_http_client.dart';
 
 /// To run the tests, a local .env.test file is required.
@@ -58,13 +59,10 @@ main() {
   }
 
   final client = _makeClient();
-  final server = Server(client);
-  final database = Database(client, dbName);
-  final designDocs = database.designDocuments;
-  final docs = database.documents;
-  final localDocs = database.localDocuments;
 
   group("Server operations", () {
+    final server = Server(client);
+
     test("_all_dbs", () async {
       final result = await server.allDbs(startKey: '_users', endKey: '_users');
       expect(result, isList);
@@ -78,7 +76,44 @@ main() {
     });
   });
 
+  group('Database names', () {
+    databaseValidNames.forEach((dbName) {
+      test("Create then delete database: $dbName", () async {
+        final database = Database(client, dbName);
+        expect(await database.create(), isA<DatabaseResponse>());
+        expect(database.delete(), completion(isA<DatabaseResponse>()));
+      });
+    });
+
+    databaseInvalidNames.forEach((dbName) {
+      test("Should not be able to create database: $dbName", () async {
+        final database = Database(client, dbName);
+        expect(() => database.create(), throwsException);
+      });
+    });
+  });
+
+  group("Documents in database name with slash /", () {
+    final dbName = 'test/with/slashes/';
+    final database = Database(client, dbName);
+
+    setUp(() async => await database.create());
+    tearDown(() async => await database.delete());
+
+    test("Create then delete regular document in database: $dbName", () async {
+      final docContent = {
+        'some': 'random text',
+      };
+      final result = await database.createDoc(docContent);
+      expect(result, isA<DatabaseResponse>());
+      expect(database.documents.deleteDoc(result.id, result.rev),
+          completion(isA<DocumentsResponse>()));
+    });
+  });
+
   group("Database operations", () {
+    final database = Database(client, dbName);
+
     test("Create then delete database", () async {
       expect(await database.create(), isA<DatabaseResponse>());
       expect(database.delete(), completion(isA<DatabaseResponse>()));
@@ -97,13 +132,17 @@ main() {
   });
 
   group("Document operations", () {
+    final database = Database(client, dbName);
+    final docs = database.documents;
+
     setUp(() async => await database.create());
     tearDown(() async => await database.delete());
 
     test("Create then delete document", () async {
-      final doc = await docs.insertDoc("my_test_doc", {'centent': "blank"});
+      final doc = await docs.insertDoc("my_test_doc", {'content': "blank"});
       expect(doc, isA<DocumentsResponse>());
-      expect(docs.deleteDoc(doc.id, doc.rev), completion(isA<DocumentsResponse>()));
+      expect(docs.deleteDoc(doc.id, doc.rev),
+          completion(isA<DocumentsResponse>()));
     });
   });
 
