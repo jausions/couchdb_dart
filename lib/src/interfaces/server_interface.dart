@@ -150,12 +150,14 @@ abstract class ServerInterface {
 
   /// Returns the status of the node or cluster, per the cluster setup wizard
   ///
-  /// If [ensureDbsExist] isn't specified, it is defaults to `["_users","_replicator","_global_changes"]`.
+  /// If [ensureDbsExist] isn't specified, it defaults to `["_users","_replicator","_global_changes"]`.
+  ///
   /// Return JSON like:
   /// ```json
   /// {"state": "cluster_enabled"}
   /// ```
-  /// May be one of the following:
+  ///
+  /// The `state` may be one of the following:
   ///
   ///   - `cluster_disabled`,
   ///   - `single_node_disabled`,
@@ -503,5 +505,5 @@ abstract class ServerInterface {
   ///     ]
   /// }
   /// ```
-  Future<ServerResponse> uuids({int count = 1, Map<String, String> headers});
+  Future<List<String>> uuids({int count = 1, Map<String, String> headers});
 }

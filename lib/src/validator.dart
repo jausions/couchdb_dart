@@ -38,7 +38,7 @@ class Validator implements ValidatorInterface {
   /// If the check fails an [ArgumentError] exception is thrown.
   String validateDatabaseName(String dbName) {
     if (!isValidDatabaseName(dbName)) {
-      throw ArgumentError(r'''Incorrect database name!
+      throw ArgumentError.value(dbName, null, r'''Incorrect database name!
       Name must be composed by following next rules:
         - Name must begin with a lowercase letter (a-z)
         - Lowercase characters (a-z)
@@ -52,7 +52,7 @@ class Validator implements ValidatorInterface {
   /// If the check fails an [ArgumentError] exception is thrown.
   String validateDesignDocId(String ddocId) {
     if (!isValidDesignDocumentId(ddocId)) {
-      throw ArgumentError(
+      throw ArgumentError.value(ddocId, null,
           'Malformed design document id: The id must start with "_design/".');
     }
     return ddocId;
@@ -62,7 +62,7 @@ class Validator implements ValidatorInterface {
   /// If the check fails an [ArgumentError] exception is thrown.
   String validateDocId(String docId) {
     if (!isValidDocumentId(docId)) {
-      throw ArgumentError(
+      throw ArgumentError.value(docId, null,
           'Invalid document id: The id cannot start with an underscore "_".');
     }
     return docId;
@@ -72,7 +72,7 @@ class Validator implements ValidatorInterface {
   /// If the check fails an [ArgumentError] exception is thrown.
   String validateLocalDocId(String docId) {
     if (!isValidLocalDocumentId(docId)) {
-      throw ArgumentError(
+      throw ArgumentError.value(docId, null,
           'Malformed local document id: The id must start with "_local/".');
     }
     return docId;

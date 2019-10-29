@@ -1,10 +1,8 @@
 import 'package:couchdb/couchdb.dart';
 import 'package:dotenv/dotenv.dart' as dotenv show load, env;
-import 'package:http/http.dart' as http;
 import "package:test/test.dart";
 
-import 'credentials.dart';
-import 'database_names.dart';
+import 'clients.dart';
 import 'mock_http_client.dart';
 
 /// To run the tests, a local .env.test file is required.
@@ -12,6 +10,9 @@ import 'mock_http_client.dart';
 /// environment.
 main() {
   dotenv.load('.env.test');
+
+  /// CouchDbClient _factory_
+  final clients = Clients();
 
   final dbName = dotenv.env['COUCHDB_TEST_DB'] ?? 'couchdb_dart-test';
   final host = dotenv.env['COUCHDB_TEST_HOST'] ?? 'localhost';
@@ -21,98 +22,70 @@ main() {
   /// Mock HTTP client to process API requests
   final _mockHttpClient = MockHttpClient().client;
 
-  /// Standard HTTP client
-  final _httpClient = http.Client();
-
-  /// To bypass any input validation to not interfere with talking
-  /// with the CouchDB server.
-  /// The validator is tested separately.
-  final _noValidation = PassthruValidator();
-
-  CouchDbClient _makeClient([String username, String password]) {
-    final user = username ?? dotenv.env['COUCHDB_TEST_USERNAME'];
-    final pass = password ?? dotenv.env['COUCHDB_TEST_PASSWORD'];
-
-    return CouchDbClient(
-      username: user,
-      password: pass,
-      scheme: scheme,
-      host: host,
-      port: port,
-      httpClient: _httpClient,
-      validator: _noValidation,
-    );
-  }
-
-  CouchDbClient _makeMockClient(String username, String password,
-      [String auth = 'basic']) {
-    return CouchDbClient(
-      username: username,
-      password: password,
-      scheme: scheme,
-      host: host,
-      port: port,
-      auth: auth,
-      httpClient: _mockHttpClient,
-      validator: _noValidation,
-    );
-  }
-
-  final client = _makeClient();
+  final _liveClient = clients.makeClient();
 
   group("Server operations", () {
-    final server = Server(client);
+    final server = Server(_liveClient);
 
-    test("_all_dbs", () async {
+    test("/", () async {
+      final result = await server.couchDbInfo();
+      expect(result, isA<ServerResponse>());
+      expect(result.version, isNotEmpty);
+    });
+
+    test("/_active_tasks", () {
+      expect(server.activeTasks(), completion(isA<ServerResponse>()));
+    });
+
+    test("/_all_dbs", () async {
       final result = await server.allDbs(startKey: '_users', endKey: '_users');
       expect(result, isList);
       expect(result.contains('_users'), isTrue);
     });
 
-    test("_dbs_info", () async {
+    test("/_dbs_info", () async {
       final result = await server.dbsInfo(['_users']);
       expect(result, isA<ServerResponse>());
       expect(result.list.length, equals(1));
     });
-  });
 
-  group('Database names', () {
-    databaseValidNames.forEach((dbName) {
-      test("Create then delete database: $dbName", () async {
-        final database = Database(client, dbName);
-        expect(await database.create(), isA<DatabaseResponse>());
-        expect(database.delete(), completion(isA<DatabaseResponse>()));
-      });
+    test("/_db_updates", () {
+      expect(server.dbUpdates(), completion(isA<ServerResponse>()));
     });
 
-    databaseInvalidNames.forEach((dbName) {
-      test("Should not be able to create database: $dbName", () async {
-        final database = Database(client, dbName);
-        expect(() => database.create(), throwsException);
-      });
+    test("/_membership", () {
+      expect(server.membership(), completion(isA<ServerResponse>()));
+    });
+
+    test("/_scheduler/jobs", () {
+      expect(server.schedulerJobs(), completion(isA<ServerResponse>()));
+    });
+
+    test("/_scheduler/docs", () {
+      expect(server.schedulerDocs(), completion(isA<ServerResponse>()));
+    });
+
+    test("/_up", () async {
+      final result = await server.up();
+      expect(result, isA<ServerResponse>());
+      expect(result.status, equals('ok'));
+    });
+
+    test("/_uuids", () async {
+      final result = await server.uuids(count: 5);
+      expect(result, isList);
+      expect(result.length, equals(5));
+    });
+
+    test("/_uuids/?count=0", () async {
+      final result = await server.uuids(count: 0);
+      expect(result, isList);
+      expect(result, isEmpty);
     });
   });
 
-  group("Documents in database name with slash /", () {
-    final dbName = 'test/with/slashes/';
-    final database = Database(client, dbName);
-
-    setUp(() async => await database.create());
-    tearDown(() async => await database.delete());
-
-    test("Create then delete regular document in database: $dbName", () async {
-      final docContent = {
-        'some': 'random text',
-      };
-      final result = await database.createDoc(docContent);
-      expect(result, isA<DatabaseResponse>());
-      expect(database.documents.deleteDoc(result.id, result.rev),
-          completion(isA<DocumentsResponse>()));
-    });
-  });
-
-  group("Database operations", () {
-    final database = Database(client, dbName);
+  group("Database existence", () {
+    final database = Database(_liveClient, dbName);
 
     test("Create then delete database", () async {
       expect(await database.create(), isA<DatabaseResponse>());
@@ -120,19 +93,40 @@ main() {
     });
 
     test("_users database exists", () {
-      final usersDb = Database(client, '_users');
+      final usersDb = Database(_liveClient, '_users');
       expect(usersDb.exists(), completion(isTrue));
     });
 
     test("Fake database does not exist", () {
-      final unknownDb =
-          Database(client, '_unknown_db_520b0dde-82b6-4da7-94eb-ab61233acafa');
+      final unknownDb = Database(
+          _liveClient, '_unknown_db_520b0dde-82b6-4da7-94eb-ab61233acafa');
       expect(unknownDb.exists(), completion(isFalse));
     });
   });
 
+  group("Database operations", () {
+    final _usersDb = Database(_liveClient, '_users');
+
+    test("/_users HEAD", () async {
+      final result = await _usersDb.headersInfo();
+      expect(result, isMap);
+    });
+
+    test("/_users GET", () async {
+      final info = await _usersDb.info();
+      expect(info, isA<DatabaseResponse>());
+      expect(info.dbName, equals('_users'));
+    });
+
+    test('/_users/_all_docs', () async {
+      final result = await _usersDb.allDocs();
+      expect(result, isA<DatabaseResponse>());
+    });
+
+  });
+
   group("Document operations", () {
-    final database = Database(client, dbName);
+    final database = Database(_liveClient, dbName);
     final docs = database.documents;
 
     setUp(() async => await database.create());
@@ -144,109 +138,16 @@ main() {
       expect(docs.deleteDoc(doc.id, doc.rev),
           completion(isA<DocumentsResponse>()));
     });
-  });
 
-  group("Basic Authentication", () {
-    credentials.forEach((username, password) {
-      test(
-          "Credentials with special characters are properly sent: $username / $password",
-          () {
-        final mockClient = _makeMockClient(username, password);
-        final server = Server(mockClient);
-        expect(server.allDbs(), completion(isA<List<String>>()));
-      });
-
-      test(
-          ".fromUri(): Credentials with special characters are properly sent: $username / $password",
-          () {
-        final uri = Uri(
-          scheme: scheme,
-          userInfo:
-              "${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}",
-          host: host,
-          port: port,
-        );
-        final mockClient =
-            CouchDbClient.fromUri(uri, httpClient: _mockHttpClient);
-        final server = Server(mockClient);
-        expect(server.allDbs(), completion(isA<List<String>>()));
-      });
-
-      test(
-          ".fromString(): Credentials with special characters are properly sent: $username / $password",
-          () {
-        final userInfo =
-            "${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}";
-        final uri = "$scheme://$userInfo@$host:$port";
-        final mockClient =
-            CouchDbClient.fromString(uri, httpClient: _mockHttpClient);
-        final server = Server(mockClient);
-        expect(server.allDbs(), completion(isA<List<String>>()));
-      });
+    test('List all documents', () async {
+      await docs.insertDoc("my_test_all_docs", {'content': "blank"});
+      final result = await database.allDocs();
+      expect(result, isA<DatabaseResponse>());
+      expect(result.totalRows, equals(1));
+      expect(result.rows, isNotEmpty);
+      expect(result.rows[0].containsKey('id'), isTrue);
+      expect(result.rows[0]['id'], equals('my_test_all_docs'));
     });
 
-    /// This test checks that our mock server detects wrong passwords.
-    test("The mock client detects wrong passwords", () async {
-      await Future.forEach(credentials.keys, (username) async {
-        final password = credentials[username];
-        final mockClient = _makeMockClient(username, "wrong-$password");
-        expect(() async => await mockClient.authenticate(), throwsException);
-      });
-    });
-  });
-
-  group("Cookie Authentication", () {
-    credentials.forEach((username, password) {
-      test(
-          "Credentials with special characters are properly sent: $username / $password",
-          () async {
-        final mockClient = _makeMockClient(username, password, 'cookie');
-        expect(await mockClient.authenticate(), isA<Response>());
-        final server = Server(mockClient);
-        expect(server.allDbs(), completion(isA<List<String>>()));
-      });
-
-      test(
-          ".fromUri(): Credentials with special characters are properly sent: $username / $password",
-          () async {
-        final uri = Uri(
-          scheme: scheme,
-          userInfo:
-              "${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}",
-          host: host,
-          port: port,
-        );
-        final mockClient = CouchDbClient.fromUri(uri,
-            httpClient: _mockHttpClient, auth: 'cookie');
-        expect(await mockClient.authenticate(), isA<Response>());
-        final server = Server(mockClient);
-        expect(server.allDbs(), completion(isA<List<String>>()));
-      });
-
-      test(
-          ".fromString(): Credentials with special characters are properly sent: $username / $password",
-          () async {
-        final userInfo =
-            "${Uri.encodeQueryComponent(username)}:${Uri.encodeQueryComponent(password)}";
-        final uri = "$scheme://$userInfo@$host:$port";
-        final mockClient = CouchDbClient.fromString(uri,
-            httpClient: _mockHttpClient, auth: 'cookie');
-        expect(await mockClient.authenticate(), isA<Response>());
-        final server = Server(mockClient);
-        expect(server.allDbs(), completion(isA<List<String>>()));
-      });
-    });
-
-    /// This test checks that our mock server detects wrong passwords.
-    /// If we don't do that type of test we won't know if the mock server
-    /// knows the difference between right and wrong passwords.
-    test("The mock client detects wrong passwords", () async {
-      await Future.forEach(credentials.keys, (username) async {
-        final password = credentials[username];
-        final mockClient =
-            _makeMockClient(username, "wrong-$password", 'cookie');
-        expect(() async => await mockClient.authenticate(), throwsException);
-      });
-    });
   });
 }

@@ -152,7 +152,7 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
       'update_seq': updateSeq,
     };
 
-    final path = '$_dbNameUrl/_all_docs'
+    final path = '$_dbNameUrl/_all_docs?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path);

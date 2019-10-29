@@ -20,8 +20,8 @@ This is a major rework of the package, with a lot of breaking changes.
 - The `Response.headers` member is now a `CaseInsensitiveMap<String>` instead
   of a `Map<String, String>`.  This is to be more tolerant with HTTP headers.
 - The name of methods that call the CouchDB API with HTTP HEAD requests have
-  now been standardized to end with _`...HeadersInfo()`_. These methods now
-  also return a `Future<CaseInsensitiveMap<String>>` instead of a specialized
+  now been standardized to end with _`...HeadersInfo()`_. Also, these methods
+  now return a `Future<CaseInsensitiveMap<String>>` instead of a specialized
   _`Future<...Response>`_.
 - Added proactive validation of database names and document ids before sending
   *some* API requests to CouchDB. This can be bypassed or customized with your own
@@ -33,6 +33,8 @@ This is a major rework of the package, with a lot of breaking changes.
 - Added `Database.exists()`, `DesignDocuments.exists()`, `Documents.docExists()`,
   `Documents.attachmentExists()`, and `DesignDocuments.designDocAttachmentExists()`
   methods.
+- Calling `Server.uuids()` with a negative integer will now throw an
+  `ArgumentError`. The method now also returns a `Future<List<String>>`.
 - Bug fix: The credentials were not properly sent to the server when they
   contained special characters.
 - Bug fix: URL query parameters were not properly escaped.
@@ -79,6 +81,8 @@ This is a major rework of the package, with a lot of breaking changes.
   `LocalDocuments` and `DesignDocuments`. The database name must now be provided
   to the constructor.
 - `Server.allDbs()` now returns a `Future<List<String>>` instead of a
+  `Future<ServerResponse>`.
+- `Server.uuids()` now returns a `Future<List<String>>` instead of a
   `Future<ServerResponse>`.
 - The methods that call the CouchDB API with a HTTP HEAD now return a
   `Future<CaseInsensitiveMap<String>>` instead of a specialized `Future<...Response>`

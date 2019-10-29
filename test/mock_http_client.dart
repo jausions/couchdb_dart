@@ -97,6 +97,12 @@ class MockHttpClient {
     }
 
     final pathSegments = request.url.pathSegments;
+
+    // Root URL / ?
+    if (pathSegments.isEmpty) {
+      return Future.value(rootHandler(request));
+    }
+
     switch (pathSegments[0]) {
       case '_all_dbs':
         return Future.value(_all_dbsHandler(request));
@@ -108,7 +114,23 @@ class MockHttpClient {
         request: request, headers: _responseHttpHeaders));
   }
 
-  /// Handles the requests mode to the _all_dbs path
+  /// Handles the requests made to the / path
+  Response rootHandler(Request request) {
+    if (request.method == 'GET') {
+      final info = {
+        "couchdb": "You reached the mock server.",
+        "uuid": "8abadba97f974e76bb9dfb779be0c8ad",
+        "vendor": {"name": "CouchDB Dart Client", "version": "0.7.0"},
+        "version": "0.7.0"
+      };
+      return Response(jsonEncode(info), 200,
+          request: request, headers: _responseHttpHeaders);
+    }
+    return Response(_wrongHttpMethodPayload, 400,
+        request: request, headers: _responseHttpHeaders);
+  }
+
+  /// Handles the requests mode to the /_all_dbs path
   Response _all_dbsHandler(Request request) {
     if (request.method == 'GET') {
       final dbs = [

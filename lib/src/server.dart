@@ -271,9 +271,15 @@ class Server extends Base implements ServerInterface {
   }
 
   @override
-  Future<ServerResponse> uuids(
+  Future<List<String>> uuids(
       {int count = 1, Map<String, String> headers}) async {
+    if (count < 0) {
+      throw ArgumentError.value(count, 'count', "must be a positive integer");
+    }
+    if (count == 0) {
+      return Future.value(List<String>());
+    }
     final result = await client.get('_uuids?count=$count', reqHeaders: headers);
-    return ServerResponse.from(result);
+    return ServerResponse.from(result).uuids;
   }
 }
