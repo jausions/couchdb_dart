@@ -66,8 +66,8 @@ main() {
         dotenv.env['COUCHDB_TEST_DB_PREFIX'] ?? 'couchdb_dart-test';
     final dbName = "${dbNamePrefix}-doc_ids_tests";
     final database = Database(_liveClient, dbName);
-    final docs = Documents(_liveClient, dbName);
 
+    final docs = Documents(_liveClient, dbName);
     // Also possible with current implementation, but not part of [DatabaseInterface]
     //final docs = database.documents;
 
@@ -76,6 +76,9 @@ main() {
 
     documentValidIds.forEach((docId) {
       test("Document: $docId", () async {
+//        if (!await database.exists()) {
+//          await database.create();
+//        }
         final creation = await docs.insertDoc(docId, {'content': 'test'});
         expect(creation, isA<DocumentsResponse>());
         expect(creation.ok, isTrue);
