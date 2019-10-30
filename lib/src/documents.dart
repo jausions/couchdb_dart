@@ -158,8 +158,15 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
     final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await client.put(path, reqHeaders: headers, body: body);
-    return DocumentsResponse.from(result);
+    try {
+      final result = await client.put(path, reqHeaders: headers, body: body);
+      return DocumentsResponse.from(result);
+    } on CouchDbException catch (e) {
+      if (e.code == 409) {
+        throw ConflictException(dbName, docId);
+      }
+      rethrow;
+    }
   }
 
   Future<DocumentsResponse> deleteDoc(String docId, String rev,
@@ -279,8 +286,15 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
     final path = '$_dbNameUrl/$docIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await client.put(path, reqHeaders: headers, body: body);
-    return DocumentsResponse.from(result);
+    try {
+      final result = await client.put(path, reqHeaders: headers, body: body);
+      return DocumentsResponse.from(result);
+    } on CouchDbException catch (e) {
+      if (e.code == 409) {
+        throw ConflictException(dbName, docId);
+      }
+      rethrow;
+    }
   }
 
   Future<DocumentsResponse> deleteAttachment(String docId, String attName,

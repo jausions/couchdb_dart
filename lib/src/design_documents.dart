@@ -158,8 +158,15 @@ class DesignDocuments extends Base
     final path = '$_dbNameUrl/$ddocIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await client.put(path, reqHeaders: headers, body: body);
-    return DesignDocumentsResponse.from(result);
+    try {
+      final result = await client.put(path, reqHeaders: headers, body: body);
+      return DesignDocumentsResponse.from(result);
+    } on CouchDbException catch (e) {
+      if (e.code == 409) {
+        throw ConflictException(dbName, ddocId);
+      }
+      rethrow;
+    }
   }
 
   Future<DesignDocumentsResponse> deleteDesignDoc(String ddocId, String rev,
@@ -266,8 +273,15 @@ class DesignDocuments extends Base
     final path = '$_dbNameUrl/$ddocIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await client.put(path, reqHeaders: headers, body: body);
-    return DesignDocumentsResponse.from(result);
+    try {
+      final result = await client.put(path, reqHeaders: headers, body: body);
+      return DesignDocumentsResponse.from(result);
+    } on CouchDbException catch (e) {
+      if (e.code == 409) {
+        throw ConflictException(dbName, ddocId);
+      }
+      rethrow;
+    }
   }
 
   Future<DesignDocumentsResponse> deleteDesignDocAttachment(

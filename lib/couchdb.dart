@@ -14,6 +14,7 @@ export 'src/clients/couchdb_client.dart';
 export 'src/database.dart';
 export 'src/design_documents.dart';
 export 'src/documents.dart';
+export 'src/exceptions/conflict_exception.dart';
 export 'src/exceptions/couchdb_exception.dart';
 export 'src/interfaces/client_interface.dart';
 export 'src/interfaces/database_interface.dart';

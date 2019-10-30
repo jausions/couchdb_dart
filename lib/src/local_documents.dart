@@ -183,7 +183,14 @@ class LocalDocuments extends Base implements LocalDocumentsInterface {
     final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
-    final result = await client.put(path, reqHeaders: headers, body: body);
-    return LocalDocumentsResponse.from(result);
+    try {
+      final result = await client.put(path, reqHeaders: headers, body: body);
+      return LocalDocumentsResponse.from(result);
+    } on CouchDbException catch (e) {
+      if (e.code == 409) {
+        throw ConflictException(dbName, docId);
+      }
+      rethrow;
+    }
   }
 }

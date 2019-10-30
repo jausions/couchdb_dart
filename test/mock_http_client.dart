@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' show Request, Response, BaseClient;
 import 'package:http/testing.dart';
+import 'package:uuid/uuid.dart';
 
 import 'cookies.dart';
 import 'credentials.dart';
@@ -47,7 +48,10 @@ class MockHttpClient {
 
   final Map<String, String> _responseHttpHeaders = {
     'Content-Type': 'application/json',
+    'Server': 'Mock CouchDb (Dart)',
   };
+
+  final uuidGenerator = Uuid();
 
   bool _isJsonContentType(Request request) {
     final contentType = request.headers['content-type'];
@@ -90,6 +94,7 @@ class MockHttpClient {
     return true;
   }
 
+  /// Dispatches the incoming API request
   Future<Response> requestHandler(Request request) {
     if (!_isAuthorizedAccess(request)) {
       return Future.value(Response(_failedAuthenticationPayload, 401,
@@ -98,16 +103,75 @@ class MockHttpClient {
 
     final pathSegments = request.url.pathSegments;
 
-    // Root URL / ?
-    if (pathSegments.isEmpty) {
-      return Future.value(rootHandler(request));
+    try {
+      // Root URL / ?
+      if (pathSegments.isEmpty) {
+        return Future.value(rootHandler(request));
+      }
+
+      switch (pathSegments[0]) {
+        case '_all_dbs':
+          return Future.value(allDbsHandler(request));
+        case '_session':
+          return Future.value(sessionHandler(request));
+        case '_uuids':
+          return Future.value(uuidsHandler(request));
+        case '_active_tasks':
+        case '_dbs_info':
+        case '_cluster_setup':
+        case '_db_updates':
+        case '_membership':
+        case '_replicate':
+        case '_scheduler':
+        case '_node':
+        case '_utils':
+        case '_up':
+        case 'favicon.ico':
+          return Future.value(Response(_notImplementedPayload, 501,
+              request: request, headers: _responseHttpHeaders));
+      }
+
+      // The rest is handled as if sent to a specific database
+      return databaseHandler(pathSegments, request);
+    } on Exception catch (e) {
+      final error = {
+        "error": "Mock server error",
+        "reason": "An exception was thrown: $e",
+      };
+      return Future.value(Response(jsonEncode(error), 500, request: request));
+    }
+  }
+
+  /// Dispatches the request for a specific database
+  Future<Response> databaseHandler(List<String> path, Request request) {
+    final dbName = path[0];
+
+    if (path.length == 1) {
+      return Future.value(dbHandler(dbName, request));
     }
 
-    switch (pathSegments[0]) {
-      case '_all_dbs':
-        return Future.value(_all_dbsHandler(request));
-      case '_session':
-        return Future.value(_sessionHandler(request));
+    switch (path[1]) {
+      case '_all_docs':
+      case '_design_docs':
+      case '_bulk_get':
+      case '_bulk_docs':
+      case '_find':
+      case '_index':
+      case '_explain':
+      case '_shards':
+      case '_sync_shards':
+      case '_chnages':
+      case '_compact':
+      case '_ensure_full_commit':
+      case '_view_cleanup':
+      case '_security':
+      case '_purge':
+      case '_purged_infos_limit':
+      case '_missing_revs':
+      case '_revs_diff':
+      case '_revs_limit':
+        return Future.value(Response(_notImplementedPayload, 501,
+            request: request, headers: _responseHttpHeaders));
     }
 
     return Future.value(Response(_notImplementedPayload, 501,
@@ -131,7 +195,7 @@ class MockHttpClient {
   }
 
   /// Handles the requests mode to the /_all_dbs path
-  Response _all_dbsHandler(Request request) {
+  Response allDbsHandler(Request request) {
     if (request.method == 'GET') {
       final dbs = [
         "_global_changes",
@@ -146,22 +210,103 @@ class MockHttpClient {
         request: request, headers: _responseHttpHeaders);
   }
 
-  /// Handles the requests made to the _session path
-  Response _sessionHandler(Request request) {
-    // Login
-    if (request.method == 'POST') {
-      return _sessionLoginHandler(request);
+  /// Handles the requests made to the /_uuids path
+  Response uuidsHandler(Request request) {
+    if (request.method != 'GET') {
+      return Response(_wrongHttpMethodPayload, 400,
+          request: request, headers: _responseHttpHeaders);
     }
-    // Logout
-    if (request.method == 'DELETE') {
-      return _sessionLogoutHandler(request);
+
+    final qs = request.url.queryParameters;
+    var count;
+    if (!qs.containsKey('count')) {
+      count = 1;
+    } else {
+      final qsCount = int.tryParse(qs['count']);
+      if (qsCount == null || qsCount < 0 || qsCount > 20) {
+        return Response(
+            jsonEncode({
+              "error": "bad request",
+              "reason": "Mock server says: `count` is out of range (0-20).",
+            }),
+            400,
+            request: request,
+            headers: _responseHttpHeaders);
+      }
+      count = qsCount;
+    }
+
+    final uuids = {
+      'uuids': [
+        for (var i = 1; i <= count; ++i) uuidGenerator.v4().replaceAll('-', ''),
+      ]
+    };
+    return Response(jsonEncode(uuids), 200,
+        request: request, headers: _responseHttpHeaders);
+  }
+
+  /// Handles the requests made to a /{db} path
+  Response dbHandler(String dbName, Request request) {
+    // Add document
+    if (request.method == 'POST') {
+      return dbPostHandler(dbName, request);
     }
 
     return Response(_notImplementedPayload, 501,
         request: request, headers: _responseHttpHeaders);
   }
 
-  Response _sessionLoginHandler(Request request) {
+  /// Handles the requests made to a /{db} path with POST HTTP method.
+  /// This would try to add a document to the database.
+  ///
+  /// This handler checks the `_id` for special values to behave accordingly.
+  ///
+  ///   - `conflict` will trigger a 409 HTTP status code
+  Response dbPostHandler(String dbName, Request request) {
+    final json = jsonDecode(request.body);
+
+    // @TODO Check and mimic CouchDB behavior when POST body is not a JSON object
+    if (!(json is Map)) {
+      return Response(_incompleteDataPayload, 400,
+          request: request, headers: _responseHttpHeaders);
+    }
+
+    final id = json['_id'] ?? uuidGenerator.v4();
+
+    switch (id) {
+      case 'conflict':
+        final conflict = {
+          "error": "conflict",
+          "reason": "Mock document update conflict.",
+        };
+        return Response(jsonEncode(conflict), 409,
+            request: request, headers: _responseHttpHeaders);
+    }
+
+    final batch = request.url.queryParameters['batch'] ?? 'no';
+    final code = (batch == 'ok') ? 202 : 201;
+
+    return Response(_notImplementedPayload, 501,
+        request: request, headers: _responseHttpHeaders);
+  }
+
+  /// Handles the requests made to the /_session path
+  Response sessionHandler(Request request) {
+    // Login
+    if (request.method == 'POST') {
+      return sessionPostHandler(request);
+    }
+    // Logout
+    if (request.method == 'DELETE') {
+      return sessionDeleteHandler(request);
+    }
+
+    return Response(_notImplementedPayload, 501,
+        request: request, headers: _responseHttpHeaders);
+  }
+
+  /// Handles logging in when accessing /_session with POST HTTP method
+  Response sessionPostHandler(Request request) {
     if (!_isJsonContentType(request)) {
       return Response(_invalidMimeTypePayload, 400,
           request: request, headers: _responseHttpHeaders);
@@ -196,7 +341,8 @@ class MockHttpClient {
     return Response(_simpleOkPayload, 200, request: request, headers: headers);
   }
 
-  Response _sessionLogoutHandler(Request request) {
+  /// Handles logging out when accessing /_session with DELETE HTTP method
+  Response sessionDeleteHandler(Request request) {
     final Map<String, String> headers =
         Map<String, String>.from(_responseHttpHeaders);
 
