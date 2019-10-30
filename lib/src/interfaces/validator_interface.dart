@@ -1,12 +1,15 @@
 abstract class ValidatorInterface {
-  /// Checks if [dbName] is a suitable database name.
-  bool isValidDatabaseName(String dbName);
-
   /// Tells whether [ddocId] could be for a design document id.
   bool isDesignDocumentId(String ddocId);
 
   /// Tells whether [docId] could be for a local document id.
   bool isLocalDocumentId(String docId);
+
+  /// Checks if [attName] is a suitable name for an attachment.
+  bool isValidAttachmentName(String attName);
+
+  /// Checks if [dbName] is a suitable database name.
+  bool isValidDatabaseName(String dbName);
 
   /// Checks if [ddocId] is a suitable id for design documents.
   bool isValidDesignDocumentId(String ddocId);
@@ -17,6 +20,10 @@ abstract class ValidatorInterface {
 
   /// Checks if [docId] is a suitable id for local documents.
   bool isValidLocalDocumentId(String docId);
+
+  /// Validates [attName] against naming rules for attachment names.
+  /// If the check fails an [ArgumentError] is thrown.
+  String validateAttachmentName(String attName);
 
   /// Validates [dbName] against naming rules for database names.
   /// If the check fails an [ArgumentError] is thrown.

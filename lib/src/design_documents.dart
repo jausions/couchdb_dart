@@ -24,7 +24,6 @@ class DesignDocuments extends Base
         dbName = dbName,
         super(client);
 
-  @override
   Future<bool> designDocExists(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
@@ -63,7 +62,6 @@ class DesignDocuments extends Base
     return httpHeadExists(path, headers);
   }
 
-  @override
   Future<CaseInsensitiveMap<String>> designDocHeadersInfo(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
@@ -103,7 +101,6 @@ class DesignDocuments extends Base
     return result.headers;
   }
 
-  @override
   Future<DesignDocumentsResponse> designDoc(String ddocId,
       {Map<String, String> headers,
       bool attachments = false,
@@ -143,7 +140,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> insertDesignDoc(
       String ddocId, Map<String, Object> body,
       {Map<String, String> headers,
@@ -166,7 +162,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> deleteDesignDoc(String ddocId, String rev,
       {Map<String, String> headers, String batch}) async {
     final ddocIdUrl = client.encoder
@@ -184,7 +179,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> copyDesignDoc(String ddocId,
       {Map<String, String> headers, String rev, String batch}) async {
     final ddocIdUrl = client.encoder
@@ -202,96 +196,100 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<bool> designDocAttachmentExists(String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
     final ddocIdUrl = client.encoder
         .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     return httpHeadExists(path, headers);
   }
 
-  @override
   Future<CaseInsensitiveMap<String>> designDocAttachmentHeadersInfo(
       String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
     final ddocIdUrl = client.encoder
         .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.head(path, reqHeaders: headers);
     return result.headers;
   }
 
-  @override
   Future<DesignDocumentsResponse> designDocAttachment(
       String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
     final ddocIdUrl = client.encoder
         .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> uploadDesignDocAttachment(
       String ddocId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
     final ddocIdUrl = client.encoder
         .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.put(path, reqHeaders: headers, body: body);
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> deleteDesignDocAttachment(
       String ddocId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
     final ddocIdUrl = client.encoder
         .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.delete(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> designDocInfo(String ddocId,
       {Map<String, String> headers}) async {
     final ddocIdUrl = client.encoder
@@ -303,7 +301,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeViewFunction(
       String ddocId, String viewName,
       {bool conflicts = false,
@@ -364,7 +361,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeViewFunctionWithKeys(
       String ddocId, String viewName,
       {@required List<Object> keys,
@@ -426,7 +422,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeViewQueries(
       String ddocId, String viewName, List<Object> queries) async {
     final ddocIdUrl = client.encoder
@@ -440,7 +435,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeShowFunctionForNull(
       String ddocId, String funcName,
       {String format}) async {
@@ -458,7 +452,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeShowFunctionForDocument(
       String ddocId, String funcName, String docId,
       {String format}) async {
@@ -476,7 +469,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeListFunctionForView(
       String ddocId, String funcName, String view,
       {String format}) async {
@@ -494,7 +486,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeListFunctionForViewFromDoc(
       String ddocId, String funcName, String otherDoc, String view,
       {String format}) async {
@@ -512,7 +503,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeUpdateFunctionForNull(
       String ddocId, String funcName, Object body) async {
     final ddocIdUrl = client.encoder
@@ -524,7 +514,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> executeUpdateFunctionForDocument(
       String ddocId, String funcName, String docId, Object body) async {
     final ddocIdUrl = client.encoder
@@ -536,7 +525,6 @@ class DesignDocuments extends Base
     return DesignDocumentsResponse.from(result);
   }
 
-  @override
   Future<DesignDocumentsResponse> rewritePath(
     String ddocId,
     String path,

@@ -12,4 +12,7 @@ abstract class EncoderInterface {
 
   /// Encodes [docId] to be suitable as local document id in the API calls.
   String encodeLocalDocId(String docId);
+
+  /// Encodes [attName] to be suitable as attachment name in API calls.
+  String encodeAttachmentName(String attName);
 }

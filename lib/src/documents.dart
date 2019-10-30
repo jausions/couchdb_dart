@@ -25,7 +25,6 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
         dbName = dbName,
         super(client);
 
-  @override
   Future<bool> docExists(String docId,
       {Map<String, String> headers,
       bool attachments = false,
@@ -64,7 +63,6 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
     return httpHeadExists(path, headers);
   }
 
-  @override
   Future<CaseInsensitiveMap<String>> docHeadersInfo(String docId,
       {Map<String, String> headers,
       bool attachments = false,
@@ -104,7 +102,6 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
     return result.headers;
   }
 
-  @override
   Future<DocumentsResponse> doc(String docId,
       {Map<String, String> headers,
       bool attachments = false,
@@ -144,7 +141,6 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
     return DocumentsResponse.from(result);
   }
 
-  @override
   Future<DocumentsResponse> insertDoc(String docId, Map<String, Object> body,
       {Map<String, String> headers,
       String rev,
@@ -166,7 +162,6 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
     return DocumentsResponse.from(result);
   }
 
-  @override
   Future<DocumentsResponse> deleteDoc(String docId, String rev,
       {Map<String, String> headers, String batch}) async {
     final docIdUrl =
@@ -184,7 +179,6 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
     return DocumentsResponse.from(result);
   }
 
-  @override
   Future<DocumentsResponse> copyDoc(String docId, String destinationId,
       {Map<String, String> headers,
       String rev,
@@ -216,87 +210,92 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
     return DocumentsResponse.from(result);
   }
 
-  @override
   Future<bool> attachmentExists(String docId, String attName,
       {Map<String, String> headers, String rev}) async {
     final docIdUrl =
         client.encoder.encodeDocId(client.validator.validateDocId(docId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl/$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     return httpHeadExists(path, headers);
   }
 
-  @override
   Future<CaseInsensitiveMap<String>> attachmentHeadersInfo(
       String docId, String attName,
       {Map<String, String> headers, String rev}) async {
     final docIdUrl =
         client.encoder.encodeDocId(client.validator.validateDocId(docId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl/$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.head(path, reqHeaders: headers);
     return result.headers;
   }
 
-  @override
   Future<DocumentsResponse> attachment(String docId, String attName,
       {Map<String, String> headers, String rev}) async {
     final docIdUrl =
         client.encoder.encodeDocId(client.validator.validateDocId(docId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl/$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path, reqHeaders: headers);
     return DocumentsResponse.from(result);
   }
 
-  @override
   Future<DocumentsResponse> uploadAttachment(
       String docId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
     final docIdUrl =
         client.encoder.encodeDocId(client.validator.validateDocId(docId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl/$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.put(path, reqHeaders: headers, body: body);
     return DocumentsResponse.from(result);
   }
 
-  @override
   Future<DocumentsResponse> deleteAttachment(String docId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
     final docIdUrl =
         client.encoder.encodeDocId(client.validator.validateDocId(docId));
+    final attNameUrl = client.encoder
+        .encodeAttachmentName(client.validator.validateAttachmentName(attName));
 
     final Map<String, Object> queryParams = {
       'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl/$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attNameUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.delete(path, reqHeaders: headers);

@@ -12,13 +12,11 @@ class Server extends Base implements ServerInterface {
   /// Create Server by accepting web-based or server-based client
   Server(CouchDbClient client) : super(client);
 
-  @override
   Future<ServerResponse> activeTasks({Map<String, String> headers}) async {
     final result = await client.get('_active_tasks', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
-  @override
   Future<List<String>> allDbs({
     Map<String, String> headers,
     bool descending = false,
@@ -42,7 +40,6 @@ class Server extends Base implements ServerInterface {
     return List<String>.from(ServerResponse.from(result).list);
   }
 
-  @override
   Future<ServerResponse> dbsInfo(List<String> keys) async {
     final body = <String, List<String>>{'keys': keys};
 
@@ -50,7 +47,6 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> clusterSetupStatus(
       {List<String> ensureDbsExist, Map<String, String> headers}) async {
     //
@@ -65,7 +61,6 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> configureCouchDb(
       {@required String action,
       String bindAddress,
@@ -117,13 +112,11 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> couchDbInfo({Map<String, String> headers}) async {
     final result = await client.get('', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> dbUpdates(
       {String feed = 'normal',
       int timeout = 60,
@@ -146,13 +139,11 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> membership({Map<String, String> headers}) async {
     final result = await client.get('_membership', reqHeaders: headers);
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> nodeStats(
       {String nodeName = '_local',
       String statisticSection,
@@ -166,7 +157,6 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> replicate(
       {bool cancel,
       bool continuous,
@@ -209,7 +199,6 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> schedulerJobs({int limit, int skip}) async {
     final Map<String, Object> queryParams = {
       if (limit != null) 'limit': limit,
@@ -222,7 +211,6 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> schedulerDocs({int limit, int skip}) async {
     final Map<String, Object> queryParams = {
       if (limit != null) 'limit': limit,
@@ -235,7 +223,6 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> schedulerDocsWithReplicatorDbName(
       {String replicator = '_replicator', int limit, int skip}) async {
     final Map<String, Object> queryParams = {
@@ -249,14 +236,12 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> schedulerDocsWithDocId(String docId,
       {String replicator = '_replicator'}) async {
     final result = await client.get('_scheduler/docs/$replicator/$docId');
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> systemStatsForNode(
       {String nodeName = '_local', Map<String, String> headers}) async {
     final result =
@@ -264,13 +249,11 @@ class Server extends Base implements ServerInterface {
     return ServerResponse.from(result);
   }
 
-  @override
   Future<ServerResponse> up() async {
     final result = await client.get('_up');
     return ServerResponse.from(result);
   }
 
-  @override
   Future<List<String>> uuids(
       {int count = 1, Map<String, String> headers}) async {
     if (count < 0) {

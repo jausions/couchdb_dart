@@ -50,12 +50,10 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
         dbName = dbName,
         super(client);
 
-  @override
   Future<bool> exists() async {
     return httpHeadExists(_dbNameUrl, {});
   }
 
-  @override
   Future<CaseInsensitiveMap<String>> headersInfo() async {
     try {
       final result = await client.head(_dbNameUrl);
@@ -69,26 +67,22 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     }
   }
 
-  @override
   Future<DatabaseResponse> info() async {
     final result = await client.get(_dbNameUrl);
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> create({int q = 8}) async {
     final path = '$_dbNameUrl?q=$q';
     final result = await client.put(path);
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> delete() async {
     final result = await client.delete(_dbNameUrl);
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> createDoc(Map<String, Object> doc,
       {String batch, Map<String, String> headers}) async {
     final Map<String, Object> queryParams = {
@@ -102,7 +96,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> allDocs(
       {bool conflicts = false,
       bool descending = false,
@@ -159,7 +152,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> docsByKeys({List<String> keys}) async {
     final body = <String, List<String>>{'keys': keys};
 
@@ -169,7 +161,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> allDesignDocs(
       {bool conflicts = false,
       bool descending = false,
@@ -208,7 +199,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> designDocsByKeys(List<String> keys) async {
     final path = '$_dbNameUrl/_design_docs';
     final body = <String, List<String>>{'keys': keys};
@@ -216,7 +206,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> queriesDocsFrom(
       List<Map<String, Object>> queries) async {
     final path = '$_dbNameUrl/_all_docs/queries';
@@ -225,7 +214,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> bulkDocs(List<Object> docs,
       {@required bool revs}) async {
     final path = '$_dbNameUrl?revs=$revs';
@@ -234,7 +222,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> insertBulkDocs(List<Object> docs,
       {bool newEdits = true, Map<String, String> headers}) async {
     final path = '$_dbNameUrl/_bulk_docs';
@@ -243,7 +230,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> find(Map<String, Object> selector,
       {int limit = 25,
       int skip,
@@ -285,7 +271,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> createIndex(
       {@required List<String> indexFields,
       String ddoc,
@@ -310,20 +295,17 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> indexes() async {
     final result = await client.get('$_dbNameUrl/_index');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> deleteIndex(String designDoc, String name) async {
     final result =
         await client.delete('$_dbNameUrl/_index/$designDoc/json/$name');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> explain(Map<String, Object> selector,
       {int limit = 25,
       int skip,
@@ -365,25 +347,21 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> shards() async {
     final result = await client.get('$_dbNameUrl/_shards');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> shard(String docId) async {
     final result = await client.get('$_dbNameUrl/_shards/$docId');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> synchronizeShards() async {
     final result = await client.post('$_dbNameUrl/_sync_shards');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<Stream<DatabaseResponse>> changes(
       {List<String> docIds,
       bool conflicts = false,
@@ -456,7 +434,6 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     }
   }
 
-  @override
   Future<Stream<DatabaseResponse>> postChanges(
       {List<String> docIds,
       bool conflicts = false,
@@ -530,83 +507,68 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
     }
   }
 
-  @override
   Future<DatabaseResponse> compact() async {
     final result = await client.post('$_dbNameUrl/_compact');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> compactViewIndexesWith(String ddocName) async {
     final result = await client.post('$_dbNameUrl/_compact/$ddocName');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> ensureFullCommit() async {
     final result = await client.post('$_dbNameUrl/_ensure_full_commit');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> viewCleanup() async {
     final result = await client.post('$_dbNameUrl/_view_cleanup');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> security() async {
     final result = await client.get('$_dbNameUrl/_security');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> setSecurity(
       Map<String, Map<String, List<String>>> security) async {
     final result = await client.put('$_dbNameUrl/_security', body: security);
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> purge(Map<String, List<String>> docs) async {
     final result = await client.post('$_dbNameUrl/_purge', body: docs);
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> purgedInfosLimit() async {
     final result = await client.get('$_dbNameUrl/_purged_infos_limit');
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> setPurgedInfosLimit(int limit) async {
     final result =
         await client.put('$_dbNameUrl/_purged_infos_limit', body: limit);
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> missingRevs(Map<String, List<String>> revs) async {
     final result = await client.post('$_dbNameUrl/_missing_revs', body: revs);
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> revsDiff(Map<String, List<String>> revs) async {
     final result = await client.post('$_dbNameUrl/_revs_diff', body: revs);
     return DatabaseResponse.from(result);
   }
 
-  @override
   Future<DatabaseResponse> revsLimit() async {
     final result = await client.get('$_dbNameUrl/_revs_limit');
     return DatabaseResponse.from(result);
   }
 
-  /// Sets the maximum number of document revisions that will be tracked by CouchDB,
-  /// even after compaction has occurred
-  @override
   Future<DatabaseResponse> setRevsLimit(int limit) async {
     final result = await client.put('$_dbNameUrl/_revs_limit', body: limit);
     return DatabaseResponse.from(result);

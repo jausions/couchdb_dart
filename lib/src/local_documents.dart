@@ -20,7 +20,6 @@ class LocalDocuments extends Base implements LocalDocumentsInterface {
         dbName = dbName,
         super(client);
 
-  @override
   Future<LocalDocumentsResponse> localDocs(
       {bool conflicts = false,
       bool descending = false,
@@ -60,7 +59,6 @@ class LocalDocuments extends Base implements LocalDocumentsInterface {
     return LocalDocumentsResponse.from(result);
   }
 
-  @override
   Future<LocalDocumentsResponse> localDocsWithKeys(
       {@required List<String> keys,
       bool conflicts = false,
@@ -100,7 +98,6 @@ class LocalDocuments extends Base implements LocalDocumentsInterface {
     return LocalDocumentsResponse.from(result);
   }
 
-  @override
   Future<LocalDocumentsResponse> localDoc(String docId,
       {Map<String, String> headers,
       bool conflicts = false,
@@ -134,7 +131,6 @@ class LocalDocuments extends Base implements LocalDocumentsInterface {
     return LocalDocumentsResponse.from(result);
   }
 
-  @override
   Future<LocalDocumentsResponse> copyLocalDoc(String docId,
       {Map<String, String> headers, String rev, String batch}) async {
     final docIdUrl = client.encoder
@@ -152,7 +148,6 @@ class LocalDocuments extends Base implements LocalDocumentsInterface {
     return LocalDocumentsResponse.from(result);
   }
 
-  @override
   Future<LocalDocumentsResponse> deleteLocalDoc(String docId, String rev,
       {Map<String, String> headers, String batch}) async {
     final docIdUrl = client.encoder
@@ -170,7 +165,6 @@ class LocalDocuments extends Base implements LocalDocumentsInterface {
     return LocalDocumentsResponse.from(result);
   }
 
-  @override
   Future<LocalDocumentsResponse> insertLocalDoc(
       String docId, Map<String, Object> body,
       {Map<String, String> headers,
