@@ -5,6 +5,7 @@ import "package:test/test.dart";
 import 'clients.dart';
 import 'credentials.dart';
 import 'database_names.dart';
+import 'document_ids.dart';
 import 'mock_http_client.dart';
 
 /// To run the tests, a local .env.test file is required.
@@ -57,6 +58,32 @@ main() {
       expect(result, isA<DatabaseResponse>());
       expect(database.documents.deleteDoc(result.id, result.rev),
           completion(isA<DocumentsResponse>()));
+    });
+  });
+
+  group("Document ids", () {
+    final dbNamePrefix =
+        dotenv.env['COUCHDB_TEST_DB_PREFIX'] ?? 'couchdb_dart-test';
+    final dbName = "${dbNamePrefix}-doc_ids_tests";
+    final database = Database(_liveClient, dbName);
+    final docs = Documents(_liveClient, dbName);
+
+    // Also possible with current implementation, but not part of [DatabaseInterface]
+    //final docs = database.documents;
+
+    setUp(() async => await database.create());
+    tearDown(() async => await database.delete());
+
+    documentValidIds.forEach((docId) {
+      test("Document: $docId", () async {
+        final creation = await docs.insertDoc(docId, {'content': 'test'});
+        expect(creation, isA<DocumentsResponse>());
+        expect(creation.ok, isTrue);
+        expect(creation.id, equals(docId));
+        expect(await docs.docExists(docId), isTrue);
+        expect(await docs.deleteDoc(docId, creation.rev),
+            isA<DocumentsResponse>());
+      });
     });
   });
 

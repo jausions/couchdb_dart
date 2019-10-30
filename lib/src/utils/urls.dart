@@ -12,5 +12,5 @@ String queryStringFromMap(Map<String, Object> queryParams) {
 }
 
 /// URL encode each element of a path and prefix with a slash `/`
-String urlEncodePath(String path) => path.split('/').fold(
-    '', (pathUrl, pathPart) => "$pathUrl/${Uri.encodeQueryComponent(pathPart)}");
+String urlEncodePath(String path) => path.split('/').fold('',
+    (pathUrl, pathPart) => "$pathUrl/${Uri.encodeQueryComponent(pathPart)}");

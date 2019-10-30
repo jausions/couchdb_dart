@@ -20,9 +20,10 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   /// The [Documents] class takes a [ClientInterface] implementation instance
   /// and a database name [dbName].
   Documents(CouchDbClient client, String dbName)
-      : _dbNameUrl = Uri.encodeQueryComponent(
-            client.validator.validateDatabaseName(dbName)),
-        dbName = dbName, super(client);
+      : _dbNameUrl = client.encoder
+            .encodeDatabaseName(client.validator.validateDatabaseName(dbName)),
+        dbName = dbName,
+        super(client);
 
   @override
   Future<bool> docExists(String docId,
@@ -39,7 +40,8 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       'attachments': attachments,
@@ -56,7 +58,7 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       'revs_info': revsInfo,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     return httpHeadExists(path, headers);
@@ -77,7 +79,8 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       'attachments': attachments,
@@ -94,7 +97,7 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       'revs_info': revsInfo,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.head(path, reqHeaders: headers);
@@ -116,7 +119,8 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       'attachments': attachments,
@@ -133,7 +137,7 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       'revs_info': revsInfo,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path, reqHeaders: headers);
@@ -146,7 +150,8 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       String rev,
       String batch,
       bool newEdits = true}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       'new_edits': newEdits,
@@ -154,7 +159,7 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.put(path, reqHeaders: headers, body: body);
@@ -164,14 +169,15 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   @override
   Future<DocumentsResponse> deleteDoc(String docId, String rev,
       {Map<String, String> headers, String batch}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.delete(path, reqHeaders: headers);
@@ -185,14 +191,15 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       String destinationRev,
       String batch}) async {
     client.validator.validateDocId(destinationId);
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final destinationQS = queryStringFromMap({
@@ -212,13 +219,14 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   @override
   Future<bool> attachmentExists(String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     return httpHeadExists(path, headers);
@@ -228,13 +236,14 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   Future<CaseInsensitiveMap<String>> attachmentHeadersInfo(
       String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.head(path, reqHeaders: headers);
@@ -244,13 +253,14 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   @override
   Future<DocumentsResponse> attachment(String docId, String attName,
       {Map<String, String> headers, String rev}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path, reqHeaders: headers);
@@ -261,13 +271,14 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   Future<DocumentsResponse> uploadAttachment(
       String docId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.put(path, reqHeaders: headers, body: body);
@@ -277,14 +288,15 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
   @override
   Future<DocumentsResponse> deleteAttachment(String docId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateDocId(docId));
+    final docIdUrl =
+        client.encoder.encodeDocId(client.validator.validateDocId(docId));
 
     final Map<String, Object> queryParams = {
       'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$docIdUrl/$attName?'
+    final path = '$_dbNameUrl/$docIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.delete(path, reqHeaders: headers);

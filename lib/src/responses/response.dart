@@ -5,8 +5,7 @@ import 'error_response.dart';
 /// Class representing the complete response from CouchDB
 class Response {
   /// Creates instance of [Response] with [raw] and [json]
-  Response(Map<String, Object> json,
-      {Map<String, String> headers, String raw})
+  Response(Map<String, Object> json, {Map<String, String> headers, String raw})
       : json = json,
         raw = raw,
         headers = CaseInsensitiveMap.from(headers);

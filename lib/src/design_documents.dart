@@ -19,8 +19,8 @@ class DesignDocuments extends Base
   /// The [DesignDocuments] class takes a [ClientInterface] implementation instance
   /// and a database name [dbName].
   DesignDocuments(CouchDbClient client, String dbName)
-      : _dbNameUrl = Uri.encodeQueryComponent(
-            client.validator.validateDatabaseName(dbName)),
+      : _dbNameUrl = client.encoder
+            .encodeDatabaseName(client.validator.validateDatabaseName(dbName)),
         dbName = dbName,
         super(client);
 
@@ -39,8 +39,8 @@ class DesignDocuments extends Base
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       'attachments': attachments,
@@ -57,7 +57,7 @@ class DesignDocuments extends Base
       'revs_info': revsInfo,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl?'
+    final path = '$_dbNameUrl/$ddocIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     return httpHeadExists(path, headers);
@@ -78,8 +78,8 @@ class DesignDocuments extends Base
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       'attachments': attachments,
@@ -96,7 +96,7 @@ class DesignDocuments extends Base
       'revs_info': revsInfo,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl?'
+    final path = '$_dbNameUrl/$ddocIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.head(path, reqHeaders: headers);
@@ -118,8 +118,8 @@ class DesignDocuments extends Base
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       'attachments': attachments,
@@ -136,7 +136,7 @@ class DesignDocuments extends Base
       'revs_info': revsInfo,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl?'
+    final path = '$_dbNameUrl/$ddocIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path, reqHeaders: headers);
@@ -150,8 +150,8 @@ class DesignDocuments extends Base
       String rev,
       String batch,
       bool newEdits = true}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       'new_edits': newEdits,
@@ -159,7 +159,7 @@ class DesignDocuments extends Base
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl?'
+    final path = '$_dbNameUrl/$ddocIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.put(path, reqHeaders: headers, body: body);
@@ -169,15 +169,15 @@ class DesignDocuments extends Base
   @override
   Future<DesignDocumentsResponse> deleteDesignDoc(String ddocId, String rev,
       {Map<String, String> headers, String batch}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl?'
+    final path = '$_dbNameUrl/$ddocIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.delete(path, reqHeaders: headers);
@@ -187,15 +187,15 @@ class DesignDocuments extends Base
   @override
   Future<DesignDocumentsResponse> copyDesignDoc(String ddocId,
       {Map<String, String> headers, String rev, String batch}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl?'
+    final path = '$_dbNameUrl/$ddocIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.copy(path, reqHeaders: headers);
@@ -203,17 +203,16 @@ class DesignDocuments extends Base
   }
 
   @override
-  Future<bool> designDocAttachmentExists(
-      String ddocId, String attName,
+  Future<bool> designDocAttachmentExists(String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     return httpHeadExists(path, headers);
@@ -223,14 +222,14 @@ class DesignDocuments extends Base
   Future<CaseInsensitiveMap<String>> designDocAttachmentHeadersInfo(
       String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.head(path, reqHeaders: headers);
@@ -241,14 +240,14 @@ class DesignDocuments extends Base
   Future<DesignDocumentsResponse> designDocAttachment(
       String ddocId, String attName,
       {Map<String, String> headers, String rev}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path, reqHeaders: headers);
@@ -259,14 +258,14 @@ class DesignDocuments extends Base
   Future<DesignDocumentsResponse> uploadDesignDocAttachment(
       String ddocId, String attName, Object body,
       {Map<String, String> headers, String rev}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.put(path, reqHeaders: headers, body: body);
@@ -277,15 +276,15 @@ class DesignDocuments extends Base
   Future<DesignDocumentsResponse> deleteDesignDocAttachment(
       String ddocId, String attName,
       {@required String rev, Map<String, String> headers, String batch}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/$attName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/$attName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.delete(path, reqHeaders: headers);
@@ -295,10 +294,10 @@ class DesignDocuments extends Base
   @override
   Future<DesignDocumentsResponse> designDocInfo(String ddocId,
       {Map<String, String> headers}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$_dbNameUrl$ddocIdUrl/_info';
+    final path = '$_dbNameUrl/$ddocIdUrl/_info';
 
     final result = await client.get(path, reqHeaders: headers);
     return DesignDocumentsResponse.from(result);
@@ -330,8 +329,8 @@ class DesignDocuments extends Base
       String update = 'true',
       bool updateSeq = false,
       Map<String, String> headers}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (!reduce) 'conflicts': conflicts,
@@ -358,7 +357,7 @@ class DesignDocuments extends Base
       'update_seq': updateSeq,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/_view/$viewName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/_view/$viewName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path, reqHeaders: headers);
@@ -391,8 +390,8 @@ class DesignDocuments extends Base
       String update = 'true',
       bool updateSeq = false,
       Map<String, String> headers}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (!reduce) 'conflicts': conflicts,
@@ -418,7 +417,7 @@ class DesignDocuments extends Base
       'update_seq': updateSeq,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/_view/$viewName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/_view/$viewName?'
         '${queryStringFromMap(queryParams)}';
 
     final body = <String, List<Object>>{'keys': keys};
@@ -430,10 +429,10 @@ class DesignDocuments extends Base
   @override
   Future<DesignDocumentsResponse> executeViewQueries(
       String ddocId, String viewName, List<Object> queries) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$_dbNameUrl$ddocIdUrl/_view/$viewName/queries';
+    final path = '$_dbNameUrl/$ddocIdUrl/_view/$viewName/queries';
 
     final body = <String, List<Object>>{'queries': queries};
 
@@ -445,14 +444,14 @@ class DesignDocuments extends Base
   Future<DesignDocumentsResponse> executeShowFunctionForNull(
       String ddocId, String funcName,
       {String format}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (format != null) 'format': format,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/_show/$funcName?'
+    final path = '$_dbNameUrl/$ddocIdUrl/_show/$funcName?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path);
@@ -463,14 +462,14 @@ class DesignDocuments extends Base
   Future<DesignDocumentsResponse> executeShowFunctionForDocument(
       String ddocId, String funcName, String docId,
       {String format}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (format != null) 'format': format,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/_show/$funcName/$docId?'
+    final path = '$_dbNameUrl/$ddocIdUrl/_show/$funcName/$docId?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path);
@@ -481,14 +480,14 @@ class DesignDocuments extends Base
   Future<DesignDocumentsResponse> executeListFunctionForView(
       String ddocId, String funcName, String view,
       {String format}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (format != null) 'format': format,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/_list/$funcName/$view?'
+    final path = '$_dbNameUrl/$ddocIdUrl/_list/$funcName/$view?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path);
@@ -499,14 +498,14 @@ class DesignDocuments extends Base
   Future<DesignDocumentsResponse> executeListFunctionForViewFromDoc(
       String ddocId, String funcName, String otherDoc, String view,
       {String format}) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
     final Map<String, Object> queryParams = {
       if (format != null) 'format': format,
     };
 
-    final path = '$_dbNameUrl$ddocIdUrl/_list/$funcName/$otherDoc/$view?'
+    final path = '$_dbNameUrl/$ddocIdUrl/_list/$funcName/$otherDoc/$view?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path);
@@ -516,10 +515,10 @@ class DesignDocuments extends Base
   @override
   Future<DesignDocumentsResponse> executeUpdateFunctionForNull(
       String ddocId, String funcName, Object body) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$_dbNameUrl$ddocIdUrl/_update/$funcName';
+    final path = '$_dbNameUrl/$ddocIdUrl/_update/$funcName';
 
     final result = await client.post(path, body: body);
     return DesignDocumentsResponse.from(result);
@@ -528,10 +527,10 @@ class DesignDocuments extends Base
   @override
   Future<DesignDocumentsResponse> executeUpdateFunctionForDocument(
       String ddocId, String funcName, String docId, Object body) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
-    final path = '$_dbNameUrl$ddocIdUrl/_update/$funcName/$docId';
+    final path = '$_dbNameUrl/$ddocIdUrl/_update/$funcName/$docId';
 
     final result = await client.put(path, body: body);
     return DesignDocumentsResponse.from(result);
@@ -542,10 +541,10 @@ class DesignDocuments extends Base
     String ddocId,
     String path,
   ) async {
-    final ddocIdUrl =
-        urlEncodePath(client.validator.validateDesignDocId(ddocId));
+    final ddocIdUrl = client.encoder
+        .encodeDesignDocId(client.validator.validateDesignDocId(ddocId));
 
-    final result = await client.put('$_dbNameUrl$ddocIdUrl/_rewrite/$path');
+    final result = await client.put('$_dbNameUrl/$ddocIdUrl/_rewrite/$path');
     return DesignDocumentsResponse.from(result);
   }
 }

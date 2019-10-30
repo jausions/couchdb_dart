@@ -90,8 +90,7 @@ abstract class DesignDocumentsInterface {
       {Map<String, String> headers, String rev, String batch});
 
   /// Returns whether the specified design document attachment exists
-  Future<bool> designDocAttachmentExists(
-      String ddocId, String attName,
+  Future<bool> designDocAttachmentExists(String ddocId, String attName,
       {Map<String, String> headers, String rev});
 
   /// Returns the HTTP headers containing a minimal amount of information about

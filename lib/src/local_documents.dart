@@ -6,8 +6,7 @@ import 'utils/urls.dart';
 
 /// The Local (non-replicating) document interface allows to create local documents
 /// that are not replicated to other databases
-class LocalDocuments extends Base
-    implements LocalDocumentsInterface {
+class LocalDocuments extends Base implements LocalDocumentsInterface {
   // Database name
   final String dbName;
 
@@ -16,8 +15,8 @@ class LocalDocuments extends Base
 
   /// Create LocalDocuments by accepting web-based or server-based client
   LocalDocuments(CouchDbClient client, String dbName)
-      : _dbNameUrl = Uri.encodeQueryComponent(
-            client.validator.validateDatabaseName(dbName)),
+      : _dbNameUrl = client.encoder
+            .encodeDatabaseName(client.validator.validateDatabaseName(dbName)),
         dbName = dbName,
         super(client);
 
@@ -113,7 +112,8 @@ class LocalDocuments extends Base
       String rev,
       bool revs = false,
       bool revsInfo = false}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateLocalDocId(docId));
+    final docIdUrl = client.encoder
+        .encodeLocalDocId(client.validator.validateLocalDocId(docId));
 
     final Map<String, Object> queryParams = {
       'conflicts': conflicts,
@@ -127,7 +127,7 @@ class LocalDocuments extends Base
       'revs_info': revsInfo,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.get(path, reqHeaders: headers);
@@ -137,14 +137,15 @@ class LocalDocuments extends Base
   @override
   Future<LocalDocumentsResponse> copyLocalDoc(String docId,
       {Map<String, String> headers, String rev, String batch}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateLocalDocId(docId));
+    final docIdUrl = client.encoder
+        .encodeLocalDocId(client.validator.validateLocalDocId(docId));
 
     final Map<String, Object> queryParams = {
       if (rev != null) 'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.copy(path, reqHeaders: headers);
@@ -154,14 +155,15 @@ class LocalDocuments extends Base
   @override
   Future<LocalDocumentsResponse> deleteLocalDoc(String docId, String rev,
       {Map<String, String> headers, String batch}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateLocalDocId(docId));
+    final docIdUrl = client.encoder
+        .encodeLocalDocId(client.validator.validateLocalDocId(docId));
 
     final Map<String, Object> queryParams = {
       'rev': rev,
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.delete(path, reqHeaders: headers);
@@ -175,7 +177,8 @@ class LocalDocuments extends Base
       String rev,
       String batch,
       bool newEdits = true}) async {
-    final docIdUrl = urlEncodePath(client.validator.validateLocalDocId(docId));
+    final docIdUrl = client.encoder
+        .encodeLocalDocId(client.validator.validateLocalDocId(docId));
 
     final Map<String, Object> queryParams = {
       'new_edits': newEdits,
@@ -183,7 +186,7 @@ class LocalDocuments extends Base
       if (batch != null) 'batch': batch,
     };
 
-    final path = '$_dbNameUrl$docIdUrl?'
+    final path = '$_dbNameUrl/$docIdUrl?'
         '${queryStringFromMap(queryParams)}';
 
     final result = await client.put(path, reqHeaders: headers, body: body);

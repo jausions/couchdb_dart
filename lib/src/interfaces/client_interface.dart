@@ -7,7 +7,10 @@ abstract class ClientInterface {
   /// To validate database names, document ids, and so on
   final ValidatorInterface validator;
 
-  ClientInterface(this.validator);
+  /// To encode database names amd document ids
+  final EncoderInterface encoder;
+
+  ClientInterface(this.validator, this.encoder);
 
   /// HEAD method
   Future<Response> head(String path, {Map<String, String> reqHeaders});

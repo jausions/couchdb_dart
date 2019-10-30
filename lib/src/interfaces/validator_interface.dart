@@ -19,18 +19,18 @@ abstract class ValidatorInterface {
   bool isValidLocalDocumentId(String docId);
 
   /// Validates [dbName] against naming rules for database names.
-  /// If the check fails an [ArgumentError] exception is thrown.
+  /// If the check fails an [ArgumentError] is thrown.
   String validateDatabaseName(String dbName);
 
   /// Validates [ddocId] against naming rules for design document ids.
-  /// If the check fails an [ArgumentError] exception is thrown.
+  /// If the check fails an [ArgumentError] is thrown.
   String validateDesignDocId(String ddocId);
 
   /// Validates [docId] against naming rules for "regular" document ids.
-  /// If the check fails an [ArgumentError] exception is thrown.
+  /// If the check fails an [ArgumentError] is thrown.
   String validateDocId(String docId);
 
   /// Validates [docId] against naming rules for local document ids.
-  /// If the check fails an [ArgumentError] exception is thrown.
+  /// If the check fails an [ArgumentError] is thrown.
   String validateLocalDocId(String docId);
 }

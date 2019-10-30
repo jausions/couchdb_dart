@@ -45,8 +45,8 @@ class Database extends Base with HttpMixin implements DatabaseInterface {
   /// The [Database] class takes a [ClientInterface] implementation instance
   /// and a database name [dbName].
   Database(CouchDbClient client, String dbName)
-      : _dbNameUrl = Uri.encodeQueryComponent(
-            client.validator.validateDatabaseName(dbName)),
+      : _dbNameUrl = client.encoder
+            .encodeDatabaseName(client.validator.validateDatabaseName(dbName)),
         dbName = dbName,
         super(client);
 

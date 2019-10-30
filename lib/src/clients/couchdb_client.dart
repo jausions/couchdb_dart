@@ -41,10 +41,12 @@ class CouchDbClient implements ClientInterface {
       String secret,
       String path,
       http.BaseClient httpClient,
-      ValidatorInterface validator})
+      ValidatorInterface validator,
+      EncoderInterface encoder})
       : secret = utf8.encode(secret != null ? secret : ''),
         _httpClient = httpClient ?? http.Client(),
-        validator = validator ?? Validator() {
+        validator = validator ?? Validator(),
+        encoder = encoder ?? UrlEncoder() {
     if (username == null && password != null) {
       throw CouchDbException(401,
           response: Response(<String, Object>{
@@ -82,10 +84,12 @@ class CouchDbClient implements ClientInterface {
       this.cors = false,
       String secret,
       http.BaseClient httpClient,
-        ValidatorInterface validator})
+      ValidatorInterface validator,
+      EncoderInterface encoder})
       : secret = utf8.encode(secret != null ? secret : ''),
         _httpClient = httpClient ?? http.Client(),
-        validator = validator ?? Validator() {
+        validator = validator ?? Validator(),
+        encoder = encoder ?? UrlEncoder() {
     final properUri = Uri(
       scheme: (uri.scheme == '') ? 'http' : uri.scheme,
       userInfo: uri.userInfo,
@@ -104,9 +108,16 @@ class CouchDbClient implements ClientInterface {
       {String auth = 'basic',
       bool cors = false,
       String secret,
-      http.BaseClient httpClient})
+      http.BaseClient httpClient,
+      ValidatorInterface validator,
+      EncoderInterface encoder})
       : this.fromUri(Uri.tryParse(uri),
-            auth: auth, cors: cors, secret: secret, httpClient: httpClient);
+            auth: auth,
+            cors: cors,
+            secret: secret,
+            httpClient: httpClient,
+            validator: validator,
+            encoder: encoder);
 
   /// Host of database instance
   String get host => _connectUri.host;
@@ -161,6 +172,9 @@ class CouchDbClient implements ClientInterface {
   /// Value validator
   final ValidatorInterface validator;
 
+  /// Value encoder
+  final EncoderInterface encoder;
+
   /// Request headers
   ///
   /// Already contains `Accept` and `Content-Type` headers defaults to `application/json`.
@@ -212,8 +226,7 @@ class CouchDbClient implements ClientInterface {
   }
 
   /// HEAD method
-  Future<Response> head(String path,
-      {Map<String, String> reqHeaders}) async {
+  Future<Response> head(String path, {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
     final res =
@@ -235,7 +248,8 @@ class CouchDbClient implements ClientInterface {
 
     final bodyUTF8 = utf8.decode(res.bodyBytes);
     final responseHeaders = CaseInsensitiveMap<String>.from(res.headers);
-    if (responseHeaders['content-type'].startsWith(RegExp(r'^application/json;?'))) {
+    if (responseHeaders['content-type']
+        .startsWith(RegExp(r'^application/json;?'))) {
       final resBody = jsonDecode(bodyUTF8);
 
       if (resBody is int) {
@@ -310,8 +324,7 @@ class CouchDbClient implements ClientInterface {
   }
 
   /// DELETE method
-  Future<Response> delete(String path,
-      {Map<String, String> reqHeaders}) async {
+  Future<Response> delete(String path, {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
 
     final res =
@@ -328,8 +341,7 @@ class CouchDbClient implements ClientInterface {
   }
 
   /// COPY method
-  Future<Response> copy(String path,
-      {Map<String, String> reqHeaders}) async {
+  Future<Response> copy(String path, {Map<String, String> reqHeaders}) async {
     modifyRequestHeaders(reqHeaders);
     final request = http.Request('COPY', Uri.parse('$origin/$path'));
     request.headers.addAll(headers);
@@ -378,8 +390,8 @@ class CouchDbClient implements ClientInterface {
       {String body, Map<String, String> headers}) {
     if (code < 200 || code > 304) {
       throw CouchDbException(code,
-          response:
-              Response(jsonDecode(body ?? 'null'), headers: headers).errorResponse());
+          response: Response(jsonDecode(body ?? 'null'), headers: headers)
+              .errorResponse());
     }
   }
 

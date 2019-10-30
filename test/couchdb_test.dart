@@ -3,7 +3,6 @@ import 'package:dotenv/dotenv.dart' as dotenv show load, env;
 import "package:test/test.dart";
 
 import 'clients.dart';
-import 'mock_http_client.dart';
 
 /// To run the tests, a local .env.test file is required.
 /// A sample .env.test.sample file is provided for you to copy into your local
@@ -14,13 +13,8 @@ main() {
   /// CouchDbClient _factory_
   final clients = Clients();
 
-  final dbName = dotenv.env['COUCHDB_TEST_DB'] ?? 'couchdb_dart-test';
-  final host = dotenv.env['COUCHDB_TEST_HOST'] ?? 'localhost';
-  final port = dotenv.env['COUCHDB_TEST_PORT'] ?? 5984;
-  final scheme = dotenv.env['COUCHDB_TEST_SCHEME'] ?? 'http';
-
-  /// Mock HTTP client to process API requests
-  final _mockHttpClient = MockHttpClient().client;
+  final dbNamePrefix =
+      dotenv.env['COUCHDB_TEST_DB_PREFIX'] ?? 'couchdb_dart-test';
 
   final _liveClient = clients.makeClient();
 
@@ -85,11 +79,12 @@ main() {
   });
 
   group("Database existence", () {
-    final database = Database(_liveClient, dbName);
+    final database =
+        Database(_liveClient, "${dbNamePrefix}-db_existence_tests");
 
     test("Create then delete database", () async {
       expect(await database.create(), isA<DatabaseResponse>());
-      expect(database.delete(), completion(isA<DatabaseResponse>()));
+      expect(await database.delete(), isA<DatabaseResponse>());
     });
 
     test("_users database exists", () {
@@ -122,11 +117,11 @@ main() {
       final result = await _usersDb.allDocs();
       expect(result, isA<DatabaseResponse>());
     });
-
   });
 
   group("Document operations", () {
-    final database = Database(_liveClient, dbName);
+    final database =
+        Database(_liveClient, "${dbNamePrefix}-doc_operations_tests");
     final docs = database.documents;
 
     setUp(() async => await database.create());
@@ -140,7 +135,7 @@ main() {
     });
 
     test('List all documents', () async {
-      await docs.insertDoc("my_test_all_docs", {'content': "blank"});
+      await docs.insertDoc("my_test_all_docs", {'test': true});
       final result = await database.allDocs();
       expect(result, isA<DatabaseResponse>());
       expect(result.totalRows, equals(1));
@@ -148,6 +143,5 @@ main() {
       expect(result.rows[0].containsKey('id'), isTrue);
       expect(result.rows[0]['id'], equals('my_test_all_docs'));
     });
-
   });
 }
