@@ -163,7 +163,7 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       return DocumentsResponse.from(result);
     } on CouchDbException catch (e) {
       if (e.code == 409) {
-        throw ConflictException(dbName, docId);
+        throw ConflictException(dbName, docId, rev: rev);
       }
       rethrow;
     }
@@ -291,7 +291,7 @@ class Documents extends Base with HttpMixin implements DocumentsInterface {
       return DocumentsResponse.from(result);
     } on CouchDbException catch (e) {
       if (e.code == 409) {
-        throw ConflictException(dbName, docId);
+        throw ConflictException(dbName, docId, rev: rev, attName: attName);
       }
       rethrow;
     }

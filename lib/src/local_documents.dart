@@ -188,7 +188,7 @@ class LocalDocuments extends Base implements LocalDocumentsInterface {
       return LocalDocumentsResponse.from(result);
     } on CouchDbException catch (e) {
       if (e.code == 409) {
-        throw ConflictException(dbName, docId);
+        throw ConflictException(dbName, docId, rev: rev);
       }
       rethrow;
     }

@@ -163,7 +163,7 @@ class DesignDocuments extends Base
       return DesignDocumentsResponse.from(result);
     } on CouchDbException catch (e) {
       if (e.code == 409) {
-        throw ConflictException(dbName, ddocId);
+        throw ConflictException(dbName, ddocId, rev: rev);
       }
       rethrow;
     }
@@ -278,7 +278,7 @@ class DesignDocuments extends Base
       return DesignDocumentsResponse.from(result);
     } on CouchDbException catch (e) {
       if (e.code == 409) {
-        throw ConflictException(dbName, ddocId);
+        throw ConflictException(dbName, ddocId, rev: rev, attName: attName);
       }
       rethrow;
     }
