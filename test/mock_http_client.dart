@@ -146,6 +146,7 @@ class MockHttpClient {
   Future<Response> databaseHandler(List<String> path, Request request) {
     final dbName = path[0];
 
+    // Only the database name was provided
     if (path.length == 1) {
       return Future.value(dbHandler(dbName, request));
     }
@@ -257,7 +258,7 @@ class MockHttpClient {
   }
 
   /// Handles the requests made to a /{db} path with POST HTTP method.
-  /// This would try to add a document to the database.
+  /// This would normally try to add a document to the database.
   ///
   /// This handler checks the `_id` for special values to behave accordingly.
   ///
